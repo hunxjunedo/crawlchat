@@ -16,6 +16,7 @@ export default [
   route("/logout", "auth/logout.tsx"),
   layout("dashboard/layout.tsx", [
     route("app", "dashboard/page.tsx"),
+    route("threads/new", "dashboard/thread-new.tsx"),
     route("threads/:id", "dashboard/thread.tsx"),
   ]),
 

@@ -93,7 +93,7 @@ export async function scrapeLoop(
     onComplete?: () => Promise<void>;
   }
 ) {
-  const { limit = 10000 } = options ?? {};
+  const { limit = 1000 } = options ?? {};
 
   while (urlsNotFetched(store).length > 0) {
     await scrapeWithLinks(urlsNotFetched(store)[0], store, baseUrl, options);

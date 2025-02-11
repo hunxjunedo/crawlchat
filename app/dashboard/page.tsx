@@ -1,14 +1,39 @@
-import { Group, Heading, Input, Stack, Text } from "@chakra-ui/react";
+import {
+  GridItem,
+  Group,
+  Heading,
+  Input,
+  SimpleGrid,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { useState } from "react";
 import type { Route } from "./+types/page";
-import { TbCheck, TbCircleCheckFilled } from "react-icons/tb";
+import {
+  TbArrowRight,
+  TbCheck,
+  TbCircleCheckFilled,
+  TbWorld,
+} from "react-icons/tb";
 import { Link, redirect, useFetcher } from "react-router";
 import { Button } from "~/components/ui/button";
-
-export async function loader() {
+import { getAuthUser } from "~/auth/middleware";
+import { prisma } from "~/prisma";
+import moment from "moment";
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await getAuthUser(request);
+  const scrapes = await prisma.scrape.findMany({
+    where: {
+      userId: user?.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
   return {
-    serverHost: process.env.SERVER_WS_URL,
+    user,
+    scrapes,
   };
 }
 
@@ -68,7 +93,12 @@ export default function LandingPage({
     scrapeFetcher.state !== "idle" || ["scraping", "scraped"].includes(stage);
 
   return (
-    <Stack alignItems={"center"} justifyContent={"center"} height={"100dvh"}>
+    <Stack
+      alignItems={"center"}
+      justifyContent={"center"}
+      height={"100dvh"}
+      gap={8}
+    >
       <Stack w={"400px"}>
         <scrapeFetcher.Form method="post">
           <Stack>
@@ -100,6 +130,44 @@ export default function LandingPage({
             </Group>
           )}
         </Stack>
+      </Stack>
+
+      <Stack w={"400px"}>
+        <SimpleGrid columns={2} gap={4}>
+          {loaderData.scrapes.map((scrape) => (
+            <GridItem key={scrape.id}>
+              <Stack
+                bg="brand.gray.100"
+                p={4}
+                rounded={"lg"}
+                h="full"
+                className="group"
+              >
+                <Group h={"30px"}>
+                  <Text fontSize={"30px"} _groupHover={{ display: "none" }}>
+                    <TbWorld />
+                  </Text>
+                  <Button
+                    size={"xs"}
+                    display={"none"}
+                    _groupHover={{ display: "flex" }}
+                    asChild
+                  >
+                    <Link to={`/threads/new?id=${scrape.id}`}>
+                      Chat now
+                      <TbArrowRight />
+                    </Link>
+                  </Button>
+                </Group>
+
+                <Text fontSize={"sm"}>{scrape.url}</Text>
+                <Text fontSize={"xs"} opacity={0.5}>
+                  {moment(scrape.createdAt).fromNow()}
+                </Text>
+              </Stack>
+            </GridItem>
+          ))}
+        </SimpleGrid>
       </Stack>
     </Stack>
   );

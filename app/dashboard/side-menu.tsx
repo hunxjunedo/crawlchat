@@ -7,7 +7,14 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { TbChevronRight, TbLogout, TbMessage, TbWorld } from "react-icons/tb";
+import {
+  TbChevronRight,
+  TbHome,
+  TbLogout,
+  TbMessage,
+  TbSettings,
+  TbWorld,
+} from "react-icons/tb";
 import { Link, NavLink } from "react-router";
 import { Avatar } from "~/components/ui/avatar";
 import {
@@ -20,8 +27,8 @@ import type { Thread, User } from "@prisma/client";
 import { getThreadName } from "~/thread-util";
 
 const links = [
-  { label: "New website", to: "/app", icon: <TbWorld /> },
-  { label: "New thread", to: "/threads/new", icon: <TbMessage /> },
+  { label: "Home", to: "/app", icon: <TbHome /> },
+  { label: "Settings", to: "/settings", icon: <TbSettings /> },
 ];
 
 function SideMenuItem({
@@ -87,7 +94,10 @@ export function SideMenu({
             color="brand.fg"
             asChild
           >
-            <Link to="/home">Talk</Link>
+            <Group>
+              <TbWorld />
+              <Link to="/app">Website Chat</Link>
+            </Group>
           </Heading>
         </Stack>
 
