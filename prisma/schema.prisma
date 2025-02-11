@@ -1,0 +1,73 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  email           String   @unique
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  buddies         Buddy[]
+}
+
+enum FormItemType {
+  boolean
+  string
+  integer
+  number
+}
+
+type FormItem {
+  key String
+  type FormItemType
+  description String
+  required Boolean
+  useConfirm Boolean?
+  title String?
+}
+
+enum PopoverType {
+  popover
+  arrow
+}
+
+model Buddy {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
+  name            String
+  prompt          String
+
+  elAgentId       String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  formItems       FormItem[]
+  firstMessage    String
+  voiceId         String
+  popoverText     String?
+  popoverType     PopoverType?
+  language        String?
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions     Submission[]
+}
+
+model Submission {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  buddyId         String   @db.ObjectId
+  userId          String   @db.ObjectId
+
+  data            Json
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  buddy           Buddy    @relation(fields: [buddyId], references: [id], onDelete: Cascade)
+}
