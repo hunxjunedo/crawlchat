@@ -3,7 +3,12 @@ import TurndownService from "turndown";
 import { OrderedSet } from "./ordered-set";
 
 export type ScrapeStore = {
-  urls: Record<string, { markdown: string } | undefined | null>;
+  urls: Record<
+    string,
+    | { markdown: string; metaTags: { key: string; value: string }[] }
+    | undefined
+    | null
+  >;
   urlSet: OrderedSet<string>;
 };
 
@@ -27,6 +32,16 @@ export async function scrape(url: string) {
   $("nav").remove();
   $("footer").remove();
 
+  const metaTags: { key: string; value: string }[] = $("meta")
+    .map((_, meta) => ({
+      key: $(meta).attr("name") ?? $(meta).attr("property") ?? "",
+      value: $(meta).attr("content") ?? "",
+    }))
+    .toArray()
+    .filter((meta) => meta.key && meta.value);
+
+  $("meta").remove();
+
   const turndownService = new TurndownService();
   turndownService.addRule("headings", {
     filter: ["h1", "h2", "h3", "h4", "h5", "h6"],
@@ -41,6 +56,7 @@ export async function scrape(url: string) {
   return {
     markdown,
     links,
+    metaTags,
   };
 }
 
@@ -56,9 +72,14 @@ export async function scrapeWithLinks(
   if (options?.onPreScrape) {
     options.onPreScrape(url, store);
   }
-  const { markdown: linkMarkdown, links: linkLinks } = await scrape(url);
+  const {
+    markdown: linkMarkdown,
+    links: linkLinks,
+    metaTags,
+  } = await scrape(url);
   store.urls[url] = {
     markdown: linkMarkdown,
+    metaTags,
   };
   for (const link of linkLinks) {
     if (!link.href) continue;

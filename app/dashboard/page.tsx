@@ -128,7 +128,9 @@ function ScrapeCard({
         </Group>
       </Group>
 
-      <Text fontSize={"sm"}>{scrape.url}</Text>
+      <Text fontSize={"sm"} lineClamp={2}>
+        {scrape.url}
+      </Text>
       <Group fontSize={"xs"}>
         <Text opacity={0.5}>{moment(scrape.createdAt).fromNow()}</Text>
         <Badge size={"xs"} variant={"surface"} colorPalette={"brand"}>

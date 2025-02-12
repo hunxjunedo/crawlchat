@@ -10,7 +10,6 @@ import cors from "cors";
 import OpenAI from "openai";
 import { askLLM, makeContext } from "./llm";
 import { Stream } from "openai/streaming";
-import mongoose from "mongoose";
 import { loadIndex, loadStore, saveIndex, saveStore } from "./scrape/store";
 import { makeIndex } from "./vector";
 import { addMessage } from "./thread/store";
@@ -145,7 +144,10 @@ expressWs.app.ws("/", function (ws, req) {
         where: { id: thread.scrapeId },
       });
 
-      addMessage(threadId, { role: "user", content: message.data.query });
+      addMessage(threadId, {
+        llmMessage: { role: "user", content: message.data.query },
+        links: [],
+      });
 
       const store = await loadStore(scrape.id);
       const index = await loadIndex(scrape.id);
@@ -154,22 +156,43 @@ expressWs.app.ws("/", function (ws, req) {
         return;
       }
 
+      const context = await makeContext(message.data.query, index, store);
       const response = await askLLM(
         message.data.query,
-        thread.messages as any,
+        thread.messages,
         {
           url: scrape.url,
-          context: await makeContext(message.data.query, index, store),
+          context: context?.content,
         }
       );
+      if (context?.links) {
+        ws.send(
+          makeMessage("links", {
+            links: context.links,
+          })
+        );
+      }
       const { content, role } = await streamLLMResponse(ws as any, response);
-      addMessage(threadId, { role, content } as any);
-      ws.send(makeMessage("llm-chunk", { end: true, content, role }));
+      addMessage(threadId, {
+        llmMessage: { role, content },
+        links:
+          context?.links?.map((link) => ({
+            url: link.url,
+            metaTags: link.metaTags,
+          })) ?? [],
+      });
+      ws.send(
+        makeMessage("llm-chunk", {
+          end: true,
+          content,
+          role,
+          links: context?.links,
+        })
+      );
     }
   });
 });
 
 app.listen(port, async () => {
-  await mongoose.connect(process.env.DATABASE_URL!);
   console.log(`Running on port ${port}`);
 });

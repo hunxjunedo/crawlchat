@@ -1,22 +1,63 @@
-import { Box, Group, Heading, IconButton, Input } from "@chakra-ui/react";
+import {
+  Box,
+  GridItem,
+  Group,
+  Heading,
+  IconButton,
+  Input,
+  Link,
+  SimpleGrid,
+} from "@chakra-ui/react";
 import { Stack, Text } from "@chakra-ui/react";
-import type { Thread } from "@prisma/client";
+import type { Message, ScrapeLink, Thread } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
-import { TbCheck, TbSend, TbTrash } from "react-icons/tb";
+import { TbCheck, TbSend, TbTrash, TbWorld } from "react-icons/tb";
 import Markdown from "react-markdown";
 import { Prose } from "~/components/ui/prose";
-import { getThreadName } from "~/thread-util";
+import { getLinkTitle, getThreadName } from "~/thread-util";
 import { sleep } from "~/util";
 
 function makeMessage(type: string, data: any) {
   return JSON.stringify({ type, data });
 }
 
-function AssistantMessage({ content }: { content: string }) {
+function LinkCard({ link }: { link: ScrapeLink }) {
   return (
-    <Prose w="full">
-      <Markdown>{content}</Markdown>
-    </Prose>
+    <Stack bg="brand.gray.100" p={2} rounded={"md"} h="full">
+      <Link
+        href={link.url}
+        key={link.url}
+        fontSize={"xs"}
+        lineClamp={2}
+        target="_blank"
+      >
+        {getLinkTitle(link)}
+      </Link>
+    </Stack>
+  );
+}
+
+function AssistantMessage({
+  content,
+  links,
+}: {
+  content: string;
+  links: ScrapeLink[];
+}) {
+  return (
+    <Stack>
+      <Prose w="full">
+        <Markdown>{content}</Markdown>
+
+        <SimpleGrid columns={3} gap={2}>
+          {links.map((link, index) => (
+            <GridItem key={index}>
+              <LinkCard link={link} />
+            </GridItem>
+          ))}
+        </SimpleGrid>
+      </Prose>
+    </Stack>
   );
 }
 
@@ -48,10 +89,9 @@ export default function ChatBox({
 }) {
   const socket = useRef<WebSocket>(null);
   const [content, setContent] = useState("");
+  const [links, setLinks] = useState<ScrapeLink[]>([]);
   const [query, setQuery] = useState("");
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>(
-    thread.messages as { role: string; content: string }[]
-  );
+  const [messages, setMessages] = useState<Message[]>(thread.messages);
   const containerRef = useRef<HTMLDivElement>(null);
   const promptBoxRef = useRef<HTMLDivElement>(null);
   const [deleteActive, setDeleteActive] = useState(false);
@@ -65,13 +105,23 @@ export default function ChatBox({
     socket.current = new WebSocket("ws://localhost:3000");
     socket.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
+      if (message.type === "links") {
+        setLinks(message.data);
+      }
       if (message.type === "llm-chunk") {
         if (message.data.end) {
           setMessages((prev) => [
             ...prev,
-            { role: message.data.role, content: message.data.content },
+            {
+              llmMessage: {
+                role: message.data.role,
+                content: message.data.content,
+              },
+              links: message.data.links ?? [],
+            },
           ]);
           setContent("");
+          setLinks([]);
           return;
         }
         setContent((prev) => prev + message.data.content);
@@ -92,7 +142,10 @@ export default function ChatBox({
     socket.current!.send(
       makeMessage("ask-llm", { threadId: thread.id, query })
     );
-    setMessages((prev) => [...prev, { role: "user", content: query }]);
+    setMessages((prev) => [
+      ...prev,
+      { llmMessage: { role: "user", content: query }, links: [] },
+    ]);
     setQuery("");
     await sleep(0);
     scrollToBottom();
@@ -128,6 +181,20 @@ export default function ChatBox({
     onDelete();
   }
 
+  function allMessages() {
+    const allMessages = [
+      ...messages,
+      ...(content
+        ? [{ llmMessage: { role: "assistant", content }, links: [] }]
+        : []),
+    ];
+    return allMessages.map((message) => ({
+      role: (message.llmMessage as any).role,
+      content: (message.llmMessage as any).content,
+      links: message.links,
+    }));
+  }
+
   return (
     <Stack w={"full"} h="full" ref={containerRef}>
       <Stack>
@@ -146,13 +213,13 @@ export default function ChatBox({
       </Stack>
 
       <Stack flex={1} pb={"60px"}>
-        {[
-          ...messages,
-          ...(content ? [{ role: "assistant", content }] : []),
-        ].map((message, index) => (
+        {allMessages().map((message, index) => (
           <Stack key={index}>
             {message.role === "assistant" ? (
-              <AssistantMessage content={message.content} />
+              <AssistantMessage
+                content={message.content}
+                links={message.links}
+              />
             ) : (
               <UserMessage content={message.content} />
             )}

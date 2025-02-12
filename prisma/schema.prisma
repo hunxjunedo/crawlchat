@@ -39,12 +39,27 @@ model Scrape {
   threads         Thread[]
 }
 
+type MetaTag {
+  key String
+  value String
+}
+
+type ScrapeLink {
+  url             String
+  metaTags        MetaTag[]
+}
+
+type Message {
+  llmMessage      Json
+  links           ScrapeLink[]
+}
+
 model Thread {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userId          String   @db.ObjectId
   scrapeId        String   @db.ObjectId
 
-  messages        Json[]
+  messages        Message[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

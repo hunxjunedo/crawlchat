@@ -6,6 +6,7 @@ export type LinkResult = {
   url: string;
   index: number;
   content: string;
+  metaTags: { key: string; value: string }[];
 };
 
 export async function extractMarkdownText(content: string): Promise<string> {
@@ -65,5 +66,6 @@ export async function getLinks(
     url: urls[label],
     index: label,
     content: store.urls[urls[label]]?.markdown ?? "",
+    metaTags: store.urls[urls[label]]?.metaTags ?? [],
   }));
 }

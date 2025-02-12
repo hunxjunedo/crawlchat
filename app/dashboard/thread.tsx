@@ -32,12 +32,14 @@ export default function Thread({ loaderData }: Route.ComponentProps) {
 
   return (
     <Stack p={8} h="full">
-      <ChatBox
-        thread={loaderData.thread}
-        key={loaderData.thread.id}
-        deleting={deleteFetcher.state !== "idle"}
-        onDelete={handleDelete}
-      />
+      <Stack maxW={"700px"}>
+        <ChatBox
+          thread={loaderData.thread}
+          key={loaderData.thread.id}
+          deleting={deleteFetcher.state !== "idle"}
+          onDelete={handleDelete}
+        />
+      </Stack>
     </Stack>
   );
 }

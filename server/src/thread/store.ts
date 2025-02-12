@@ -1,13 +1,9 @@
-import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { prisma } from "../prisma";
-import type { InputJsonObject } from "@prisma/client/runtime/library";
+import type { Message } from "@prisma/client";
 
-export async function addMessage(
-  threadId: string,
-  message: ChatCompletionMessageParam
-) {
+export async function addMessage(threadId: string, message: Message) {
   return await prisma.thread.update({
     where: { id: threadId },
-    data: { messages: { push: message as unknown as InputJsonObject } },
+    data: { messages: { push: message as any } },
   });
 }
