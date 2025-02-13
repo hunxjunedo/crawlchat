@@ -9,12 +9,12 @@ import {
 } from "@chakra-ui/react";
 import {
   TbChevronRight,
+  TbFolder,
   TbHome,
   TbLogout,
   TbMessage,
   TbSettings,
   TbWand,
-  TbWorld,
 } from "react-icons/tb";
 import { Link, NavLink } from "react-router";
 import { Avatar } from "~/components/ui/avatar";
@@ -31,6 +31,7 @@ import { AppContext } from "./context";
 
 const links = [
   { label: "Home", to: "/app", icon: <TbHome /> },
+  { label: "Collections", to: "/collections", icon: <TbFolder /> },
   { label: "Settings", to: "/settings", icon: <TbSettings /> },
 ];
 
@@ -75,7 +76,7 @@ export function SideMenu({
   threads: Thread[];
 }) {
   const { threadTitle } = useContext(AppContext);
-  
+
   return (
     <Stack
       h="100dvh"

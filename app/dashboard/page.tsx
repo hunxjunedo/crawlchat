@@ -5,12 +5,12 @@ import {
   GridItem,
   Group,
   Heading,
-  IconButton,
   Input,
   Separator,
   SimpleGrid,
   Stack,
   Text,
+  Link as ChakraLink,
 } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { useState } from "react";
@@ -20,16 +20,11 @@ import {
   TbChevronDown,
   TbChevronUp,
   TbCircleCheckFilled,
-  TbMessage,
-  TbTrash,
-  TbWorld,
 } from "react-icons/tb";
 import { Link, redirect, useFetcher } from "react-router";
 import { Button } from "~/components/ui/button";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
-import moment from "moment";
-import type { Scrape } from "@prisma/client";
 import { Field } from "~/components/ui/field";
 import {
   SelectContent,
@@ -39,6 +34,7 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "~/components/ui/select";
+import { ScrapeCard } from "~/scrapes/card";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -59,8 +55,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 export function meta() {
   return [
     {
-      title: "LLM Ready",
-      description: "Make your website ready for LLMs",
+      title: "Kaho",
+      description: "Chat with any website!",
     },
   ];
 }
@@ -94,70 +90,6 @@ export async function action({ request }: { request: Request }) {
       throw redirect(`/threads/new?id=${json.scrapeId}`);
     }
   }
-}
-
-function ScrapeCard({
-  scrape,
-  onDelete,
-  deleting,
-}: {
-  scrape: Scrape;
-  onDelete: () => void;
-  deleting: boolean;
-}) {
-  const [deleteActive, setDeleteActive] = useState(false);
-
-  useEffect(() => {
-    if (deleteActive) {
-      setTimeout(() => {
-        setDeleteActive(false);
-      }, 3000);
-    }
-  }, [deleteActive]);
-
-  function handleDelete() {
-    if (!deleteActive) {
-      setDeleteActive(true);
-      return;
-    }
-    onDelete();
-  }
-
-  return (
-    <Stack bg="brand.gray.100" p={4} rounded={"lg"} h="full" className="group">
-      <Group h={"30px"}>
-        <Text fontSize={"30px"} _groupHover={{ display: "none" }}>
-          <TbWorld />
-        </Text>
-        <Group h="full" display={"none"} _groupHover={{ display: "flex" }}>
-          <IconButton size={"xs"} asChild>
-            <Link to={`/threads/new?id=${scrape.id}`}>
-              <TbMessage />
-            </Link>
-          </IconButton>
-          <IconButton
-            size={"xs"}
-            variant={deleteActive ? "solid" : "subtle"}
-            colorPalette={"red"}
-            onClick={handleDelete}
-          >
-            {deleteActive ? <TbCheck /> : <TbTrash />}
-          </IconButton>
-        </Group>
-      </Group>
-
-      <Text fontSize={"sm"} lineClamp={2}>
-        {scrape.url}
-      </Text>
-      <Group fontSize={"xs"}>
-        <Text opacity={0.5}>{moment(scrape.createdAt).fromNow()}</Text>
-        <Badge size={"xs"} variant={"surface"} colorPalette={"brand"}>
-          <TbWorld />
-          {scrape.urlCount}
-        </Badge>
-      </Group>
-    </Stack>
-  );
 }
 
 const maxLinks = createListCollection({
@@ -317,7 +249,7 @@ export default function LandingPage({
 
       <Stack w={"400px"}>
         <SimpleGrid columns={2} gap={4}>
-          {loaderData.scrapes.map((scrape) => (
+          {loaderData.scrapes.slice(0, 4).map((scrape) => (
             <GridItem key={scrape.id}>
               <ScrapeCard
                 scrape={scrape}
@@ -327,6 +259,11 @@ export default function LandingPage({
             </GridItem>
           ))}
         </SimpleGrid>
+        <Group justifyContent={"flex-end"}>
+          <ChakraLink asChild variant={"underline"}>
+            <Link to="/collections">View all</Link>
+          </ChakraLink>
+        </Group>
       </Stack>
     </Stack>
   );
