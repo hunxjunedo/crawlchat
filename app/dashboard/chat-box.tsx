@@ -145,6 +145,8 @@ export default function ChatBox({
   }, [title]);
 
   async function handleAsk() {
+    if (query.length === 0) return;
+
     socket.current!.send(
       makeMessage("ask-llm", { threadId: thread.id, query })
     );
@@ -253,7 +255,7 @@ export default function ChatBox({
             }
           }}
         />
-        <IconButton onClick={handleAsk}>
+        <IconButton onClick={handleAsk} disabled={query.length === 0}>
           <TbSend />
         </IconButton>
       </Group>
