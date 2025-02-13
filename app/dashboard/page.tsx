@@ -7,7 +7,6 @@ import {
   Heading,
   IconButton,
   Input,
-  Select,
   Separator,
   SimpleGrid,
   Stack,
@@ -91,7 +90,8 @@ export async function action({ request }: { request: Request }) {
     });
 
     if (response.status === 212) {
-      throw redirect(`/chat?url=${url}`);
+      const json = await response.json();
+      throw redirect(`/threads/new?id=${json.scrapeId}`);
     }
   }
 }
@@ -189,6 +189,14 @@ export default function LandingPage({
 
   useEffect(() => {
     socket.current = new WebSocket("ws://localhost:3000");
+    socket.current.onopen = () => {
+      socket.current?.send(
+        JSON.stringify({
+          type: "join-room",
+          data: { userId: loaderData.user!.id },
+        })
+      );
+    };
     socket.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "scrape-pre") {

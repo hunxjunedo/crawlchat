@@ -18,6 +18,9 @@ import {
   saveEmbedding,
   search,
 } from "./scrape/pinecone";
+import { joinRoom, broadcast } from "./socket-room";
+import { getRoomIds } from "./socket-room";
+
 const userId = "6790c3cc84f4e51db33779c5";
 
 const app: Express = express();
@@ -29,12 +32,6 @@ app.use(cors());
 
 function makeMessage(type: string, data: any) {
   return JSON.stringify({ type, data });
-}
-
-function broadcast(message: string) {
-  expressWs.getWss().clients.forEach((client) => {
-    client.send(message);
-  });
 }
 
 async function streamLLMResponse(
@@ -74,12 +71,13 @@ app.get("/test", async function (req: Request, res: Response) {
 app.post("/scrape", async function (req: Request, res: Response) {
   const url = req.body.url;
 
-  if (
-    await prisma.scrape.findFirst({
-      where: { url, userId },
-    })
-  ) {
-    res.status(212).json({ message: "already-scraped" });
+  const existingScrape = await prisma.scrape.findFirst({
+    where: { url, userId },
+  });
+  if (existingScrape) {
+    res
+      .status(212)
+      .json({ message: "already-scraped", scrapeId: existingScrape.id });
     return;
   }
 
@@ -107,7 +105,10 @@ app.post("/scrape", async function (req: Request, res: Response) {
             .map((regex: string) => new RegExp(regex))
         : undefined,
       onComplete: async () => {
-        broadcast(makeMessage("scrape-complete", { url }));
+        const roomIds = getRoomIds({ userId });
+        roomIds.forEach((roomId) =>
+          broadcast(roomId, makeMessage("scrape-complete", { url }))
+        );
       },
       afterScrape: async (url, markdown) => {
         const scrapedUrlCount = Object.values(store.urls).length;
@@ -117,14 +118,17 @@ app.post("/scrape", async function (req: Request, res: Response) {
         const remainingUrlCount = maxLinks
           ? maxLinks - scrapedUrlCount
           : store.urlSet.size() - scrapedUrlCount;
-        broadcast(
-          makeMessage("scrape-pre", {
-            url,
-            scrapedUrlCount,
-            remainingUrlCount,
-          })
+        const roomIds = getRoomIds({ userId });
+        roomIds.forEach((roomId) =>
+          broadcast(
+            roomId,
+            makeMessage("scrape-pre", {
+              url,
+              scrapedUrlCount,
+              remainingUrlCount,
+            })
+          )
         );
-
         const chunks = await chunkText(markdown);
 
         const batchSize = 20;
@@ -151,7 +155,10 @@ app.post("/scrape", async function (req: Request, res: Response) {
       },
     });
 
-    broadcast(makeMessage("saved", { url }));
+    const roomIds = getRoomIds({ userId });
+    roomIds.forEach((roomId) =>
+      broadcast(roomId, makeMessage("saved", { url }))
+    );
   })();
 
   res.json({ message: "ok" });
@@ -160,6 +167,10 @@ app.post("/scrape", async function (req: Request, res: Response) {
 expressWs.app.ws("/", function (ws, req) {
   ws.on("message", async function (msg) {
     const message = JSON.parse(msg.toString());
+
+    if (message.type === "join-room") {
+      getRoomIds(message.data).forEach((roomId) => joinRoom(roomId, ws as any));
+    }
 
     if (message.type === "create-thread") {
       const scrape = await prisma.scrape.findFirstOrThrow({
