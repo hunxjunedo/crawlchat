@@ -21,6 +21,4 @@ export default [
     route("collections", "scrapes/page.tsx"),
     route("settings", "dashboard/settings.tsx"),
   ]),
-
-  route("test", "test.tsx"),
 ] satisfies RouteConfig;
