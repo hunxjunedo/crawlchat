@@ -1,0 +1,74 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+type UserSettings {
+  openaiApiKey String?
+  systemPrompt String?
+}
+
+model User {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  email           String   @unique
+  settings        UserSettings?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  scrapes         Scrape[]
+  threads         Thread[]
+}
+
+enum ScrapeStatus {
+  pending
+  scraping
+  done
+  error
+}
+
+model Scrape {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
+
+  url             String
+  status          ScrapeStatus
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  urlCount        Int
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threads         Thread[]
+}
+
+type MetaTag {
+  key String
+  value String
+}
+
+type ScrapeLink {
+  url             String
+  metaTags        MetaTag[]
+}
+
+type Message {
+  llmMessage      Json
+  links           ScrapeLink[]
+}
+
+model Thread {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
+  scrapeId        String   @db.ObjectId
+
+  messages        Message[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
