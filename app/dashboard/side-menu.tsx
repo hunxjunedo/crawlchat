@@ -2,6 +2,7 @@ import {
   Group,
   Heading,
   IconButton,
+  Image,
   Separator,
   Spinner,
   Stack,
@@ -28,6 +29,7 @@ import type { Thread, User } from "@prisma/client";
 import { getThreadName } from "~/thread-util";
 import { useContext } from "react";
 import { AppContext } from "./context";
+import { RiChatVoiceAiFill } from "react-icons/ri";
 
 const links = [
   { label: "Home", to: "/app", icon: <TbHome /> },
@@ -101,7 +103,7 @@ export function SideMenu({
             asChild
           >
             <Group>
-              <TbWand />
+              <RiChatVoiceAiFill />
               <Link to="/app">CrawlChat</Link>
             </Group>
           </Heading>

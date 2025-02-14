@@ -59,27 +59,6 @@ export default function LoginPage() {
 
   return (
     <Flex h="100dvh" w="100vw" gap={4} alignItems={"center"}>
-      <Stack
-        bg="brand.fg"
-        h="100dvh"
-        flex={1}
-        display={["none", "none", "flex"]}
-        justifyContent={"center"}
-        alignItems={"center"}
-        gap={16}
-        pr={12}
-      >
-        <Heading
-          fontSize={80}
-          maxW={"90%"}
-          lineHeight={1.2}
-          textAlign={"center"}
-          fontWeight={"bold"}
-          color={"white"}
-        >
-          Still in doubt? Talk to me!
-        </Heading>
-      </Stack>
       <Stack flex={1}>
         <Center>
           <fetcher.Form method="post">

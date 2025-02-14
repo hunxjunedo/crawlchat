@@ -182,7 +182,7 @@ export default function LandingPage({
                   name="url"
                   disabled={loading}
                 />
-                <Button type="submit" loading={loading}>
+                <Button type="submit" loading={loading} colorPalette={"brand"}>
                   Scrape
                   <TbCheck />
                 </Button>

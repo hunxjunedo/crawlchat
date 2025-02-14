@@ -299,6 +299,7 @@ export default function ChatBox({
         <IconButton
           onClick={() => handleAsk(query)}
           disabled={query.length === 0}
+          colorPalette={"brand"}
         >
           <TbSend />
         </IconButton>
