@@ -20,7 +20,7 @@ authenticator.use(
       },
       secret: "secret",
       callbackURL: "/login/verify",
-      successRedirect: "/dashboard/home",
+      successRedirect: "/app",
       failureRedirect: "/login",
       emailSentRedirect: "/login?mail-sent=true",
       sessionStorage,

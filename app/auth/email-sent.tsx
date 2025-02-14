@@ -7,7 +7,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { dontRedirect: true });
 
   if (user) {
-    throw redirect("/dashboard/home");
+    throw redirect("/app");
   }
 
   return {};

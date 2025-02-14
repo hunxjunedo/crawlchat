@@ -14,7 +14,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { dontRedirect: true });
 
   if (user) {
-    return redirect("/dashboard/home");
+    return redirect("/app");
   }
 
   const searchParams = new URL(request.url).searchParams;
@@ -39,7 +39,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   const session = await getSession(request.headers.get("cookie"));
   session.set("userId", user.id);
-  return redirect("/dashboard/home", {
+  return redirect("/app", {
     headers: {
       "Set-Cookie": await commitSession(session),
     },

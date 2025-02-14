@@ -182,7 +182,7 @@ export class EmailLinkStrategy<
     this.validateSessionMagicLink = options.validateSessionMagicLink ?? false;
     
 
-    this.successRedirect = options.successRedirect ?? "/dashboard/home";
+    this.successRedirect = options.successRedirect ?? "/app";
     this.failureRedirect = options.failureRedirect ?? "/login";
     
 
@@ -300,7 +300,7 @@ export class EmailLinkStrategy<
 
     session_.set("user", user as any);
     const cookie = await this.sessionStorage.commitSession(session_);
-    throw redirect("/dashboard/home", {
+    throw redirect("/app", {
       headers: { "Set-Cookie": cookie },
     });
   }
