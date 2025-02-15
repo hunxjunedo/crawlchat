@@ -71,7 +71,7 @@ export function ScrapeCard({
         <Text opacity={0.5}>{moment(scrape.createdAt).fromNow()}</Text>
         <Badge size={"xs"} variant={"surface"} colorPalette={"brand"}>
           <TbWorld />
-          {scrape.urlCount}
+          {scrape.urls.length}
         </Badge>
       </Group>
     </Stack>

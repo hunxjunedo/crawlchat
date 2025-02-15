@@ -38,7 +38,7 @@ model Scrape {
   status          ScrapeStatus
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  urlCount        Int
+  urls            ScrapeLink[]
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   threads         Thread[]
@@ -51,12 +51,18 @@ type MetaTag {
 
 type ScrapeLink {
   url             String
-  metaTags        MetaTag[]
 }
 
 type Message {
   llmMessage      Json
   links           ScrapeLink[]
+}
+
+enum ResponseType {
+  short
+  brief
+  long
+  points
 }
 
 model Thread {
@@ -65,6 +71,7 @@ model Thread {
   scrapeId        String   @db.ObjectId
 
   messages        Message[]
+  responseType    ResponseType?
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

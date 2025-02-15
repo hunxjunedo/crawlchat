@@ -108,7 +108,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
 
   (async function () {
     const scrape = await prisma.scrape.create({
-      data: { url, status: "pending", userId, urlCount: 0 },
+      data: { url, status: "pending", userId, urls: [] },
     });
 
     const store: ScrapeStore = {
@@ -144,16 +144,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           ? maxLinks - scrapedUrlCount
           : store.urlSet.size() - scrapedUrlCount;
         const roomIds = getRoomIds({ userId });
-        roomIds.forEach((roomId) =>
-          broadcast(
-            roomId,
-            makeMessage("scrape-pre", {
-              url,
-              scrapedUrlCount,
-              remainingUrlCount,
-            })
-          )
-        );
+
         const chunks = await chunkText(text);
 
         const batchSize = 20;
@@ -169,6 +160,26 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           }
           await saveEmbedding(userId, scrape.id, embeddings);
         }
+
+        await prisma.scrape.update({
+          where: { id: scrape.id },
+          data: {
+            urls: Object.keys(store.urls)
+              .filter(Boolean)
+              .map((url) => ({ url })),
+          },
+        });
+
+        roomIds.forEach((roomId) =>
+          broadcast(
+            roomId,
+            makeMessage("scrape-pre", {
+              url,
+              scrapedUrlCount,
+              remainingUrlCount,
+            })
+          )
+        );
       },
     });
 
@@ -176,7 +187,9 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
       where: { id: scrape.id },
       data: {
         status: "done",
-        urlCount: Object.values(store.urls).filter(Boolean).length,
+        urls: Object.keys(store.urls)
+          .filter(Boolean)
+          .map((url) => ({ url })),
       },
     });
 
@@ -270,7 +283,6 @@ expressWs.app.ws("/", (ws: any, req) => {
           content: matches.map((match) => match.content).join("\n\n"),
           links: getUniqueLinks(matches).map((match) => ({
             url: match.url,
-            metaTags: [],
           })),
         };
 

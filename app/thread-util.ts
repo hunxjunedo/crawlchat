@@ -10,9 +10,5 @@ export function getThreadName(messages: Message[], maxLength = 500) {
 }
 
 export function getLinkTitle(link: ScrapeLink) {
-  const title = link.metaTags?.find((tag) => tag.key.match(/.*:title/))?.value;
-  if (title) {
-    return title;
-  }
   return link.url;
 }
