@@ -8,7 +8,7 @@ import { scrape, scrapeLoop, type ScrapeStore } from "./scrape/crawl";
 import { OrderedSet } from "./scrape/ordered-set";
 import cors from "cors";
 import OpenAI from "openai";
-import { askLLM } from "./llm";
+import { askLLM, getSystemPrompt } from "./llm";
 import { Stream } from "openai/streaming";
 import { addMessage } from "./thread/store";
 import { prisma } from "./prisma";
@@ -277,6 +277,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         const response = await askLLM(message.data.query, thread.messages, {
           url: scrape.url,
           context: context?.content,
+          systemPrompt: getSystemPrompt(thread.responseType ?? "long"),
         });
         if (context?.links) {
           ws.send(

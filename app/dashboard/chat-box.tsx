@@ -19,6 +19,8 @@ import { AppContext } from "./context";
 import { Button } from "~/components/ui/button";
 import { makeMessage } from "./socket-util";
 import { toaster } from "~/components/ui/toaster";
+import type { FetcherWithComponents } from "react-router";
+import type { ResponseType } from "@prisma/client";
 
 function LinkCard({ link }: { link: ScrapeLink }) {
   return (
@@ -80,9 +82,11 @@ function UserMessage({ content }: { content: string }) {
 export default function ChatBox({
   thread,
   token,
+  patchFetcher,
 }: {
   thread: Thread;
   token: string;
+  patchFetcher: FetcherWithComponents<{ responseType: ResponseType }>;
 }) {
   const { setThreadTitle } = useContext(AppContext);
   const socket = useRef<WebSocket>(null);
@@ -221,6 +225,7 @@ export default function ChatBox({
     const rect = containerRef.current.getBoundingClientRect();
     promptBoxRef.current.style.left = `${rect.left}px`;
     promptBoxRef.current.style.width = `${rect.width}px`;
+    promptBoxRef.current.style.opacity = "1";
   }
 
   function scrollToBottom(force = false) {
@@ -259,6 +264,9 @@ export default function ChatBox({
     }
   }
 
+  const responseType =
+    patchFetcher.formData?.get("responseType") ?? thread.responseType ?? "long";
+
   return (
     <Stack w={"full"} h="full" ref={containerRef}>
       <Stack flex={1} pb={"100px"} gap={8}>
@@ -276,34 +284,79 @@ export default function ChatBox({
         ))}
       </Stack>
 
-      <Group
+      <Stack
         position={"fixed"}
         bottom={0}
         left={0}
         w="full"
         zIndex={1}
         ref={promptBoxRef}
-        pb={8}
+        pb={4}
         bg="brand.white"
+        opacity={0}
       >
-        <Input
-          placeholder="Ask your query"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleAsk(query);
-            }
-          }}
-        />
-        <IconButton
-          onClick={() => handleAsk(query)}
-          disabled={query.length === 0}
-          colorPalette={"brand"}
-        >
-          <TbSend />
-        </IconButton>
-      </Group>
+        <Group w="full">
+          <Input
+            placeholder="Ask your query"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleAsk(query);
+              }
+            }}
+          />
+          <IconButton
+            onClick={() => handleAsk(query)}
+            disabled={query.length === 0}
+            colorPalette={"brand"}
+          >
+            <TbSend />
+          </IconButton>
+        </Group>
+        <Group>
+          <patchFetcher.Form method="patch">
+            <Group attached>
+              <Button
+                variant={responseType === "long" ? "solid" : "outline"}
+                size="xs"
+                type="submit"
+                name="responseType"
+                value="long"
+              >
+                Long
+              </Button>
+              <Button
+                variant={responseType === "brief" ? "solid" : "outline"}
+                size="xs"
+                type="submit"
+                name="responseType"
+                value="brief"
+              >
+                Brief
+              </Button>
+              <Button
+                variant={responseType === "short" ? "solid" : "outline"}
+                size="xs"
+                type="submit"
+                name="responseType"
+                value="short"
+              >
+                Short
+              </Button>
+              <Button
+                variant={responseType === "points" ? "solid" : "outline"}
+                size="xs"
+                type="submit"
+                name="responseType"
+                value="points"
+              >
+                Points
+              </Button>
+            </Group>
+          </patchFetcher.Form>
+        </Group>
+      </Stack>
 
       <Box
         position={"fixed"}

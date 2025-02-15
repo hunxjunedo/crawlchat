@@ -59,12 +59,20 @@ type Message {
   links           ScrapeLink[]
 }
 
+enum ResponseType {
+  short
+  brief
+  long
+  points
+}
+
 model Thread {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userId          String   @db.ObjectId
   scrapeId        String   @db.ObjectId
 
   messages        Message[]
+  responseType    ResponseType?
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

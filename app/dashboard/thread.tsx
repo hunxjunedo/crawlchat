@@ -10,6 +10,7 @@ import { getThreadName } from "~/thread-util";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "./context";
 import { TbCheck, TbMessage, TbTrash } from "react-icons/tb";
+import type { ResponseType, Prisma } from "@prisma/client";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const thread = await prisma.thread.findUnique({
@@ -26,15 +27,32 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   return { thread, token };
 }
 
-export async function action({ params }: Route.ActionArgs) {
-  await prisma.thread.delete({
-    where: { id: params.id },
-  });
-  return redirect("/app");
+export async function action({ params, request }: Route.ActionArgs) {
+  if (request.method === "DELETE") {
+    await prisma.thread.delete({
+      where: { id: params.id },
+    });
+    return redirect("/app");
+  }
+  if (request.method === "PATCH") {
+    const formData = await request.formData();
+    const responseType = formData.get("responseType");
+
+    const update: Prisma.ThreadUpdateInput = {};
+    if (responseType) {
+      update.responseType = responseType as ResponseType;
+    }
+
+    await prisma.thread.update({
+      where: { id: params.id },
+      data: update,
+    });
+  }
 }
 
-export default function Thread({ loaderData }: Route.ComponentProps) {
+export default function ThreadPage({ loaderData }: Route.ComponentProps) {
   const deleteFetcher = useFetcher();
+  const patchFetcher = useFetcher<{ responseType: ResponseType }>();
   const { threadTitle } = useContext(AppContext);
   const [deleteActive, setDeleteActive] = useState(false);
 
@@ -86,6 +104,7 @@ export default function Thread({ loaderData }: Route.ComponentProps) {
           token={loaderData.token}
           thread={loaderData.thread}
           key={loaderData.thread.id}
+          patchFetcher={patchFetcher}
         />
       </Stack>
     </Page>
