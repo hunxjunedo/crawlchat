@@ -73,11 +73,18 @@ app.get("/test", async function (req: Request, res: Response) {
   //   await makeEmbedding("How to setup google auth?")
   // );
 
+  // const result = await scrape(
+  //   "https://www.hindustantimes.com/entertainment/tv/ranveer-allahbadia-s-new-note-my-remark-was-insensitive-101739630398181.html"
+  // );
+  // const result = await scrape(
+  //   "https://docs.firecrawl.dev/features/crawl"
+  // );
+
   const result = await scrape(
-    "https://www.hindustantimes.com/entertainment/tv/ranveer-allahbadia-s-new-note-my-remark-was-insensitive-101739630398181.html"
+    "https://www.chakra-ui.com/docs/components/empty-state"
   );
 
-  await fs.writeFile("test.md", result.text);
+  await fs.writeFile("test.md", result.markdown);
 
   res.json({ result });
 });
@@ -135,7 +142,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           broadcast(roomId, makeMessage("scrape-complete", { url }))
         );
       },
-      afterScrape: async (url, text) => {
+      afterScrape: async (url, { markdown }) => {
         const scrapedUrlCount = Object.values(store.urls).length;
         const maxLinks = req.body.maxLinks
           ? parseInt(req.body.maxLinks)
@@ -145,7 +152,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           : store.urlSet.size() - scrapedUrlCount;
         const roomIds = getRoomIds({ userId });
 
-        const chunks = await chunkText(text);
+        const chunks = await chunkText(markdown);
 
         const batchSize = 20;
         for (let i = 0; i < chunks.length; i += batchSize) {

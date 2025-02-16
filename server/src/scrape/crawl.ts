@@ -54,7 +54,7 @@ export async function scrapeWithLinks(
   if (options?.onPreScrape) {
     options.onPreScrape(url, store);
   }
-  const { links: linkLinks, metaTags, text } = await scrape(url);
+  const { links: linkLinks, metaTags, text, markdown } = await scrape(url);
   store.urls[url] = {
     metaTags,
     text,
@@ -78,7 +78,7 @@ export async function scrapeWithLinks(
     store.urlSet.add(linkUrlStr);
   }
 
-  return text;
+  return { text, markdown };
 }
 
 export function urlsNotFetched(store: ScrapeStore) {
@@ -93,17 +93,25 @@ export async function scrapeLoop(
     skipRegex?: RegExp[];
     onPreScrape?: (url: string, store: ScrapeStore) => Promise<void>;
     onComplete?: () => Promise<void>;
-    afterScrape?: (url: string, text: string) => Promise<void>;
+    afterScrape?: (
+      url: string,
+      opts: { text: string; markdown: string }
+    ) => Promise<void>;
   }
 ) {
   const { limit = 300 } = options ?? {};
 
   while (urlsNotFetched(store).length > 0) {
     const url = urlsNotFetched(store)[0];
-    const text = await scrapeWithLinks(url, store, baseUrl, options);
+    const { text, markdown } = await scrapeWithLinks(
+      url,
+      store,
+      baseUrl,
+      options
+    );
 
     if (options?.afterScrape) {
-      await options.afterScrape(url, text);
+      await options.afterScrape(url, { text, markdown });
     }
 
     if (Object.keys(store.urls).length >= limit) {

@@ -1,7 +1,7 @@
 import { markdownToTxt } from "markdown-to-txt";
 
 export function format(markdown: string) {
-  return markdown.replace(/\n/g, "\n\n");
+  
 }
 
 function isJustListLink(line: string) {

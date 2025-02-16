@@ -2,15 +2,68 @@ import * as cheerio from "cheerio";
 import TurndownService from "turndown";
 import { removeConsecutiveLinks, markdownToText } from "./markdown";
 
+const EXCLUDE_NON_MAIN_TAGS = [
+  "header",
+  "footer",
+  "nav",
+  "aside",
+  ".header",
+  ".top",
+  ".navbar",
+  "#header",
+  ".footer",
+  ".bottom",
+  "#footer",
+  ".sidebar",
+  ".side",
+  ".aside",
+  "#sidebar",
+  ".modal",
+  ".popup",
+  "#modal",
+  ".overlay",
+  ".ad",
+  ".ads",
+  ".advert",
+  "#ad",
+  ".lang-selector",
+  ".language",
+  "#language-selector",
+  ".social",
+  ".social-media",
+  ".social-links",
+  "#social",
+  ".menu",
+  ".navigation",
+  "#nav",
+  ".breadcrumbs",
+  "#breadcrumbs",
+  ".share",
+  "#share",
+  ".widget",
+  "#widget",
+  ".cookie",
+  "#cookie",
+
+  "script",
+  "style",
+  "p:empty",
+  "div:empty",
+  '[class*="sidebar"]',
+  '[id*="sidebar"]',
+  "iframe",
+];
+
 function cleanHtml($: cheerio.CheerioAPI) {
-  $("script").remove();
-  $("style").remove();
-  $("iframe").remove();
-  $("nav").remove();
-  $("header").remove();
-  $("footer").remove();
-  $("p:empty").remove();
-  $("div:empty").remove();
+  for (const tag of EXCLUDE_NON_MAIN_TAGS) {
+    $(tag).remove();
+  }
+
+  $("a").each((_, a) => {
+    if ($(a).text().trim().length === 0) {
+      $(a).remove();
+    }
+  });
 }
 
 export function parseHtml(html: string) {
@@ -41,11 +94,21 @@ export function parseHtml(html: string) {
     filter: ["h1", "h2", "h3", "h4", "h5", "h6"],
     replacement: function (content, node) {
       const level = Number(node.nodeName.charAt(1));
-      return "\n" + "#".repeat(level) + " " + content + "\n\n";
+      return (
+        "\n" +
+        "#".repeat(level) +
+        " " +
+        content.trim().replace(/\n/g, "") +
+        "\n\n"
+      );
     },
   });
 
-  let markdown = turndownService.turndown($("body").html()!);
+  let content = $("main").html() ?? $("body").html();
+  if (!content) {
+    content = $("body").html();
+  }
+  let markdown = turndownService.turndown(content!);
   markdown = removeConsecutiveLinks(markdown);
 
   return {
