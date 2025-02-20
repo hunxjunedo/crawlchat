@@ -58,6 +58,7 @@ export async function scrape(
     try {
       output.parseOutput = parseHtml(await scrapePw(url));
     } catch (e: any) {
+      console.log(e);
       output.error = e.message;
     }
   }
