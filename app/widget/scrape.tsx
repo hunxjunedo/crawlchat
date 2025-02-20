@@ -17,23 +17,23 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }
 
   const session = await getSession(request.headers.get("cookie"));
-  let chatSessionKey = session.get("chatSessionKey");
+  const chatSessionKeys = session.get("chatSessionKeys") ?? {};
 
-  if (!chatSessionKey) {
+  if (!chatSessionKeys[scrape.id]) {
     const thread = await prisma.thread.create({
       data: {
         scrapeId: scrape.id,
       },
     });
-    chatSessionKey = thread.id;
+    chatSessionKeys[scrape.id] = thread.id;
   }
 
-  session.set("chatSessionKey", chatSessionKey);
+  session.set("chatSessionKeys", chatSessionKeys);
 
-  const userToken = await createToken(chatSessionKey);
+  const userToken = await createToken(chatSessionKeys[scrape.id]);
 
   const thread = await prisma.thread.update({
-    where: { id: chatSessionKey },
+    where: { id: chatSessionKeys[scrape.id] },
     data: {
       openedAt: new Date(),
     },
