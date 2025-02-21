@@ -9,6 +9,7 @@ import {
   TbFileText,
   TbGitPullRequest,
   TbShoppingCart,
+  TbCode,
 } from "react-icons/tb";
 import { Button } from "~/components/ui/button";
 import "./tailwind.css";
@@ -63,17 +64,15 @@ export default function Index() {
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto text-center">
           <span className="inline-block px-4 py-1.5 bg-purple-100 rounded-full text-sm font-medium text-purple-900 mb-8">
-            Introducing CrawlChat
+            Connect documentations to MCP!
           </span>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Chat with Any Website
-            <br />
-            Using AI
+            Make your content LLM ready!
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-            Tired of hitting token limits and context windows? CrawlChat lets
-            you have meaningful conversations about any website's content using
-            AI - without any restrictions or limitations.
+            Don't fall behind by just providing the content to your customers.
+            Make it easily accessible to them by making your content or
+            documents LLM ready.
           </p>
           <div className="space-x-4">
             <Button
@@ -111,7 +110,7 @@ export default function Index() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900 dark:text-gray-900">
             How CrawlChat Works
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
               <TbWorld className="h-12 w-12 text-purple-600 mb-6" />
               <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
@@ -138,22 +137,12 @@ export default function Index() {
             <div className="p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
               <TbSearch className="h-12 w-12 text-purple-600 mb-6" />
               <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                3. API Access
+                3. MCP
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Access processed markdowns or search embeddings directly through
-                our API for integration with your applications.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
-              <TbRobot className="h-12 w-12 text-purple-600 mb-6" />
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                4. Choose Your LLM
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Select your preferred Language Model for conversations. Full
-                flexibility to use the AI that works best for you.
+                Tools like Cursor often hallucinate if proper context is not
+                provided. CrawlChat lets you easily connect such tools using
+                MPC.
               </p>
             </div>
           </div>
@@ -170,7 +159,7 @@ export default function Index() {
             From developers to researchers, CrawlChat adapts to your specific
             needs with powerful, context-aware conversations.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
               <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
                 <TbBook className="h-6 w-6 text-purple-600" />
@@ -200,27 +189,14 @@ export default function Index() {
 
             <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
               <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
-                <TbGitPullRequest className="h-6 w-6 text-purple-600" />
+                <TbCode className="h-6 w-6 text-purple-600" />
               </div>
               <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                Code Review Assistant
+                Development
               </h3>
               <p className="text-gray-600">
-                Drop in PR links and discuss changes with AI. Get insights and
-                suggestions for your code reviews.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
-                <TbShoppingCart className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                E-commerce Assistant
-              </h3>
-              <p className="text-gray-600">
-                Find the perfect products by chatting about e-commerce websites.
-                Get personalized recommendations.
+                Just connect MCP with your editor like Cursor or Windsurf and
+                code without switch windows.
               </p>
             </div>
           </div>
