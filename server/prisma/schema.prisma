@@ -46,6 +46,7 @@ model Scrape {
   updatedAt       DateTime @updatedAt
   title           String?
   chatPrompt      String?
+  mcpToolName     String?
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   threads         Thread[]

@@ -22,6 +22,8 @@ import {
   TbSettings,
   TbTrash,
   TbWorld,
+  TbBrain,
+  TbRobotFace,
 } from "react-icons/tb";
 import moment from "moment";
 import { SettingsSection } from "~/dashboard/settings";
@@ -253,11 +255,20 @@ export default function ScrapePage({
                   </HStack>
                 ),
               },
+              {
+                value: "mcp",
+                label: (
+                  <HStack>
+                    <TbRobotFace />
+                    MCP
+                  </HStack>
+                ),
+              },
             ]}
           />
         </Box>
 
-        <Stack>
+        <Stack mt={6}>
           <Outlet />
         </Stack>
       </Stack>
