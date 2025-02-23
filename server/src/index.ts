@@ -4,7 +4,7 @@ dotenv.config();
 import express from "express";
 import type { Express, Request, Response } from "express";
 import ws from "express-ws";
-import { scrape, scrapeLoop, type ScrapeStore } from "./scrape/crawl";
+import { scrapeLoop, type ScrapeStore } from "./scrape/crawl";
 import { OrderedSet } from "./scrape/ordered-set";
 import cors from "cors";
 import OpenAI from "openai";
@@ -21,10 +21,13 @@ import {
 import { joinRoom, broadcast } from "./socket-room";
 import { getRoomIds } from "./socket-room";
 import { authenticate, verifyToken } from "./jwt";
-import fs from "fs/promises";
 import { getMetaTitle } from "./scrape/parse";
 import { splitMarkdown } from "./scrape/markdown-splitter";
-import { Scrape } from "@prisma/client";
+import {
+  AnswerAgent,
+  QueryPlannerAgent,
+  QuestionSplitterAgent,
+} from "./llm/agentic";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -68,9 +71,7 @@ app.get("/", function (req: Request, res: Response) {
 });
 
 app.get("/test", async function (req: Request, res: Response) {
-  const id = "67b9da88ac25fcf3263f8260";
-  const result = await deleteScrape(id);
-  res.json({ message: "ok", result });
+  res.json({ message: "ok" });
 });
 
 app.post("/scrape", authenticate, async function (req: Request, res: Response) {
@@ -267,15 +268,19 @@ expressWs.app.ws("/", (ws: any, req) => {
           where: { id: thread.scrapeId },
         });
 
-        addMessage(threadId, {
+        const newQueryMessage = {
           llmMessage: { role: "user", content: message.data.query },
           links: [],
-        });
+        };
+        addMessage(threadId, newQueryMessage);
 
-        const result = await search(
-          scrape.id,
-          await makeEmbedding(message.data.query)
-        );
+        const queryAgent = new QueryPlannerAgent();
+        const { query } = await queryAgent.run([
+          ...thread.messages,
+          newQueryMessage,
+        ]);
+
+        const result = await search(scrape.id, await makeEmbedding(query));
         const matches = result.matches.map((match) => ({
           content: match.metadata!.content as string,
           url: match.metadata!.url as string,
