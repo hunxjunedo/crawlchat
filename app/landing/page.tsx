@@ -35,57 +35,77 @@ export function meta() {
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const url = formData.get("url");
-  const roomId = formData.get("roomId");
+  const type = formData.get("type");
 
-  if (!url) {
-    return { error: "URL is required" };
-  }
-  if (!roomId) {
-    return { error: "Room ID is required" };
-  }
+  if (type === "scrape") {
+    const url = formData.get("url");
+    const roomId = formData.get("roomId");
 
-  const lastMinute = new Date(Date.now() - 60 * 1000);
+    if (!url) {
+      return { error: "URL is required" };
+    }
+    if (!roomId) {
+      return { error: "Room ID is required" };
+    }
 
-  const scrapes = await prisma.scrape.findMany({
-    where: {
-      userId: process.env.OPEN_USER_ID!,
-      createdAt: {
-        gt: lastMinute,
+    const lastMinute = new Date(Date.now() - 60 * 1000);
+
+    const scrapes = await prisma.scrape.findMany({
+      where: {
+        userId: process.env.OPEN_USER_ID!,
+        createdAt: {
+          gt: lastMinute,
+        },
       },
-    },
-  });
+    });
 
-  if (scrapes.length >= 5) {
-    console.log("Too many scrapes");
-    return { error: "Too many scrapes" };
+    if (scrapes.length >= 5) {
+      console.log("Too many scrapes");
+      return { error: "Too many scrapes" };
+    }
+
+    const scrape = await prisma.scrape.create({
+      data: {
+        userId: process.env.OPEN_USER_ID!,
+        url: url as string,
+        status: "pending",
+      },
+    });
+
+    await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
+      method: "POST",
+      body: JSON.stringify({
+        scrapeId: scrape.id,
+        userId: scrape.userId,
+        url,
+        maxLinks: 1,
+        roomId: `user-${roomId}`,
+        includeMarkdown: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${createToken(process.env.OPEN_USER_ID!)}`,
+      },
+    });
+
+    return { token: createToken(roomId as string), scrapeId: scrape.id };
   }
 
-  const scrape = await prisma.scrape.create({
-    data: {
-      userId: process.env.OPEN_USER_ID!,
-      url: url as string,
-      status: "pending",
-    },
-  });
+  if (type === "llm.txt") {
+    const scrapeId = formData.get("scrapeId");
+    const res = await fetch(
+      `${process.env.VITE_SERVER_URL}/llm.txt?scrapeId=${scrapeId}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${createToken(process.env.OPEN_USER_ID!)}`,
+        },
+      }
+    );
+    const { text } = await res.json();
 
-  await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
-    method: "POST",
-    body: JSON.stringify({
-      scrapeId: scrape.id,
-      userId: scrape.userId,
-      url,
-      maxLinks: 1,
-      roomId: `user-${roomId}`,
-      includeMarkdown: true,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${createToken(process.env.OPEN_USER_ID!)}`,
-    },
-  });
-
-  return { token: createToken(roomId as string), scrapeId: scrape.id };
+    return { llmTxt: text };
+  }
 }
 
 function ScrapeButton({
@@ -111,6 +131,7 @@ function ScrapeButton({
 export default function Index() {
   const { connect, scraping, stage } = useScrape();
   const scrapeFetcher = useFetcher();
+  const llmTxtFetcher = useFetcher();
   const [roomId, setRoomId] = useState<string>("");
   const [mpcCmd, setMpcCmd] = useState<string>("");
 
@@ -137,25 +158,36 @@ export default function Index() {
     }
   }, [scrapeFetcher.data?.token]);
 
+  useEffect(() => {
+    if (llmTxtFetcher.data?.llmTxt) {
+      downloadTxt(llmTxtFetcher.data.llmTxt, "llm.txt");
+    }
+  }, [llmTxtFetcher.data?.llmTxt]);
+
+  function downloadTxt(text: string, filename: string) {
+    const blob = new Blob([text], {
+      type: "text/markdown",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
   function handleChat() {
     window.open(`/w/${scrapeFetcher.data?.scrapeId}`, "_blank");
   }
 
-  function handleMarkdown() {
+  function handleLlmTxt() {
     if (scraping?.markdown) {
-      const scrapedUrl = new URL(scraping.url);
-
-      const blob = new Blob([scraping.markdown], {
-        type: "text/markdown",
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${scrapedUrl.hostname}-crawlchat-content.md`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      llmTxtFetcher.submit(
+        { type: "llm.txt", scrapeId: scrapeFetcher.data?.scrapeId },
+        { method: "post" }
+      );
     }
   }
 
@@ -226,6 +258,7 @@ export default function Index() {
             <scrapeFetcher.Form className="max-w-xl mx-auto mb-8" method="post">
               <div className="flex flex-col items-start w-full">
                 <div className="flex flex-col md:flex-row gap-2 w-full">
+                  <input type="hidden" name="type" value="scrape" />
                   <input name="roomId" type="hidden" value={roomId} />
                   <input
                     name="url"
@@ -261,7 +294,7 @@ export default function Index() {
                     <>
                       <TbAlertCircle className="h-4 w-4 opacity-50" />
                       <div className="opacity-50">
-                        It will scrape and make it LLM ready!
+                        Fetches 5 pages and makes it LLM ready
                       </div>
                     </>
                   )}
@@ -284,9 +317,9 @@ export default function Index() {
                   text="Chat"
                 />
                 <ScrapeButton
-                  onClick={handleMarkdown}
+                  onClick={handleLlmTxt}
                   icon={<TbMarkdown />}
-                  text="Markdown"
+                  text="LLM.txt"
                 />
                 <ScrapeButton
                   onClick={handleMCP}

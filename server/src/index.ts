@@ -28,6 +28,7 @@ import {
   QueryPlannerAgent,
   QuestionSplitterAgent,
 } from "./llm/agentic";
+import { makeLLMTxt } from "./llm-txt";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -214,6 +215,18 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   })();
 
   res.json({ message: "ok" });
+});
+
+app.get("/llm.txt", authenticate, async function (req: Request, res: Response) {
+  const userId = req.user!.id;
+  const scrapeId = req.query.scrapeId as string;
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: { id: scrapeId, userId },
+  });
+  const scrapeItems = await prisma.scrapeItem.findMany({
+    where: { scrapeId: scrape.id },
+  });
+  res.json({ text: makeLLMTxt(scrapeItems) });
 });
 
 app.delete(
