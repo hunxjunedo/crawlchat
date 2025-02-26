@@ -3,9 +3,9 @@ import fs from "fs";
 import path from "path";
 import type { Route } from "./+types/terms";
 import { Prose } from "~/components/ui/prose";
-import { Footer, Navbar } from "./new-page";
+import { Footer, Navbar } from "./page";
 import { Stack } from "@chakra-ui/react";
-import { Container } from "./new-page";
+import { Container } from "./page";
 
 export function meta() {
   return [

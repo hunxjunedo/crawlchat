@@ -1,60 +1,116 @@
 import {
+  Group,
+  Stack,
+  Text,
+  Link as ChakraLink,
+  Heading,
+  Input,
+  Spinner,
+  Box,
+  SimpleGrid,
+  GridItem,
+  Image,
+} from "@chakra-ui/react";
+import type { PropsWithChildren } from "react";
+import {
+  TbApi,
   TbArrowRight,
-  TbWorld,
-  TbMessageCircle,
-  TbShield,
-  TbSearch,
-  TbBook,
-  TbFileText,
-  TbCode,
-  TbMessage,
+  TbBrandOpenai,
+  TbCheck,
   TbCircleCheck,
+  TbCircleCheckFilled,
+  TbCode,
+  TbCrown,
   TbMarkdown,
+  TbMessage,
   TbRobotFace,
-  TbLoader2,
+  TbSettings,
+  TbWorld,
+  TbX,
 } from "react-icons/tb";
+import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Link } from "@chakra-ui/react";
 import { useOpenScrape } from "./use-open-scrape";
-import "./tailwind.css";
+import { Tooltip } from "~/components/ui/tooltip";
+import { Toaster } from "~/components/ui/toaster";
+
+const maxW = "1200px";
 
 export function meta() {
   return [
     {
-      title: "CrawlChat",
+      title: "CrawlChat - Make your content LLM ready!",
       description: "Chat with Any Website using AI",
     },
   ];
 }
 
-function ScrapeButton({
-  icon,
-  text,
-  onClick,
-  disabled,
-}: {
-  icon: React.ReactNode;
-  text: string;
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  const tooltip = disabled ? "Scrape to use it" : `${text} with this website`;
-
+export function Container({ children }: PropsWithChildren) {
   return (
-    <button
-      onClick={onClick}
-      className="bg-gradient-to-b from-purple-100 to-purple-200 p-4 rounded-xl flex gap-2 enabled:cursor-pointer disabled:cursor-not-allowed transition-all flex-1 justify-center disabled:opacity-50 enabled:hover:scale-105"
-      disabled={disabled}
-      title={tooltip}
-      aria-label={tooltip}
-    >
-      <div className="text-2xl text-purple-600">{icon}</div>
-      <div className="dark:text-gray-900">{text}</div>
-    </button>
+    <Group maxW={maxW} mx={"auto"} w="full" justifyContent={"space-between"}>
+      {children}
+    </Group>
   );
 }
 
-export default function Index() {
+function LogoText() {
+  return (
+    <Text
+      fontSize={"xl"}
+      fontWeight={"bold"}
+      bgGradient={"to-r"}
+      gradientFrom={"brand.500"}
+      gradientTo={"brand.300"}
+      bgClip="text"
+      color={"transparent"}
+    >
+      CrawlChat
+    </Text>
+  );
+}
+
+export function Navbar() {
+  return (
+    <Stack
+      as="nav"
+      position={"sticky"}
+      top={0}
+      bg={"brand.white"}
+      zIndex={1}
+      borderBottom={"1px solid"}
+      borderColor={"brand.outline-subtle"}
+      p={4}
+      px={8}
+    >
+      <Container>
+        <Group>
+          <LogoText />
+        </Group>
+        <Group gap={6}>
+          <ChakraLink href={"/#use-cases"} display={["none", "flex"]}>
+            Use cases
+          </ChakraLink>
+          <ChakraLink href={"/#pricing"} display={["none", "flex"]}>
+            Pricing
+          </ChakraLink>
+          <Button
+            variant={"outline"}
+            colorPalette={"brand"}
+            size={"lg"}
+            asChild
+          >
+            <Link to={"/login"}>
+              Login
+              <TbArrowRight />
+            </Link>
+          </Button>
+        </Group>
+      </Container>
+    </Stack>
+  );
+}
+
+function TryItOut() {
   const {
     scrapeFetcher,
     scraping,
@@ -67,416 +123,590 @@ export default function Index() {
     copyMcpCmd,
   } = useOpenScrape();
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Navigation */}
-      <nav className="fixed w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
-              CrawlChat
-            </span>
-          </div>
+    <Stack maxW={"500px"} w="full" gap={4} alignItems={"center"}>
+      {stage === "idle" && (
+        <scrapeFetcher.Form
+          className="w-full"
+          method="post"
+          action="/open-scrape"
+          style={{ width: "100%" }}
+        >
+          <Group w="full">
+            <input type="hidden" name="intent" value="scrape" />
+            <input type="hidden" name="roomId" value={roomId} />
+            <Input
+              name="url"
+              placeholder="Enter your website URL"
+              size={"2xl"}
+              disabled={disable}
+              flex={1}
+            />
+            <Button
+              size={"2xl"}
+              type="submit"
+              loading={disable}
+              colorPalette={"brand"}
+            >
+              Try it
+              <TbArrowRight />
+            </Button>
+          </Group>
+        </scrapeFetcher.Form>
+      )}
 
-          <div className="flex items-center space-x-6">
-            <button
-              onClick={() => scrollToSection("use-cases")}
-              className="text-gray-600 hover:text-gray-900 transition-colors font-medium hidden md:block"
-            >
-              Use Cases
-            </button>
-            <button
-              onClick={() => scrollToSection("pricing")}
-              className="text-gray-600 hover:text-gray-900 transition-colors font-medium hidden md:block"
-            >
-              Pricing
-            </button>
-            <Link
-              className="border border-purple-600 text-purple-600 hover:bg-purple-700 hover:text-white px-4 py-2 font-medium flex justify-center items-center rounded-md"
-              href="/login"
-            >
-              Login
-              <TbArrowRight className="ml-1 h-5 w-5" />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {stage !== "idle" && stage !== "saved" && (
+        <Spinner size={"xl"} color={"brand.fg"} />
+      )}
+      {stage === "saved" && (
+        <Text fontSize={"6xl"} color={"brand.fg"}>
+          <TbCircleCheck />
+        </Text>
+      )}
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-10 px-4">
-        <div className="container mx-auto text-center">
-          <span className="inline-block px-4 py-1.5 bg-purple-100 rounded-full text-sm font-medium text-purple-900 mb-8">
+      <Group justifyContent={"center"}>
+        <Text
+          fontSize={"sm"}
+          opacity={0.5}
+          truncate
+          maxW={["300px", "500px", "600px"]}
+        >
+          {scrapeFetcher.data?.error ? (
+            <span className="text-red-500">{scrapeFetcher.data?.error}</span>
+          ) : stage === "scraping" ? (
+            <span>Scraping {scraping?.url ?? "url..."}</span>
+          ) : stage === "saved" ? (
+            <span>Scraped and ready!</span>
+          ) : (
+            <span>Fetches 25 pages and makes it LLM ready!</span>
+          )}
+        </Text>
+      </Group>
+
+      <Stack w="full" direction={["column", "row"]}>
+        <Box flex={1}>
+          <Button
+            variant={"subtle"}
+            disabled={stage !== "saved"}
+            size={"2xl"}
+            onClick={openChat}
+            w="full"
+          >
+            <TbMessage />
+            Chat
+          </Button>
+        </Box>
+        <Box flex={1}>
+          <Button
+            w={"full"}
+            variant={"subtle"}
+            disabled={stage !== "saved"}
+            size={"2xl"}
+            onClick={downloadLlmTxt}
+          >
+            <TbMarkdown />
+            LLM.txt
+          </Button>
+        </Box>
+        <Box flex={1}>
+          <Button
+            w="full"
+            variant={"subtle"}
+            disabled={stage !== "saved"}
+            size={"2xl"}
+            onClick={copyMcpCmd}
+          >
+            <TbRobotFace />
+            MCP
+          </Button>
+        </Box>
+      </Stack>
+    </Stack>
+  );
+}
+
+function Hero() {
+  return (
+    <Stack w={"full"} px={8} py={12}>
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <Text
+            bg="brand.subtle"
+            p={2}
+            px={4}
+            fontSize={"sm"}
+            color={"brand.fg"}
+            fontWeight={"medium"}
+            rounded={"full"}
+          >
             Connect documentations to MCP!
-          </span>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          </Text>
+
+          <Heading
+            as="h1"
+            fontSize={"6xl"}
+            fontWeight={"bolder"}
+            lineHeight={1}
+            textAlign={"center"}
+          >
             Make your content LLM ready!
-          </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+          </Heading>
+
+          <Text
+            as="h2"
+            fontSize={"xl"}
+            textAlign={"center"}
+            maxW={"600px"}
+            opacity={0.6}
+          >
             Give URL and it will scrape all the content and turns them
             embeddings for RAG. You can share chat links or embed it on your
             website. Or use API to query the content.
-          </p>
+          </Text>
 
-          <div className="flex flex-col items-center gap-2 max-w-xl mx-auto">
-            <div className="w-full md:h-16 flex flex-col justify-center items-center">
-              {stage === "idle" && (
-                <scrapeFetcher.Form
-                  className="w-full"
-                  method="post"
-                  action="/open-scrape"
+          <TryItOut />
+        </Stack>
+      </Container>
+    </Stack>
+  );
+}
+
+function LandingHeading({ children }: PropsWithChildren) {
+  return (
+    <Heading
+      as="h2"
+      fontSize={"2xl"}
+      fontWeight={"bold"}
+      textAlign={"center"}
+      position={"relative"}
+      mb={4}
+    >
+      {children}
+      <Box
+        position={"absolute"}
+        bottom={-1.5}
+        left={"50%"}
+        w={6}
+        h={1}
+        bg="brand.fg"
+        rounded={"full"}
+        transform={"translateX(-50%)"}
+      />
+    </Heading>
+  );
+}
+
+function Demo() {
+  return (
+    <Stack w={"full"} px={8} py={12}>
+      <Container>
+        <Box rounded={"2xl"} overflow={"hidden"} w={"full"} h={"full"}>
+          <video
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+            poster="/demo-poster.png"
+            src="https://slickwid-public.s3.us-east-1.amazonaws.com/CrawlChat+Demo.mp4"
+            controls
+          >
+            Your browser does not support the video tag.
+          </video>
+        </Box>
+      </Container>
+    </Stack>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    {
+      icon: <TbWorld />,
+      title: "Scrape",
+      description:
+        "Input your website URL and let CrawlChat crawl the content. We convert pages to markdown, create embeddings, and store them in a vector database.",
+    },
+    {
+      icon: <TbSettings />,
+      title: "Customise",
+      description:
+        "Once the content is scraped, you can customise how the content is to be used. Set custom rules, custom data, system prompts etc.",
+    },
+    {
+      icon: <TbMessage />,
+      title: "Chat & APIs",
+      description:
+        "There are multiple ways you use the data for AI. Easiest is to just embed the chat widget on your website. API's to query and MCP servers are also available!",
+    },
+  ];
+  return (
+    <Stack w={"full"} px={8} py={12} bg="brand.gray.50">
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <LandingHeading>How it works</LandingHeading>
+          <SimpleGrid columns={[1, 2, 3]} gap={6} w={"full"}>
+            {steps.map((step, i) => (
+              <GridItem key={step.title}>
+                <Stack
+                  key={step.title}
+                  gap={2}
+                  bgGradient={"to-b"}
+                  gradientFrom={"brand.subtle"}
+                  gradientTo={"brand.muted"}
+                  p={6}
+                  px={8}
+                  rounded={"2xl"}
+                  h="full"
                 >
-                  <div className="flex flex-col items-start w-full">
-                    <div className="flex flex-col md:flex-row gap-2 w-full">
-                      <input type="hidden" name="intent" value="scrape" />
-                      <input type="hidden" name="roomId" value={roomId} />
-                      <input
-                        name="url"
-                        type="url"
-                        placeholder="Enter your website URL"
-                        className="flex-1 flex min-h-14 w-full rounded-md border border-input bg-background px-3 py-2 text-lg ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-gray-900"
-                        disabled={disable}
-                      />
-                      <button
-                        type="submit"
-                        className="bg-purple-600 text-white hover:bg-purple-700 h-14 px-8 text-lg font-medium flex justify-center items-center rounded-md disabled:opacity-50"
-                        disabled={disable}
-                      >
-                        Try it
-                        {disable ? (
-                          <TbLoader2 className="animate-spin h-5 w-5 ml-2" />
-                        ) : (
-                          <TbArrowRight className="ml-2 h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </scrapeFetcher.Form>
-              )}
-              {stage !== "idle" && stage !== "saved" && (
-                <TbLoader2 className="animate-spin text-purple-600 text-6xl" />
-              )}
-              {stage === "saved" && (
-                <TbCircleCheck className="text-purple-600 text-6xl" />
-              )}
-            </div>
+                  <Text fontSize={"5xl"} color="brand.fg">
+                    {step.icon}
+                  </Text>
+                  <Text fontSize={"2xl"} fontWeight={"medium"}>
+                    {i + 1}. {step.title}
+                  </Text>
+                  <Text opacity={0.6}>{step.description}</Text>
+                </Stack>
+              </GridItem>
+            ))}
+          </SimpleGrid>
+        </Stack>
+      </Container>
+    </Stack>
+  );
+}
 
-            <div className="py-2 text-sm flex items-center gap-2 dark:text-gray-600 opacity-50">
-              {scrapeFetcher.data?.error ? (
-                <div className="text-red-500">{scrapeFetcher.data?.error}</div>
-              ) : stage === "scraping" ? (
-                <div>Scraping {scraping?.url ?? "url..."}</div>
-              ) : stage === "saved" ? (
-                <div>Scraped and ready!</div>
-              ) : (
-                <div>Fetches 5 pages and makes it LLM ready!</div>
-              )}
-            </div>
+function UseCases() {
+  const useCases = [
+    {
+      icon: <TbMessage />,
+      title: "Embed chat",
+      description:
+        "It is quite common to have a heavy documentation or content for your service. It quickly gets complicated to create a chat bot that learns from all your content and answers users queries. CrawlChat takes care of it and let's you embed the chatbot with few clicks!",
+      integrations: [
+        {
+          image: "/icons/openai.webp",
+          tooltip: "Chat is powered by OpenAI",
+        },
+        {
+          image: "/icons/claude.png",
+          tooltip: "Chat is powered by Claude",
+        },
+      ],
+      integrationTag: "Integrated with",
+    },
+    {
+      icon: <TbCode />,
+      title: "API",
+      description:
+        "Want to use your content in other apps? CrawlChat provides APIs using which you can query the conentent and integrate it in your own apps. Rest all is taken care by CrawlChat!",
+      integrations: [
+        {
+          image: "/icons/rest.png",
+          tooltip: "Integrate with REST API",
+        },
+        {
+          image: "/icons/websocket.png",
+          tooltip: "Integrate with WebSocket",
+        },
+      ],
+      integrationTag: "Integrate with",
+    },
+    {
+      icon: <TbRobotFace />,
+      title: "MCP Server",
+      description:
+        "Model Context Protocol (MCP) has been very well adopted by the LLM systems already. It is a way to connect external systems to the LLMs which are generic in nature and don't know much about your services and content. CrawlChat let's you get MCP server for your content without any extra effort!",
+      integrations: [
+        {
+          image: "/icons/cursor.png",
+          tooltip: "Works with Cursor",
+        },
+        {
+          image: "/icons/windsurf.png",
+          tooltip: "Works with Windsurf",
+        },
+        {
+          image: "/icons/claude.png",
+          tooltip: "Works with Claude",
+        },
+      ],
+      integrationTag: "Works with",
+    },
+  ];
 
-            <div className="flex gap-2 w-full">
-              <ScrapeButton
-                onClick={openChat}
-                icon={<TbMessage />}
-                text="Chat"
-                disabled={stage !== "saved"}
-              />
-              <ScrapeButton
-                onClick={downloadLlmTxt}
-                icon={<TbMarkdown />}
-                text="LLM.txt"
-                disabled={stage !== "saved"}
-              />
-              <ScrapeButton
-                onClick={copyMcpCmd}
-                icon={<TbRobotFace />}
-                text="MCP"
-                disabled={stage !== "saved"}
-              />
-            </div>
-            {mpcCmd && (
-              <div className="flex flex-col mt-2 text-sm max-w-[400px] dark:text-gray-600 gap-2">
-                <div className="bg-gray-200 p-1 rounded-md px-2">{mpcCmd}</div>
-                Copied!
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Video Demo Section */}
-      <section className="pb-20 px-4 bg-gray-50">
-        <div className="container mx-auto">
-          <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden bg-gray-900 shadow-xl">
-            <video
-              className="w-full h-full object-cover"
-              poster="/demo-poster.png"
-              src="https://slickwid-public.s3.us-east-1.amazonaws.com/CrawlChat+Demo.mp4"
-              controls
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-20 px-4 bg-white">
-        <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900 dark:text-gray-900">
-            How CrawlChat Works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
-              <TbWorld className="h-12 w-12 text-purple-600 mb-6" />
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                1. Crawl & Process
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Input your website URL and let CrawlChat crawl the content. We
-                convert pages to markdown, create embeddings, and store them in
-                a vector database.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
-              <TbMessageCircle className="h-12 w-12 text-purple-600 mb-6" />
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                2. Start Chatting
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Begin conversations about the website content. Our efficient
-                context management handles large amounts of data seamlessly.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
-              <TbSearch className="h-12 w-12 text-purple-600 mb-6" />
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                3. MCP
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Tools like Cursor often hallucinate if proper context is not
-                provided. CrawlChat lets you easily connect such tools using
-                MPC.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Use Cases Section */}
-      <section id="use-cases" className="py-20 px-4 bg-gray-50">
-        <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-900 dark:text-gray-900">
-            Perfect for Every Use Case
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-            From developers to researchers, CrawlChat adapts to your specific
-            needs with powerful, context-aware conversations.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
-                <TbBook className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                Documentation Search
-              </h3>
-              <p className="text-gray-600">
-                Search and understand library/framework documentation
-                effortlessly. Get contextual answers to your implementation
-                questions.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
-                <TbFileText className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                Content Research
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Analyze content across multiple pages and get comprehensive
-                insights for your research needs.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
-                <TbCode className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
-                Development
-              </h3>
-              <p className="text-gray-600">
-                Just connect MCP with your editor like Cursor or Windsurf and
-                code without switch windows.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-4 bg-white">
-        <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-900 dark:text-gray-900">
-            Simple, Transparent Pricing
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-            Choose the plan that works best for your needs. No hidden fees or
-            surprises.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Plan */}
-            <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 hover:border-purple-200 transition-colors">
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-900">
-                  Free
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Perfect for getting started
-                </p>
-              </div>
-
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900 dark:text-gray-900">
-                  $0
-                </span>
-                <span className="text-gray-600 dark:text-gray-400">/month</span>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-600">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  100 site scrapes per month
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  500,000 tokens included
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  Bring your own LLM key
-                </li>
-                <li className="flex items-center text-gray-600 opacity-50">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  API access not included
-                </li>
-              </ul>
-
-              <Button
-                className="w-full bg-white hover:bg-gray-100 text-gray-900 border border-gray-200"
-                asChild
+  return (
+    <Stack w={"full"} px={8} py={12} id="use-cases">
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <LandingHeading>Use cases</LandingHeading>
+          <Stack w={"full"} gap={10}>
+            {useCases.map((useCase) => (
+              <Stack
+                key={useCase.title}
+                bg="brand.subtle"
+                w="full"
+                p={10}
+                rounded={"xl"}
+                position={"relative"}
+                pr={[undefined, 60]}
+                overflow={"hidden"}
               >
-                <Link href="/login">
-                  Get Started Free
-                  <TbArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
+                <Text
+                  as="h3"
+                  fontSize={"3xl"}
+                  fontWeight={"medium"}
+                  lineHeight={1}
+                >
+                  {useCase.title}
+                </Text>
+                <Text opacity={0.6} fontSize={"lg"}>
+                  {useCase.description}
+                </Text>
+                {useCase.integrations && (
+                  <Stack mt={4}>
+                    <Text fontSize={"xs"} opacity={0.5}>
+                      {useCase.integrationTag ?? "Powered by"}
+                    </Text>
+                    <Group gap={4}>
+                      {useCase.integrations?.map((integration, key) => (
+                        <Tooltip
+                          key={key}
+                          content={integration.tooltip}
+                          showArrow
+                        >
+                          <Image src={integration.image} w={10} h={10} />
+                        </Tooltip>
+                      ))}
+                    </Group>
+                  </Stack>
+                )}
+                <Box
+                  position={"absolute"}
+                  top={0}
+                  right={0}
+                  fontSize={"200px"}
+                  transform={"rotate(10deg)"}
+                  opacity={[0, 0.2]}
+                  color="brand.fg"
+                >
+                  {useCase.icon}
+                </Box>
+              </Stack>
+            ))}
+          </Stack>
+        </Stack>
+      </Container>
+    </Stack>
+  );
+}
 
-            {/* Pro Plan */}
-            <div className="bg-purple-50 p-8 rounded-2xl border-2 border-purple-200 relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Most Popular
-                </span>
-              </div>
+type Feature = {
+  label: string;
+  excluded?: boolean;
+};
 
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-900">
-                  Pro
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  For power users and teams
-                </p>
-              </div>
+function PriceBox({
+  price,
+  title,
+  description,
+  features,
+  popular,
+  href,
+  disabled,
+}: {
+  price: number;
+  title: string;
+  description: string;
+  features: Feature[];
+  href: string;
+  popular?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <Stack
+      flex={1}
+      p={8}
+      bg={popular ? "brand.subtle" : "brand.gray.50"}
+      rounded={"2xl"}
+      position={"relative"}
+      border={"2px solid"}
+      borderColor={popular ? "brand.emphasized" : "brand.subtle"}
+    >
+      {popular && (
+        <Group
+          position={"absolute"}
+          top={0}
+          left={"50%"}
+          transform={"translate(-50%, -50%)"}
+          bg="brand.fg"
+          p={1}
+          px={3}
+          rounded={"full"}
+          color="white"
+          fontSize={"xs"}
+          fontWeight={"bold"}
+        >
+          <TbCrown />
+          <Text>Popular</Text>
+        </Group>
+      )}
 
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900 dark:text-gray-900">
-                  $19
-                </span>
-                <span className="text-gray-600 dark:text-gray-400">/month</span>
-              </div>
+      <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={1}>
+        {title}
+      </Text>
+      <Text opacity={0.6}>{description}</Text>
 
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-600">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  4,000 site scrapes per month
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  1,000,000 tokens included
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  Bring your own LLM key
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <TbShield className="h-5 w-5 text-purple-600 mr-3" />
-                  Full API access
-                </li>
-              </ul>
+      <Group alignItems={"flex-end"} gap={0} my={4}>
+        <Text fontSize={"4xl"} fontWeight={"bold"} lineHeight={1}>
+          ${price}
+        </Text>
+        <Text opacity={0.6}>/month</Text>
+      </Group>
 
-              <Button
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                disabled
-              >
-                Coming soon!
-                <TbArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Stack>
+        {features.map((feature) => (
+          <Group
+            key={feature.label}
+            alignItems="center"
+            gap={2}
+            opacity={feature.excluded ? 0.5 : 1}
+          >
+            <Box color="brand.fg">
+              {feature.excluded ? <TbX /> : <TbCheck />}
+            </Box>
+            <Text>{feature.label}</Text>
+          </Group>
+        ))}
+      </Stack>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-gray-900">
-              Ready to Chat with Websites?
-            </h2>
-            <p className="text-xl text-gray-600 mb-10">
-              Join users who are already having meaningful conversations with
-              web content using CrawlChat.
-            </p>
-            <Button
-              asChild
-              className="bg-purple-600 text-white hover:bg-purple-700 px-8 py-6 rounded-full text-lg"
-            >
-              <Link href="/login">
-                Start Free Trial
-                <TbArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <Button
+        w="full"
+        mt={4}
+        variant={price === 0 ? "outline" : "solid"}
+        colorPalette={"brand"}
+        asChild
+        disabled={disabled}
+      >
+        <a href={href}>
+          {price === 0 ? "Get started" : "Purchase"}
+          <TbArrowRight />
+        </a>
+      </Button>
+    </Stack>
+  );
+}
 
-      {/* Footer */}
-      <footer className="py-12 px-4 border-t border-gray-100">
-        <div className="container mx-auto text-center text-gray-600 flex gap-4 justify-center mb-4">
-          <div className="hover:underline">
-            <Link href="/llm-txt">LLM.txt Generator</Link>
-          </div>
-          <div className="hover:underline">
-            <Link href="/login">Login</Link>
-          </div>
-        </div>
-        <div className="container mx-auto text-center text-gray-600">
-          <p>&copy; 2025 CrawlChat. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+function Pricing() {
+  return (
+    <Stack w={"full"} px={8} py={12} id="pricing">
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <LandingHeading>Pricing</LandingHeading>
+          <Stack w={"full"} gap={6} direction={["column", "row"]}>
+            <PriceBox
+              price={0}
+              title="Free"
+              description="For personal use"
+              features={[
+                { label: "100 page scrapes per month" },
+                { label: "200 messages per month" },
+                { label: "API not available", excluded: true },
+                { label: "MCP not available", excluded: true },
+              ]}
+              href="/login"
+            />
+            <PriceBox
+              price={79}
+              title="Pro"
+              description="For power users and teams"
+              features={[
+                { label: "10,000 site scrapes per month" },
+                { label: "50,000 messages per month" },
+                { label: "API available" },
+                { label: "MCP available" },
+              ]}
+              popular
+              disabled
+              href="/login"
+            />
+          </Stack>
+        </Stack>
+      </Container>
+    </Stack>
+  );
+}
+
+export function CTA() {
+  return (
+    <Stack w={"full"} px={8} py={12} bg="brand.subtle">
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <Heading
+            as="h2"
+            fontSize={"4xl"}
+            fontWeight={"bold"}
+            textAlign={"center"}
+            lineHeight={1.2}
+          >
+            Ready to make your content LLM ready?
+          </Heading>
+          <Text maxW={"500px"} textAlign={"center"} opacity={0.6}>
+            Join users who are already having meaningful conversations with web
+            content using CrawlChat.
+          </Text>
+          <Button colorPalette={"brand"} asChild size={"2xl"} rounded={"full"}>
+            <Link to="/login">
+              Get started
+              <TbArrowRight />
+            </Link>
+          </Button>
+        </Stack>
+      </Container>
+    </Stack>
+  );
+}
+
+export function Footer() {
+  return (
+    <Stack w={"full"} px={8} py={12}>
+      <Container>
+        <Group w="full" alignItems={"flex-start"}>
+          <Stack flex={2}>
+            <LogoText />
+            <Text>Turn your content LLM ready!</Text>
+            <Text fontSize={"sm"} opacity={0.5}>
+              © 2025 CrawlChat
+            </Text>
+          </Stack>
+          <Stack flex={1}>
+            <ChakraLink href={"/"}>Home</ChakraLink>
+            <ChakraLink href={"/#pricing"}>Pricing</ChakraLink>
+            <ChakraLink href={"/#use-cases"}>Use cases</ChakraLink>
+            <ChakraLink href={"/llm-txt"}>LLM.txt Generator</ChakraLink>
+          </Stack>
+          <Stack flex={1}>
+            <ChakraLink href={"/terms"}>Terms</ChakraLink>
+            <ChakraLink href={"/policy"}>Privacy policy</ChakraLink>
+          </Stack>
+        </Group>
+      </Container>
+    </Stack>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Stack gap={0} w="full">
+      <Navbar />
+      <Hero />
+      <Demo />
+      <HowItWorks />
+      <UseCases />
+      <Pricing />
+      <CTA />
+      <Footer />
+      <Toaster />
+    </Stack>
   );
 }
