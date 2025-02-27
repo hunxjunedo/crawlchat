@@ -42,9 +42,9 @@ export function ScrapeCard({
   }, [deleteActive]);
 
   return (
-    <Stack bg="brand.gray.100" p={4} rounded={"lg"} h="full" className="group">
+    <Stack bg="brand.gray.100" p={4} rounded={"lg"} h="full">
       <Group h={"30px"}>
-        <Group _groupHover={{ display: "none" }}>
+        <Group>
           {faviconUrl && <Image src={faviconUrl} w={"30px"} h={"30px"} />}
           {!faviconUrl && (
             <Text fontSize={"30px"}>
