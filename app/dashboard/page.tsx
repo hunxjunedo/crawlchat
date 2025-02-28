@@ -243,7 +243,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               <Text>Chats</Text>
             </Group>
           </Heading>
-          <AreaChart width={width} height={250} data={chartData}>
+          <AreaChart width={width - 10} height={200} data={chartData}>
             <XAxis dataKey="name" />
             <Tooltip />
             <CartesianGrid strokeDasharray="3 3" />
@@ -263,7 +263,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               <Text>Messages</Text>
             </Group>
           </Heading>
-          <AreaChart width={width} height={250} data={chartData}>
+          <AreaChart width={width - 10} height={200} data={chartData}>
             <XAxis dataKey="name" />
             <Tooltip />
             <CartesianGrid strokeDasharray="3 3" />
