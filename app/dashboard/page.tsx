@@ -1,19 +1,30 @@
 import {
-  GridItem,
   Group,
-  SimpleGrid,
   Stack,
-  Link as ChakraLink,
+  HStack,
+  Icon,
+  Stat,
+  Heading,
+  Text,
 } from "@chakra-ui/react";
 import type { Route } from "./+types/page";
-import { TbHome, TbInbox, TbPlus } from "react-icons/tb";
-import { Link } from "react-router";
+import { TbHelp, TbHome, TbMessage } from "react-icons/tb";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
-import { ScrapeCard } from "~/scrapes/card";
 import { Page } from "~/components/page";
-import { EmptyState } from "~/components/ui/empty-state";
-import { Button } from "~/components/ui/button";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  AreaChart,
+  Area,
+} from "recharts";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -33,10 +44,57 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
     });
   }
+
+  const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
+
+  const threads = await prisma.thread.findMany({
+    where: {
+      scrapeId: {
+        in: scrapes.map((scrape) => scrape.id),
+      },
+      createdAt: {
+        gte: new Date(Date.now() - ONE_WEEK),
+      },
+    },
+    select: {
+      messages: {
+        select: {
+          uuid: true,
+          createdAt: true,
+        },
+      },
+      createdAt: true,
+    },
+  });
+  const dailyThreads: Record<string, number> = {};
+  for (const thread of threads) {
+    const date = new Date(thread.createdAt);
+    const key = date.toISOString().split("T")[0];
+    dailyThreads[key] = (dailyThreads[key] ?? 0) + thread.messages.length;
+  }
+  const dailyMessages: Record<string, number> = {};
+  for (const thread of threads) {
+    for (const message of thread.messages) {
+      if (!message.createdAt) continue;
+      const date = new Date(message.createdAt);
+      const key = date.toISOString().split("T")[0];
+      dailyMessages[key] = (dailyMessages[key] ?? 0) + 1;
+    }
+  }
+
+  const today = new Date();
+  const todayKey = today.toISOString().split("T")[0];
+  const threadsToday = dailyThreads[todayKey] ?? 0;
+  const messagesToday = dailyMessages[todayKey] ?? 0;
+
   return {
     user,
     scrapes,
     itemsCount,
+    dailyThreads,
+    dailyMessages,
+    threadsToday,
+    messagesToday,
   };
 }
 
@@ -49,53 +107,174 @@ export function meta() {
   ];
 }
 
+function numberToKMB(num: number) {
+  if (num < 1000) return num;
+  if (num < 1000000) return `${(num / 1000).toFixed(1)}k`;
+  return `${(num / 1000000).toFixed(1)}M`;
+}
+
+function StatCard({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Stat.Root flex={1} borderWidth="1px" p="4" rounded="md">
+      <HStack justify="space-between">
+        <Stat.Label>{label}</Stat.Label>
+        <Icon color="fg.muted">{icon}</Icon>
+      </HStack>
+      <Stat.ValueText>{numberToKMB(value)}</Stat.ValueText>
+    </Stat.Root>
+  );
+}
+
+const data = [
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+];
+
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
-  const cardsToShow = 4;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const chartData = useMemo(() => {
+    const data = [];
+    const today = new Date();
+    const DAY_MS = 1000 * 60 * 60 * 24;
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today.getTime() - i * DAY_MS);
+      const key = date.toISOString().split("T")[0];
+      data.push({
+        name: key,
+        Conversations: loaderData.dailyThreads[key] ?? 0,
+        Messages: loaderData.dailyMessages[key] ?? 0,
+      });
+    }
+    return data.reverse();
+  }, [loaderData.dailyThreads, loaderData.dailyMessages]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setWidth(containerRef.current.clientWidth);
+    }
+  }, [containerRef]);
 
   return (
     <Page title="Home" icon={<TbHome />}>
-      <Stack
-        alignItems={"center"}
-        justifyContent={"center"}
-        height={"100%"}
-        gap={8}
-      >
-        {loaderData.scrapes.length === 0 ? (
-          <Stack maxW="400px" w="full" alignItems="center" gap={6}>
-            <EmptyState
-              icon={<TbInbox size={60} opacity={0.6} />}
-              title="No collections yet"
-              description="Start by scraping a website to create your first collection"
-            >
-              <Button mt={4} asChild colorPalette={"brand"}>
-                <Link to="/scrape">
-                  Create collection
-                  <TbPlus />
-                </Link>
-              </Button>
-            </EmptyState>
-          </Stack>
-        ) : (
-          <Stack maxW={"500px"} w={"full"}>
-            <SimpleGrid columns={2} gap={4}>
-              {loaderData.scrapes.slice(0, cardsToShow).map((scrape) => (
-                <GridItem key={scrape.id}>
-                  <ScrapeCard
-                    scrape={scrape}
-                    itemsCount={loaderData.itemsCount[scrape.id]}
-                  />
-                </GridItem>
-              ))}
-            </SimpleGrid>
-            <Group justifyContent={"flex-end"}>
-              {loaderData.scrapes.length > cardsToShow && (
-                <ChakraLink asChild variant={"underline"}>
-                  <Link to="/collections">View all</Link>
-                </ChakraLink>
-              )}
+      <Stack height={"100%"} gap={8} ref={containerRef}>
+        <Group>
+          <StatCard
+            label="Chats today"
+            value={loaderData.threadsToday}
+            icon={<TbHelp />}
+          />
+          <StatCard
+            label="Messages today"
+            value={loaderData.messagesToday}
+            icon={<TbMessage />}
+          />
+          <StatCard
+            label="Chats this week"
+            value={Object.values(loaderData.dailyThreads).reduce(
+              (acc, curr) => acc + curr,
+              0
+            )}
+            icon={<TbHelp />}
+          />
+          <StatCard
+            label="Messages this week"
+            value={Object.values(loaderData.dailyMessages).reduce(
+              (acc, curr) => acc + curr,
+              0
+            )}
+            icon={<TbMessage />}
+          />
+        </Group>
+
+        <Stack>
+          <Heading>
+            <Group>
+              <TbHelp />
+              <Text>Chats</Text>
             </Group>
-          </Stack>
-        )}
+          </Heading>
+          <AreaChart width={width} height={250} data={chartData}>
+            <XAxis dataKey="name" />
+            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Area
+              type="monotone"
+              dataKey="Conversations"
+              stroke={"var(--chakra-colors-brand-emphasized)"}
+              fill={"var(--chakra-colors-brand-muted)"}
+            />
+          </AreaChart>
+        </Stack>
+
+        <Stack>
+          <Heading>
+            <Group>
+              <TbMessage />
+              <Text>Messages</Text>
+            </Group>
+          </Heading>
+          <AreaChart width={width} height={250} data={chartData}>
+            <XAxis dataKey="name" />
+            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Area
+              type="monotone"
+              dataKey="Messages"
+              stroke={"var(--chakra-colors-brand-emphasized)"}
+              fill={"var(--chakra-colors-brand-muted)"}
+            />
+          </AreaChart>
+        </Stack>
       </Stack>
     </Page>
   );
