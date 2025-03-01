@@ -12,14 +12,7 @@ import { askLLM } from "./llm";
 import { Stream } from "openai/streaming";
 import { addMessage } from "./thread/store";
 import { prisma } from "./prisma";
-import {
-  deleteByIds,
-  deleteScrape,
-  makeEmbedding,
-  makeRecordId,
-  saveEmbedding,
-  search,
-} from "./scrape/pinecone";
+import { deleteByIds, deleteScrape, makeRecordId } from "./scrape/pinecone";
 import { joinRoom, broadcast } from "./socket-room";
 import { getRoomIds } from "./socket-room";
 import { authenticate, verifyToken } from "./jwt";
@@ -34,6 +27,8 @@ import {
   ScoredPineconeRecord,
 } from "@pinecone-database/pinecone";
 import { QueryResponse } from "@pinecone-database/pinecone";
+import { makeIndexer } from "./indexer/factory";
+import { MarsIndexer } from "./indexer/mars-indexer";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -69,18 +64,20 @@ async function streamLLMResponse(
 async function betterSearch(
   query: string,
   scrapeId: string,
-  messages: Message[]
+  messages: Message[],
+  indexerKey: string | null
 ): Promise<{
   result: QueryResponse<RecordMetadata>;
   matches: ScoredPineconeRecord<RecordMetadata>[];
 }> {
-  const queryAgent = new QueryPlannerAgent();
   const triedQueries: string[] = [query];
   let bestResult: [number, QueryResponse<RecordMetadata> | null] = [0, null];
   const bestMatches: ScoredPineconeRecord<RecordMetadata>[] = [];
 
+  const indexer = makeIndexer({ key: indexerKey });
+
   for (let i = 0; i < 4; i++) {
-    const result = await search(scrapeId, await makeEmbedding(query), {
+    const result = await indexer.search(scrapeId, query, {
       excludeIds: bestMatches.map((match) => match.id),
     });
 
@@ -94,7 +91,7 @@ async function betterSearch(
       }, 0) / result.matches.length;
 
     for (const match of result.matches) {
-      if (match.score && match.score > 0.3) {
+      if (match.score && match.score >= indexer.getMinBestScore()) {
         bestMatches.push(match);
       }
     }
@@ -111,7 +108,7 @@ async function betterSearch(
       bestMatches: bestMatches.length,
     });
 
-    if (avgScore > 0.3 && maxScore > 0.3) {
+    if (bestMatches.length >= 3) {
       break;
     }
 
@@ -125,6 +122,7 @@ async function betterSearch(
       pinnedAt: null,
       links: [],
     }));
+    const queryAgent = new QueryPlannerAgent(query);
     const queryResult = await queryAgent.run([
       ...messages,
       ...triedQueryMessages,
@@ -146,7 +144,11 @@ app.get("/", function (req: Request, res: Response) {
 });
 
 app.get("/test", async function (req: Request, res: Response) {
-  res.json({ message: "ok" });
+  const indexer = new MarsIndexer();
+  const result = await indexer.makeSparseEmbedding(
+    "The quick brown fox jumps over the lazy dog."
+  );
+  res.json({ message: result });
 });
 
 app.post("/scrape", authenticate, async function (req: Request, res: Response) {
@@ -156,13 +158,6 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   const dynamicFallbackContentLength = req.body.dynamicFallbackContentLength;
   const roomId = req.body.roomId;
   const includeMarkdown = req.body.includeMarkdown;
-
-  const scraping = await prisma.scrape.count({
-    where: {
-      userId,
-      status: "scraping",
-    },
-  });
 
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: scrapeId, userId },
@@ -230,14 +225,14 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
             : actualRemainingUrlCount;
 
           const chunks = await splitMarkdown(markdown);
-          const chunkDocs = await Promise.all(
-            chunks.map(async (chunk) => ({
-              id: makeRecordId(scrape.id, uuidv4()),
-              embedding: await makeEmbedding(chunk),
-              metadata: { content: chunk, url },
-            }))
-          );
-          await saveEmbedding(scrape.id, chunkDocs);
+
+          const indexer = makeIndexer({ key: scrape.indexer });
+          const documents = chunks.map((chunk) => ({
+            id: makeRecordId(scrape.id, uuidv4()),
+            text: chunk,
+            metadata: { content: chunk, url },
+          }));
+          await indexer.upsert(scrape.id, documents);
 
           if (scrape.url === url) {
             await prisma.scrape.update({
@@ -251,6 +246,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           });
           if (existingItem) {
             await deleteByIds(
+              indexer.getKey(),
               existingItem.embeddings.map((embedding) => embedding.id)
             );
           }
@@ -261,7 +257,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
               markdown,
               title: getMetaTitle(store.urls[url]?.metaTags ?? []),
               metaTags: store.urls[url]?.metaTags,
-              embeddings: chunkDocs.map((doc) => ({
+              embeddings: documents.map((doc) => ({
                 id: doc.id,
               })),
               status: "completed",
@@ -273,7 +269,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
               markdown,
               title: getMetaTitle(store.urls[url]?.metaTags ?? []),
               metaTags: store.urls[url]?.metaTags,
-              embeddings: chunkDocs.map((doc) => ({
+              embeddings: documents.map((doc) => ({
                 id: doc.id,
               })),
               status: "completed",
@@ -292,6 +288,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
             )
           );
         } catch (error: any) {
+          console.error(error);
           await prisma.scrapeItem.upsert({
             where: { scrapeId_url: { scrapeId: scrape.id, url } },
             update: {
@@ -343,7 +340,11 @@ app.delete(
   async function (req: Request, res: Response) {
     const scrapeId = req.body.scrapeId;
     try {
-      await deleteScrape(scrapeId);
+      const scrape = await prisma.scrape.findFirstOrThrow({
+        where: { id: scrapeId },
+      });
+      const indexer = makeIndexer({ key: scrape.indexer });
+      await deleteScrape(indexer.getKey(), scrapeId);
     } catch (error) {}
     res.json({ message: "ok" });
   }
@@ -402,7 +403,8 @@ expressWs.app.ws("/", (ws: any, req) => {
         const result = await betterSearch(
           message.data.query,
           scrape.id,
-          thread.messages
+          thread.messages,
+          scrape.indexer
         );
         const matches = result.matches.map((match) => ({
           content: match.metadata!.content as string,
@@ -421,7 +423,7 @@ expressWs.app.ws("/", (ws: any, req) => {
             context: contextContent,
             systemPrompt: scrape.chatPrompt ?? undefined,
           });
-  
+
           const streamResponse = await streamLLMResponse(ws, response);
           content = streamResponse.content;
           role = streamResponse.role;
@@ -478,7 +480,8 @@ app.get("/mcp/:scrapeId", async (req, res) => {
 
   const query = req.query.query as string;
 
-  const result = await search(scrape.id, await makeEmbedding(query));
+  const indexer = makeIndexer({ key: scrape.indexer });
+  const result = await indexer.search(scrape.id, query);
 
   res.json(result.matches.map((match) => match.metadata));
 });

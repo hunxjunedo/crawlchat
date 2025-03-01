@@ -33,7 +33,9 @@ export async function askLLM(
       ...messages.map((message) => message.llmMessage as any),
       {
         role: "system",
-        content: `If context is not provided, don't answer the question. Don't hallucinate. Don't make the answers too long.`,
+        content: `If context is not provided, don't answer the question.
+Don't hallucinate. Don't make the answers too long.
+If the context does not contain the answer, say that you don't have information about it and sugges few more questions around it.`,
       },
       {
         role: "system",
