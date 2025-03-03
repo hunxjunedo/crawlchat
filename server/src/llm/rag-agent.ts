@@ -1,11 +1,12 @@
-import { z, ZodSchema } from "zod";
+import { z } from "zod";
 import { Agent } from "./agentic";
 import { multiLinePrompt } from "./agentic";
 import { Indexer } from "../indexer/indexer";
-import { QueryResponse } from "@pinecone-database/pinecone";
-import { RecordMetadata } from "@pinecone-database/pinecone";
+import { Pinecone } from "@pinecone-database/pinecone";
 
-export type RAGAgentCustomMessage = { result?: QueryResponse<RecordMetadata> };
+export type RAGAgentCustomMessage = {
+  result?: { content: string; url: string; score: number }[];
+};
 
 export class RAGAgent extends Agent<{}, RAGAgentCustomMessage> {
   private indexer: Indexer;
@@ -47,14 +48,36 @@ export class RAGAgent extends Agent<{}, RAGAgentCustomMessage> {
         execute: async ({ query }: { query: string }) => {
           console.log("Searching RAG for", query);
           const result = await this.indexer.search(this.scrapeId, query, {
-            topK: 2,
+            topK: 20,
           });
 
+          const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
+          const rerank = await pc.inference.rerank(
+            "bge-reranker-v2-m3",
+            query,
+            result.matches.map((m) => ({
+              id: m.id,
+              text: m.metadata!.content as string,
+              url: m.metadata!.url as string,
+            })),
+            {
+              topN: 4,
+              returnDocuments: true,
+              parameters: {
+                truncate: "END",
+              },
+            }
+          );
+
           return {
-            content: result.matches
-              .map((m) => m.metadata!.content)
-              .join("\n\n"),
-            customMessage: { result },
+            content: rerank.data.map((r) => r.document!.text).join("\n\n"),
+            customMessage: {
+              result: rerank.data.map((r) => ({
+                content: r.document!.text,
+                url: r.document!.url,
+                score: r.score,
+              })),
+            },
           };
         },
       },

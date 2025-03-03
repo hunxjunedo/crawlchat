@@ -342,14 +342,8 @@ expressWs.app.ws("/", (ws: any, req) => {
         const matches = flow.flowState.state.messages
           .map((m) => m.custom?.result)
           .filter((r) => r !== undefined)
-          .map((result) => result.matches)
-          .flat()
-          .map((match) => ({
-            content: match.metadata!.content as string,
-            url: match.metadata!.url as string,
-            score: match.score,
-          }));
-
+          .flat();
+          
         const links: MessageSourceLink[] = [];
         for (const match of matches) {
           const item = await prisma.scrapeItem.findFirst({
