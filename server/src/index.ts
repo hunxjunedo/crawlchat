@@ -393,15 +393,17 @@ app.get("/mcp/:scrapeId", async (req, res) => {
     where: { id: req.params.scrapeId },
   });
 
-  const thread = await prisma.thread.upsert({
+  let thread = await prisma.thread.findFirst({
     where: { scrapeId: scrape.id, isDefault: true },
-    update: {},
-    create: {
-      scrapeId: scrape.id,
-      isDefault: true,
-    },
   });
-
+  if (!thread) {
+    thread = await prisma.thread.create({
+      data: {
+        scrapeId: scrape.id,
+        isDefault: true,
+      },
+    });
+  }
   const query = req.query.query as string;
 
   const indexer = makeIndexer({ key: scrape.indexer });
