@@ -393,11 +393,32 @@ app.get("/mcp/:scrapeId", async (req, res) => {
     where: { id: req.params.scrapeId },
   });
 
+  const thread = await prisma.thread.upsert({
+    where: { scrapeId: scrape.id, isDefault: true },
+    update: {},
+    create: {
+      scrapeId: scrape.id,
+      isDefault: true,
+    },
+  });
+
   const query = req.query.query as string;
 
   const indexer = makeIndexer({ key: scrape.indexer });
   const result = await indexer.search(scrape.id, query);
   const processed = await indexer.process(query, result);
+
+  await addMessage(thread.id, {
+    uuid: uuidv4(),
+    llmMessage: { role: "user", content: query },
+    links: processed.map((p) => ({
+      url: p.url,
+      title: null,
+      score: p.score,
+    })),
+    createdAt: new Date(),
+    pinnedAt: null,
+  });
 
   res.json(processed);
 });
