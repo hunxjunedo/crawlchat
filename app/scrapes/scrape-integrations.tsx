@@ -1,10 +1,19 @@
-import { Input, Stack } from "@chakra-ui/react";
+import { Group, Input, Stack, Text, IconButton, List } from "@chakra-ui/react";
 import { useFetcher } from "react-router";
 import { SettingsSection } from "~/dashboard/settings";
 import type { Route } from "./+types/scrape-integrations";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
+import { TbInfoCircle } from "react-icons/tb";
+import {
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverRoot,
+  PopoverTitle,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -47,7 +56,31 @@ export default function ScrapeIntegrations({
   return (
     <Stack>
       <SettingsSection
-        title="Discord Server Id"
+        title={
+          <Group>
+            <Text>Discord Server Id</Text>
+            <PopoverRoot>
+              <PopoverTrigger asChild>
+                <IconButton size={"xs"} variant={"ghost"}>
+                  <TbInfoCircle />
+                </IconButton>
+              </PopoverTrigger>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverBody>
+                  <PopoverTitle fontWeight="medium">
+                    Find server ID
+                  </PopoverTitle>
+                  <List.Root as="ol">
+                    <List.Item>Go to "Server Settings"</List.Item>
+                    <List.Item>Click on "Widget"</List.Item>
+                    <List.Item>Copy the server ID</List.Item>
+                  </List.Root>
+                </PopoverBody>
+              </PopoverContent>
+            </PopoverRoot>
+          </Group>
+        }
         description="Integrate CrawlChat with your Discord server to bother answer the queries and also to learn from the conversations."
         fetcher={discordServerIdFetcher}
       >

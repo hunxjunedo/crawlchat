@@ -45,7 +45,7 @@ export function SettingsSection({
 }: {
   children: React.ReactNode;
   fetcher: FetcherWithComponents<unknown>;
-  title?: string;
+  title?: React.ReactNode;
   description?: string;
 }) {
   return (
