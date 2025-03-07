@@ -7,6 +7,7 @@ import {
   GatewayIntentBits,
   Message,
   Snowflake,
+  TextChannel,
 } from "discord.js";
 import { getDiscordDetails, learn, query } from "./api";
 import { createToken } from "./jwt";
@@ -44,6 +45,20 @@ const fetchAllParentMessages = async (
   return fetchAllParentMessages(parentMessage, messages, i + 1);
 };
 
+const sendTyping = async (channel: TextChannel) => {
+  await channel.sendTyping();
+
+  const interval = setInterval(async () => {
+    await channel.sendTyping();
+  }, 1000);
+
+  return {
+    stopTyping: () => {
+      clearInterval(interval);
+    },
+  };
+};
+
 const cleanContent = (content: string) => {
   return content.replace(/\n/g, "\n\n");
 };
@@ -76,6 +91,7 @@ client.on(Events.MessageCreate, async (message) => {
     }
 
     let rawQuery = message.content;
+    rawQuery = rawQuery.replace(/^<@\d+> /, "").trim();
 
     if (message.reference?.messageId) {
       const parentMessage = await message.channel.messages.fetch(
@@ -92,11 +108,15 @@ client.on(Events.MessageCreate, async (message) => {
       return;
     }
 
+    const { stopTyping } = await sendTyping(message.channel as TextChannel);
+
     const { answer } = await query(
       scrapeId,
       discordPrompt(rawQuery),
       createToken(userId)
     );
+
+    stopTyping();
 
     message.reply(answer);
   }
