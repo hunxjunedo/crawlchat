@@ -12,6 +12,14 @@ import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import { Provider } from "./components/ui/provider";
 
+declare global {
+  interface Window {
+    ENV: {
+      VITE_SERVER_WS_URL: string;
+    };
+  }
+}
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -25,6 +33,14 @@ export const links: Route.LinksFunction = () => [
   },
   { rel: "stylesheet", href: stylesheet },
 ];
+
+export function loader() {
+  return {
+    ENV: {
+      VITE_SERVER_WS_URL: process.env.VITE_SERVER_WS_URL,
+    },
+  };
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const matches = useMatches();
@@ -60,10 +76,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export default function App({ loaderData }: Route.ComponentProps) {
   return (
     <Provider>
       <Outlet />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(loaderData.ENV)}`,
+        }}
+      />
     </Provider>
   );
 }

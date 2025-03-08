@@ -50,7 +50,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           width={drawerWidth}
           user={user}
           fixed={true}
-          threads={loaderData.threads}
         />
 
         <DrawerRoot
@@ -66,7 +65,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               user={user}
               fixed={false}
               contentRef={contentRef}
-              threads={loaderData.threads}
             />
           </DrawerContent>
         </DrawerRoot>
