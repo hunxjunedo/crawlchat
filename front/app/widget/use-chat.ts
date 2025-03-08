@@ -60,7 +60,7 @@ export function useScrapeChat({
   }, [messages]);
 
   function connect() {
-    socket.current = new WebSocket(import.meta.env.VITE_SERVER_WS_URL);
+    socket.current = new WebSocket("wss://wings.crawlchat.app");
     socket.current.onopen = () => {
       joinRoom();
     };
