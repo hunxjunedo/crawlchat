@@ -12,6 +12,7 @@ import {
   Highlight,
   Center,
   List,
+  Badge,
 } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
 import {
@@ -25,6 +26,7 @@ import {
   TbMessage,
   TbRobotFace,
   TbSettings,
+  TbStarFilled,
   TbWorld,
   TbX,
 } from "react-icons/tb";
@@ -519,6 +521,7 @@ function UseCases() {
 type Feature = {
   label: string;
   excluded?: boolean;
+  new?: boolean;
 };
 
 function PriceBox({
@@ -529,6 +532,7 @@ function PriceBox({
   popular,
   href,
   disabled,
+  newTab = false,
 }: {
   price: number;
   title: string;
@@ -537,6 +541,7 @@ function PriceBox({
   href: string;
   popular?: boolean;
   disabled?: boolean;
+  newTab?: boolean;
 }) {
   return (
     <Stack
@@ -591,6 +596,12 @@ function PriceBox({
               {feature.excluded ? <TbX /> : <TbCheck />}
             </Box>
             <Text>{feature.label}</Text>
+            {feature.new && (
+              <Badge colorPalette={"black"} variant={"solid"} fontSize={"xs"}>
+                <TbStarFilled />
+                New
+              </Badge>
+            )}
           </Group>
         ))}
       </Stack>
@@ -603,7 +614,7 @@ function PriceBox({
         asChild
         disabled={disabled}
       >
-        <a href={href}>
+        <a href={href} target={newTab ? "_blank" : "_self"}>
           {price === 0 ? "Get started" : "Purchase"}
           <TbArrowRight />
         </a>
@@ -628,8 +639,24 @@ export function Pricing() {
                 { label: "200 messages per month" },
                 { label: "API not available", excluded: true },
                 { label: "MCP not available", excluded: true },
+                { label: "Discord bot", excluded: true },
               ]}
               href="/login"
+            />
+            <PriceBox
+              price={29}
+              title="Starter"
+              description="Start your journey with CrawlChat"
+              features={[
+                { label: "3000 site scrapes per month" },
+                { label: "15,000 messages per month" },
+                { label: "API available" },
+                { label: "MCP available" },
+                { label: "Discord bot", new: true },
+              ]}
+              popular
+              href="https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
+              newTab
             />
             <PriceBox
               price={79}
@@ -640,10 +667,10 @@ export function Pricing() {
                 { label: "50,000 messages per month" },
                 { label: "API available" },
                 { label: "MCP available" },
+                { label: "Discord bot", new: true },
               ]}
-              popular
-              disabled
-              href="/login"
+              href="https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
+              newTab
             />
           </Stack>
         </Stack>
