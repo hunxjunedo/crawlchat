@@ -40,7 +40,7 @@ function cleanUrl(url: string) {
   if (!url.startsWith("http")) {
     url = "https://" + url;
   }
-  return url;
+  return url.toLowerCase();
 }
 
 app.get("/", function (req: Request, res: Response) {

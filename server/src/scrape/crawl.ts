@@ -16,6 +16,13 @@ type ScrapeResult = {
   parseOutput: ParseOutput;
 };
 
+function isSameHost(base: string, url: string) {
+  const baseUrl = new URL(base);
+  const urlObj = new URL(url);
+  const normalizeHost = (host: string) => host.replace(/^www\./, '');
+  return normalizeHost(baseUrl.host) === normalizeHost(urlObj.host);
+}
+
 export async function scrapeFetch(url: string): Promise<string> {
   console.log("Scraping", url);
   const headers = {
@@ -96,7 +103,7 @@ export async function scrapeWithLinks(
 
     const linkUrl = new URL(link.href, url);
 
-    if (!linkUrl.href.startsWith(baseUrl)) {
+    if (!isSameHost(baseUrl, linkUrl.toString())) {
       continue;
     }
 
