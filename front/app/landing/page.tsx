@@ -653,8 +653,7 @@ export function Pricing() {
                 { label: "Discord bot", new: true },
               ]}
               popular
-              disabled
-              href="/login"
+              href="https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
             />
             <PriceBox
               price={79}
@@ -667,9 +666,7 @@ export function Pricing() {
                 { label: "MCP available" },
                 { label: "Discord bot", new: true },
               ]}
-              popular
-              disabled
-              href="/login"
+              href="https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
             />
           </Stack>
         </Stack>
