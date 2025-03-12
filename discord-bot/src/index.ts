@@ -65,8 +65,8 @@ const cleanContent = (content: string) => {
 
 const discordPrompt = (query: string) => {
   return `Query: ${query}
-Keep the response very short and concise.
-It should be under 1500 charecters.
+Keep the response very short and very concised.
+It should be under 1000 charecters.
 Give the answer in bullet points. Each point should be very concise.
 The response is for a discrod channel. Format it accordingly.`;
 };

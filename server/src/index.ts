@@ -53,7 +53,7 @@ app.get("/test", async function (req: Request, res: Response) {
 
 app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   const userId = req.user!.id;
-  const url = cleanUrl(req.body.url);
+  const url = req.body.url ? cleanUrl(req.body.url) : req.body.url;
   const scrapeId = req.body.scrapeId!;
   const dynamicFallbackContentLength = req.body.dynamicFallbackContentLength;
   const roomId = req.body.roomId;
