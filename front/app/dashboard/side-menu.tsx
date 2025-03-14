@@ -3,6 +3,7 @@ import {
   Heading,
   IconButton,
   Progress,
+  Separator,
   Spinner,
   Stack,
   Text,
@@ -13,6 +14,7 @@ import {
   TbFolder,
   TbHome,
   TbLogout,
+  TbRoad,
   TbScan,
 } from "react-icons/tb";
 import { Link, NavLink } from "react-router";
@@ -33,16 +35,20 @@ const links = [
   { label: "Scrape", to: "/scrape", icon: <TbScan /> },
   { label: "Collections", to: "/collections", icon: <TbFolder /> },
   { label: "Data gaps", to: "/data-gaps", icon: <TbFileX /> },
-  // { label: "Settings", to: "/settings", icon: <TbSettings /> },
 ];
 
 function SideMenuItem({
   link,
 }: {
-  link: { label: string; to: string; icon: React.ReactNode };
+  link: {
+    label: string;
+    to: string;
+    icon: React.ReactNode;
+    external?: boolean;
+  };
 }) {
   return (
-    <NavLink to={link.to}>
+    <NavLink to={link.to} target={link.external ? "_blank" : undefined}>
       {({ isPending, isActive }) => (
         <Group
           px={3}
@@ -145,6 +151,19 @@ export function SideMenu({
           {links.map((link, index) => (
             <SideMenuItem key={index} link={link} />
           ))}
+        </Stack>
+
+        <Separator />
+
+        <Stack gap={1} w="full" px={3}>
+          <SideMenuItem
+            link={{
+              label: "Roadmap",
+              to: "https://crawlchat.features.vote/roadmap",
+              icon: <TbRoad />,
+              external: true,
+            }}
+          />
         </Stack>
       </Stack>
 
