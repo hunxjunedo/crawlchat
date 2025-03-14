@@ -20,6 +20,7 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions
   ],
 });
 
@@ -88,7 +89,8 @@ client.on(Events.MessageCreate, async (message) => {
 
       await learn(scrapeId, content, createToken(userId));
 
-      message.reply("Added to collection!");
+      // message.reply("Added to collection!");
+      message.react("✅");  
       return;
     }
 
