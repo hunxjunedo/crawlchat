@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Message, MessageSourceLink } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
 import { Flow } from "./llm/flow";
-import { RAGAgent, RAGAgentCustomMessage } from "./llm/rag-agent";
+import { Answerer, RAGAgent, RAGAgentCustomMessage } from "./llm/rag-agent";
 import { ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
 import { name } from "libs";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
@@ -321,6 +321,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         const flow = new Flow<{}, RAGAgentCustomMessage>(
           {
             "rag-agent": new RAGAgent(indexer, scrape.id),
+            answerer: new Answerer(message.data.query),
           },
           {
             messages: [
@@ -336,7 +337,7 @@ expressWs.app.ws("/", (ws: any, req) => {
             ],
           }
         );
-        flow.addNextAgents(["rag-agent"]);
+        flow.addNextAgents(["rag-agent", "answerer"]);
 
         while (
           await flow.stream({
@@ -548,6 +549,7 @@ app.post("/answer/:scrapeId", async (req, res) => {
   const flow = new Flow<{}, RAGAgentCustomMessage>(
     {
       "rag-agent": new RAGAgent(indexer, scrape.id),
+      answerer: new Answerer(query),
     },
     {
       messages: [
@@ -566,7 +568,7 @@ app.post("/answer/:scrapeId", async (req, res) => {
       ],
     }
   );
-  flow.addNextAgents(["rag-agent"]);
+  flow.addNextAgents(["rag-agent", "answerer"]);
 
   while (await flow.stream()) {}
 
