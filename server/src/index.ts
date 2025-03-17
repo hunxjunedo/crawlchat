@@ -384,7 +384,8 @@ expressWs.app.ws("/", (ws: any, req) => {
             links.push({
               url: match.url ?? null,
               title: item.title,
-              score: match.score ?? null,
+              score: match.score,
+              scrapeItemId: item.id,
             });
           }
         }
@@ -594,7 +595,8 @@ app.post("/answer/:scrapeId", async (req, res) => {
       links.push({
         url: match.url ?? null,
         title: item.title,
-        score: match.score ?? null,
+        score: match.score,
+        scrapeItemId: item.id,
       });
     }
   }
