@@ -17,7 +17,7 @@ type RAGAgentCustomMessage = {
   }[];
 };
 
-export function makeRagTool(scrapeId: string, indexerKey: string) {
+export function makeRagTool(scrapeId: string, indexerKey: string | null) {
   const indexer = makeIndexer({ key: indexerKey });
 
   return new SimpleTool({
@@ -56,9 +56,10 @@ export function makeFlow(
   scrapeId: string,
   systemPrompt: string,
   query: string,
-  messages: FlowMessage<RAGAgentCustomMessage>[]
+  messages: FlowMessage<RAGAgentCustomMessage>[],
+  indexerKey: string | null
 ) {
-  const ragTool = makeRagTool(scrapeId, "mars");
+  const ragTool = makeRagTool(scrapeId, indexerKey);
 
   const ragAgent = new SimpleAgent<RAGAgentCustomMessage>({
     id: "rag-agent",

@@ -324,7 +324,8 @@ expressWs.app.ws("/", (ws: any, req) => {
           message.data.query,
           thread.messages.map((message) => ({
             llmMessage: message.llmMessage as any,
-          }))
+          })),
+          scrape.indexer
         );
 
         while (
@@ -544,7 +545,8 @@ app.post("/answer/:scrapeId", async (req, res) => {
         role: m.role as "user" | "assistant",
         content: m.content,
       },
-    }))
+    })),
+    scrape.indexer
   );
 
   while (await flow.stream()) {}
