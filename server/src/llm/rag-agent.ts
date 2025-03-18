@@ -78,15 +78,18 @@ export class RAGAgent extends Agent<RAGState, RAGAgentCustomMessage> {
 
 export class Answerer extends Agent<{}, RAGAgentCustomMessage> {
   private query: string;
+  private systemPrompt: string;
 
-  constructor(query: string) {
+  constructor(query: string, systemPrompt?: string | null) {
     super();
     this.query = query;
+    this.systemPrompt = systemPrompt ?? "";
   }
 
   async getSystemPrompt() {
     return multiLinePrompt([
       `Given above context, answer the query "${this.query}".`,
+      this.systemPrompt,
     ]);
   }
 }

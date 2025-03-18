@@ -323,7 +323,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         const flow = new Flow<{}, RAGAgentCustomMessage>(
           {
             "rag-agent": new RAGAgent(indexer, scrape.id),
-            answerer: new Answerer(message.data.query),
+            answerer: new Answerer(message.data.query, scrape.chatPrompt),
           },
           {
             messages: [

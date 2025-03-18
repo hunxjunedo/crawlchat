@@ -226,10 +226,10 @@ function AssistantMessage({
   }, [links, more]);
 
   return (
-    <Stack pb={4}>
+    <Stack>
       <Stack px={4} gap={0}>
         <MarkdownProse>{content}</MarkdownProse>
-        <Group>
+        <Group pb={uniqueLinks.length === 0 ? 4 : 0}>
           <Tooltip content="Pin message" showArrow>
             <IconButton
               size={"xs"}
@@ -641,16 +641,10 @@ export default function ScrapeWidget({
                   onPin={() => handlePin(chat.allMessages[index - 1]?.id)}
                   onUnpin={() => handleUnpin(chat.allMessages[index - 1]?.id)}
                   onDelete={() =>
-                    handleDelete([
-                      chat.allMessages[index - 1]?.id,
-                      message.id,
-                    ])
+                    handleDelete([chat.allMessages[index - 1]?.id, message.id])
                   }
                   onRefresh={() =>
-                    handleRefresh(
-                      chat.allMessages[index - 1]?.id,
-                      message.id
-                    )
+                    handleRefresh(chat.allMessages[index - 1]?.id, message.id)
                   }
                 />
               )}
