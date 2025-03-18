@@ -934,8 +934,11 @@ function Features() {
   );
   const [vw, setVw] = useState(1200);
   const grouped = useMemo(() => {
-    const n = Math.floor(vw / 400);
-    const groups: FeatureItem[][] = Array.from({ length: n }, () => []);
+    const n = Math.max(1, Math.floor(vw / 400));
+    const groups: FeatureItem[][] = [];
+    for (let i = 0; i < n; i++) {
+      groups.push([]);
+    }
 
     let nextIndex = 0;
     for (let i = 0; i < features.length; i++) {
