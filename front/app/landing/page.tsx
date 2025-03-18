@@ -797,7 +797,7 @@ function FeatureCard({ feature }: { feature: FeatureItem }) {
       h="fit-content"
       position={"relative"}
     >
-      <Text color="brand.fg" fontSize={"3xl"} opacity={0.5}>
+      <Text color="brand.fg" fontSize={"3xl"}>
         {feature.icon}
       </Text>
       <Stack gap={2}>
@@ -813,7 +813,7 @@ function FeatureCard({ feature }: { feature: FeatureItem }) {
           right={0}
           transform={"translate(14%, -40%)"}
         >
-          <Badge colorPalette={"brand"} variant={"surface"} fontSize={"xs"}>
+          <Badge variant={"solid"} fontSize={"xs"}>
             Coming!
           </Badge>
         </Box>
