@@ -199,6 +199,16 @@ export default function Email(props: {
               <BandColumn tag="0.8" value={performance[0.8]} color="#caabe5" />
               <BandColumn tag="1.0" value={performance[1.0]} color="#bd96df" />
             </Row>
+            <Text
+              style={{
+                fontSize: "12px",
+                margin: "0px",
+                textAlign: "center",
+                opacity: 0.2,
+              }}
+            >
+              Responses spread across the scores. 0 is the worst, 1 is the best.
+            </Text>
           </Section>
 
           <Section style={{ padding: "0px 20px", paddingBottom: "30px" }}>
