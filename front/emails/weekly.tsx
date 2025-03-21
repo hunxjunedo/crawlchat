@@ -10,12 +10,10 @@ import {
   Img,
   Row,
   Column,
-  Heading,
   Link,
 } from "@react-email/components";
 import * as React from "react";
 import { emailConfig } from "./config";
-import { TbHome } from "react-icons/tb";
 
 function MetricCard({
   title,

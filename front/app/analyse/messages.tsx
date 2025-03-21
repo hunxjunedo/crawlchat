@@ -58,6 +58,7 @@ type MessagePair = {
   responseMessage: Message;
   maxScore: number;
   minScore: number;
+  averageScore: number;
   uniqueLinks: MessageSourceLink[];
 };
 
@@ -89,7 +90,7 @@ function makeMessagePairs(messages: MessagePairWithThread[]) {
     }
     let minScore = 0;
     let maxScore = 0;
-
+    let averageScore = 0;
     if (links.length > 0) {
       maxScore = Math.max(
         ...links.filter((l) => l.score !== null).map((l) => l.score!)
@@ -97,6 +98,11 @@ function makeMessagePairs(messages: MessagePairWithThread[]) {
       minScore = Math.min(
         ...links.filter((l) => l.score !== null).map((l) => l.score!)
       );
+      averageScore =
+        links
+          .filter((l) => l.score !== null)
+          .reduce((acc, l) => acc + l.score!, 0) /
+        links.filter((l) => l.score !== null).length;
     }
 
     messagePairs.push({
@@ -105,6 +111,7 @@ function makeMessagePairs(messages: MessagePairWithThread[]) {
       responseMessage: message,
       maxScore,
       minScore,
+      averageScore,
       uniqueLinks: links
         .filter((l) => l.score !== null)
         .filter(
@@ -175,9 +182,9 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
 
     if (filter && score !== undefined) {
       if (filter === "gt") {
-        pairs = pairs.filter((p) => p.minScore > score);
+        pairs = pairs.filter((p) => p.averageScore > score);
       } else {
-        pairs = pairs.filter((p) => p.maxScore < score);
+        pairs = pairs.filter((p) => p.averageScore < score);
       }
     }
 
@@ -187,8 +194,8 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
 
     setPairs(pairs);
     setMetrics({
-      poorResponses: pairs.filter((p) => p.minScore < 0.3).length,
-      bestResponses: pairs.filter((p) => p.maxScore > 0.7).length,
+      poorResponses: pairs.filter((p) => p.averageScore < 0.3).length,
+      bestResponses: pairs.filter((p) => p.averageScore > 0.7).length,
     });
   }, [filter, score, scrapeId, loaderData.messagePairs]);
 
@@ -323,8 +330,7 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                             colorPalette={getScoreColor(pair.maxScore)}
                             variant={"surface"}
                           >
-                            {pair.minScore.toFixed(2)} -{" "}
-                            {pair.maxScore.toFixed(2)}
+                            {pair.averageScore.toFixed(2)}
                           </Badge>
                         </Group>
                       </Group>
