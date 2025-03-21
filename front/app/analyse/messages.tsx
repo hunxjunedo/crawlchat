@@ -11,7 +11,6 @@ import {
   NativeSelect,
   Flex,
   Box,
-  NumberInput,
   Center,
   createListCollection,
 } from "@chakra-ui/react";
@@ -26,7 +25,6 @@ import { Page } from "~/components/page";
 import type { Route } from "./+types/messages";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
-import type { Message, MessageSourceLink, Prisma } from "libs/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
 import {
   AccordionItem,
@@ -40,8 +38,6 @@ import {
   NumberInputField,
   NumberInputRoot,
 } from "~/components/ui/number-input";
-import { Button } from "~/components/ui/button";
-import { useFetcher } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   SelectContent,
@@ -51,75 +47,7 @@ import {
   SelectValueText,
 } from "~/components/ui/select";
 import { StatCard } from "~/dashboard/page";
-
-type MessagePair = {
-  scrapeId: string;
-  queryMessage?: Message;
-  responseMessage: Message;
-  maxScore: number;
-  minScore: number;
-  uniqueLinks: MessageSourceLink[];
-};
-
-type MessagePairWithThread = Prisma.MessageGetPayload<{
-  include: {
-    thread: true;
-  };
-}>;
-
-function makeMessagePairs(messages: MessagePairWithThread[]) {
-  function findUserMessage(i: number, threadId: string) {
-    for (let j = i; j >= 0; j--) {
-      if (messages[j].threadId !== threadId) {
-        continue;
-      }
-      if ((messages[j].llmMessage as any).role === "user") {
-        return messages[j];
-      }
-    }
-  }
-
-  const messagePairs: MessagePair[] = [];
-
-  for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
-    const { links } = message;
-    if ((message.llmMessage as any).role === "user") {
-      continue;
-    }
-    let minScore = 0;
-    let maxScore = 0;
-
-    if (links.length > 0) {
-      maxScore = Math.max(
-        ...links.filter((l) => l.score !== null).map((l) => l.score!)
-      );
-      minScore = Math.min(
-        ...links.filter((l) => l.score !== null).map((l) => l.score!)
-      );
-    }
-
-    messagePairs.push({
-      scrapeId: message.thread.scrapeId,
-      queryMessage: findUserMessage(i, message.threadId),
-      responseMessage: message,
-      maxScore,
-      minScore,
-      uniqueLinks: links
-        .filter((l) => l.score !== null)
-        .filter(
-          (u, i, a) =>
-            i === a.findIndex((u2) => u2.scrapeItemId === u.scrapeItemId)
-        ),
-    });
-  }
-
-  return messagePairs.sort(
-    (a, b) =>
-      (b.responseMessage.createdAt?.getTime() ?? 0) -
-      (a.responseMessage.createdAt?.getTime() ?? 0)
-  );
-}
+import { makeMessagePairs } from "./analyse";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -175,9 +103,9 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
 
     if (filter && score !== undefined) {
       if (filter === "gt") {
-        pairs = pairs.filter((p) => p.minScore > score);
+        pairs = pairs.filter((p) => p.averageScore > score);
       } else {
-        pairs = pairs.filter((p) => p.maxScore < score);
+        pairs = pairs.filter((p) => p.averageScore < score);
       }
     }
 
@@ -187,8 +115,8 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
 
     setPairs(pairs);
     setMetrics({
-      poorResponses: pairs.filter((p) => p.minScore < 0.3).length,
-      bestResponses: pairs.filter((p) => p.maxScore > 0.7).length,
+      poorResponses: pairs.filter((p) => p.averageScore < 0.3).length,
+      bestResponses: pairs.filter((p) => p.averageScore > 0.7).length,
     });
   }, [filter, score, scrapeId, loaderData.messagePairs]);
 
@@ -323,8 +251,7 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                             colorPalette={getScoreColor(pair.maxScore)}
                             variant={"surface"}
                           >
-                            {pair.minScore.toFixed(2)} -{" "}
-                            {pair.maxScore.toFixed(2)}
+                            {pair.averageScore.toFixed(2)}
                           </Badge>
                         </Group>
                       </Group>

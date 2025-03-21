@@ -1,7 +1,7 @@
 import { name } from "libs";
 import type { Route } from "./+types/test";
 
-export function loader() {
+export async function loader() {
   return {
     name: name(),
   };
