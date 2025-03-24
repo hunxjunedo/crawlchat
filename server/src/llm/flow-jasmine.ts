@@ -91,6 +91,8 @@ export function makeFlow(
       "Example: If the query is 'How to make a composition?', better you use 'make a composition'",
       "The query should not be more than 3 words. Keep only the most important words.",
       "Don't repeat the same or similar queries.",
+      "Break multi level queries as well. For example: 'What is the average score?' should be split into 'score list' and then calculate the average.",
+      "You need to find indirect questions. For example: 'What is the cheapest pricing plan?' should be converted into 'pricing plans' and then find cheapest",
     ]),
     tools: [ragTool.make()],
   });
