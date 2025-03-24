@@ -8,19 +8,18 @@ import {
   Heading,
   List,
   Link,
-  NativeSelect,
   Flex,
   Box,
   Center,
   createListCollection,
+  CheckboxCard,
+  IconButton,
+  Popover,
+  Portal,
+  Highlight,
+  Icon,
 } from "@chakra-ui/react";
-import {
-  TbAlertTriangle,
-  TbBox,
-  TbCheck,
-  TbLink,
-  TbMessage,
-} from "react-icons/tb";
+import { TbBox, TbHelp, TbLink, TbMessage } from "react-icons/tb";
 import { Page } from "~/components/page";
 import type { Route } from "./+types/messages";
 import { getAuthUser } from "~/auth/middleware";
@@ -34,10 +33,6 @@ import {
 } from "~/components/ui/accordion";
 import moment from "moment";
 import { truncate } from "~/util";
-import {
-  NumberInputField,
-  NumberInputRoot,
-} from "~/components/ui/number-input";
 import { useEffect, useMemo, useState } from "react";
 import {
   SelectContent,
@@ -46,8 +41,8 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "~/components/ui/select";
-import { StatCard } from "~/dashboard/page";
 import { makeMessagePairs } from "./analyse";
+import { Tooltip } from "~/components/ui/tooltip";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -75,18 +70,57 @@ export async function loader({ request }: Route.LoaderArgs) {
   return { messagePairs: makeMessagePairs(messages), scrapes };
 }
 
+const MetricCheckbox = ({
+  label,
+  value,
+  onToggle,
+  tooltip,
+}: {
+  label: string;
+  value: number;
+  onToggle: (checked: boolean) => void;
+  tooltip?: string;
+}) => {
+  return (
+    <CheckboxCard.Root onCheckedChange={(e) => onToggle(!!e.checked)}>
+      <CheckboxCard.HiddenInput />
+      <CheckboxCard.Control>
+        <CheckboxCard.Content>
+          <Group>
+            <Text opacity={0.5}>{label}</Text>
+            <Tooltip
+              content={tooltip}
+              showArrow
+              positioning={{ placement: "top" }}
+            >
+              <Icon opacity={0.5}>
+                <TbHelp />
+              </Icon>
+            </Tooltip>
+          </Group>
+          <Text fontSize={"2xl"} fontWeight={"bold"}>
+            {value}
+          </Text>
+        </CheckboxCard.Content>
+        <CheckboxCard.Indicator />
+      </CheckboxCard.Control>
+    </CheckboxCard.Root>
+  );
+};
+
 export default function Messages({ loaderData }: Route.ComponentProps) {
   const [pairs, setPairs] = useState(loaderData.messagePairs);
-  const [filter, setFilter] = useState<"gt" | "lt">("gt");
-  const [score, setScore] = useState<number>();
   const [scrapeId, setScrapeId] = useState<string>();
-  const [metrics, setMetrics] = useState<{
-    poorResponses: number;
-    bestResponses: number;
-  }>({
-    poorResponses: 0,
-    bestResponses: 0,
-  });
+  const metrics = useMemo(
+    () => ({
+      worst: loaderData.messagePairs.filter((p) => p.averageScore < 0.25)
+        .length,
+      bad: loaderData.messagePairs.filter((p) => p.averageScore < 0.5).length,
+      good: loaderData.messagePairs.filter((p) => p.averageScore < 0.75).length,
+      best: loaderData.messagePairs.filter((p) => p.averageScore > 0.75).length,
+    }),
+    [loaderData.messagePairs]
+  );
   const scrapesCollection = useMemo(
     () =>
       createListCollection({
@@ -97,35 +131,59 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
       }),
     [loaderData.scrapes]
   );
+  const [filters, setFilters] = useState<{
+    worst?: boolean;
+    bad?: boolean;
+    good?: boolean;
+    best?: boolean;
+  }>({});
 
   useEffect(() => {
     let pairs = loaderData.messagePairs;
-
-    if (filter && score !== undefined) {
-      if (filter === "gt") {
-        pairs = pairs.filter((p) => p.averageScore > score);
-      } else {
-        pairs = pairs.filter((p) => p.averageScore < score);
-      }
-    }
 
     if (scrapeId) {
       pairs = pairs.filter((p) => p.scrapeId === scrapeId);
     }
 
-    setPairs(pairs);
-    setMetrics({
-      poorResponses: pairs.filter((p) => p.averageScore < 0.3).length,
-      bestResponses: pairs.filter((p) => p.averageScore > 0.7).length,
-    });
-  }, [filter, score, scrapeId, loaderData.messagePairs]);
+    let scores = [[-10, 10]];
+    if (Object.values(filters).filter(Boolean).length > 0) {
+      scores = [];
+
+      const filterToScore: Record<string, number[]> = {
+        best: [0.75, 10],
+        good: [0.5, 0.75],
+        bad: [0.25, 0.5],
+        worst: [-10, 0.25],
+      };
+
+      for (const filter of Object.keys(filters)) {
+        if (filters[filter as keyof typeof filters]) {
+          scores.push(filterToScore[filter]);
+        }
+      }
+    }
+
+    let filteredPairs = [];
+    for (const pair of pairs) {
+      const score = pair.averageScore;
+      for (const [min, max] of scores) {
+        if (score >= min && score < max) {
+          filteredPairs.push(pair);
+        }
+      }
+    }
+    setPairs(filteredPairs);
+  }, [scrapeId, loaderData.messagePairs, filters]);
 
   function getScoreColor(score: number) {
-    if (score < 0.2) {
+    if (score < 0.25) {
       return "red";
     }
-    if (score < 0.6) {
+    if (score < 0.5) {
       return "orange";
+    }
+    if (score < 0.75) {
+      return "blue";
     }
     return "brand";
   }
@@ -152,6 +210,50 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
         {loaderData.messagePairs.length > 0 && (
           <Stack>
             <Flex justifyContent={"flex-end"} gap={2}>
+              <Popover.Root>
+                <Popover.Trigger asChild>
+                  <IconButton variant={"ghost"}>
+                    <TbHelp />
+                  </IconButton>
+                </Popover.Trigger>
+                <Portal>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Arrow>
+                        <Popover.ArrowTip />
+                      </Popover.Arrow>
+                      <Popover.Body>
+                        <Stack>
+                          <Text>
+                            <Highlight
+                              query={["0 and 1", "0 is worst", "1 is best"]}
+                              styles={{ color: "brand.fg", fontWeight: "bold" }}
+                            >
+                              When the AI tries to answer a question, it fetches
+                              relavent records from the collection. Each record
+                              is given a score between 0 and 1 dependending on
+                              the relavence of the record to the query. 0 is
+                              worst and 1 is best.
+                            </Highlight>
+                          </Text>
+                          <Text>
+                            <Highlight
+                              query={["average"]}
+                              styles={{ color: "brand.fg", fontWeight: "bold" }}
+                            >
+                              Each query can have multiple such records fetched
+                              to answer the query. The score shown next to the
+                              question is the average of all the scores of the
+                              records fetched.
+                            </Highlight>
+                          </Text>
+                        </Stack>
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Portal>
+              </Popover.Root>
+
               <Box>
                 <SelectRoot
                   collection={scrapesCollection}
@@ -171,48 +273,38 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                   </SelectContent>
                 </SelectRoot>
               </Box>
-              <Box>
-                <NativeSelect.Root>
-                  <NativeSelect.Field
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value as "gt" | "lt")}
-                  >
-                    <option value="gt">Greater than</option>
-                    <option value="lt">Less than</option>
-                  </NativeSelect.Field>
-                  <NativeSelect.Indicator />
-                </NativeSelect.Root>
-              </Box>
-              <Box>
-                <NumberInputRoot w="80px">
-                  <NumberInputField
-                    placeholder="Ex 1"
-                    value={score !== undefined ? score.toString() : ""}
-                    onChange={(e) =>
-                      setScore(
-                        e.target.value ? Number(e.target.value) : undefined
-                      )
-                    }
-                  />
-                </NumberInputRoot>
-              </Box>
             </Flex>
 
             <Flex gap={2}>
-              <StatCard
-                label="Conversations"
-                value={pairs.length}
-                icon={<TbAlertTriangle />}
+              <MetricCheckbox
+                label="Worst"
+                value={metrics.worst}
+                onToggle={(checked) =>
+                  setFilters({ ...filters, worst: checked })
+                }
+                tooltip="0 - 0.25"
               />
-              <StatCard
-                label="Poor responses"
-                value={metrics.poorResponses}
-                icon={<TbAlertTriangle />}
+              <MetricCheckbox
+                label="Bad"
+                value={metrics.bad}
+                onToggle={(checked) => setFilters({ ...filters, bad: checked })}
+                tooltip="0.25 - 0.5"
               />
-              <StatCard
-                label="Best responses"
-                value={metrics.bestResponses}
-                icon={<TbCheck />}
+              <MetricCheckbox
+                label="Good"
+                value={metrics.good}
+                onToggle={(checked) =>
+                  setFilters({ ...filters, good: checked })
+                }
+                tooltip="0.5 - 0.75"
+              />
+              <MetricCheckbox
+                label="Best"
+                value={metrics.best}
+                onToggle={(checked) =>
+                  setFilters({ ...filters, best: checked })
+                }
+                tooltip="0.75 - 1"
               />
             </Flex>
 
@@ -248,7 +340,7 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                         </Group>
                         <Group>
                           <Badge
-                            colorPalette={getScoreColor(pair.maxScore)}
+                            colorPalette={getScoreColor(pair.averageScore)}
                             variant={"surface"}
                           >
                             {pair.averageScore.toFixed(2)}
@@ -278,7 +370,11 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                                     target="_blank"
                                   >
                                     {link.title}{" "}
-                                    <Badge colorPalette={"brand"}>
+                                    <Badge
+                                      colorPalette={getScoreColor(
+                                        link.score ?? 0
+                                      )}
+                                    >
                                       {link.score?.toFixed(2)}
                                     </Badge>
                                   </Link>
