@@ -82,6 +82,19 @@ function CreditProgress({
   used: number;
   total: number;
 }) {
+  function getProgressColor(used: number) {
+    if (used < 50) {
+      return "brand";
+    }
+    if (used < 75) {
+      return "black";
+    }
+    return "red";
+  }
+
+  const value = Math.max(0, Math.min(used, total));
+  const percentage = (value / total) * 100;
+
   return (
     <Stack gap={1}>
       <Group justify="space-between" fontSize={"sm"}>
@@ -90,7 +103,12 @@ function CreditProgress({
           {numberToKMB(used)} / {numberToKMB(total)}
         </Text>
       </Group>
-      <Progress.Root value={Math.max(0, Math.min(used, total))} max={total}>
+      <Progress.Root
+        value={value}
+        max={total}
+        size={"sm"}
+        colorPalette={getProgressColor(percentage)}
+      >
         <Progress.Track rounded="full">
           <Progress.Range />
         </Progress.Track>
