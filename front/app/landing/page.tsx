@@ -1058,11 +1058,31 @@ function Testimonials() {
       <Container>
         <Stack alignItems={"center"} w="full" gap={6}>
           <LandingHeading>People love CrawlChat</LandingHeading>
-          
+          <blockquote className="twitter-tweet">
+            <p lang="en" dir="ltr">
+              MCP, llms.txt and{" "}
+              <a href="https://t.co/wvTaGlv99L">https://t.co/wvTaGlv99L</a> are
+              now live!
+              <br />
+              <br />
+              Thanks to{" "}
+              <a href="https://twitter.com/pramodk73?ref_src=twsrc%5Etfw">
+                @pramodk73
+              </a>{" "}
+              and <a href="https://t.co/dv2PDLzt2V">https://t.co/dv2PDLzt2V</a>{" "}
+              for getting us up to speed with AI integrations.{" "}
+              <a href="https://t.co/Sornu9aIFi">https://t.co/Sornu9aIFi</a>
+            </p>
+            &mdash; Jonny Burger (@JNYBGR){" "}
+            <a href="https://twitter.com/JNYBGR/status/1899786274635927674?ref_src=twsrc%5Etfw">
+              March 12, 2025
+            </a>
+          </blockquote>
+          <script async src="https://platform.twitter.com/widgets.js" />
         </Stack>
       </Container>
     </Stack>
-  )
+  );
 }
 
 const cache = {
@@ -1131,7 +1151,7 @@ export default function LandingPage({ loaderData }: Route.ComponentProps) {
       <UseCases />
       <Features />
       <Pricing />
-      {/* <Testimonials /> */}
+      <Testimonials />
       <CTA />
       <Footer />
       <Toaster />
