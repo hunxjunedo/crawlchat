@@ -61,7 +61,7 @@ export default function ScrapeMcp({ loaderData }: Route.ComponentProps) {
     loaderData.scrape.title?.replaceAll(" ", "_") ??
     loaderData.scrape.url;
   const mcpCommand = `npx crawl-chat-mcp --id=${loaderData.scrape.id} --name=${name}`;
-  const cursorMcpCommand = `"${name}_crawlchat": {
+  const cursorMcpCommand = `"${name?.replaceAll("_", "-")}": {
   "command": "npx",
   "args": [
     "crawl-chat-mcp",
