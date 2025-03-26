@@ -4,25 +4,23 @@ dotenv.config();
 import express from "express";
 import type { Express, Request, Response } from "express";
 import ws from "express-ws";
-import { scrapeLoop, type ScrapeStore } from "./scrape/crawl";
-import { OrderedSet } from "./scrape/ordered-set";
 import cors from "cors";
 import { prisma } from "./prisma";
 import { deleteByIds, deleteScrape, makeRecordId } from "./scrape/pinecone";
 import { joinRoom, broadcast } from "./socket-room";
 import { getRoomIds } from "./socket-room";
 import { authenticate, verifyToken } from "./jwt";
-import { getMetaTitle } from "./scrape/parse";
 import { splitMarkdown } from "./scrape/markdown-splitter";
 import { makeLLMTxt } from "./llm-txt";
 import { v4 as uuidv4 } from "uuid";
-import { MessageSourceLink } from "libs/prisma";
+import { MessageSourceLink, Prisma } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
-import { ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
 import { name } from "libs";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
 import { makeFlow } from "./llm/flow-jasmine";
 import { extractCitations } from "libs/citation";
+import { BaseKbProcesserListener } from "./kb/listener";
+import { makeKbProcesser } from "./kb/factory";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -42,6 +40,14 @@ function cleanUrl(url: string) {
   return url.toLowerCase();
 }
 
+function chunk<T>(array: T[], size: number) {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
+
 app.get("/", function (req: Request, res: Response) {
   res.json({ message: "ok" });
 });
@@ -52,17 +58,22 @@ app.get("/test", async function (req: Request, res: Response) {
 
 app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   const userId = req.user!.id;
-  const url = req.body.url ? cleanUrl(req.body.url) : req.body.url;
   const scrapeId = req.body.scrapeId!;
-  const dynamicFallbackContentLength = req.body.dynamicFallbackContentLength;
-  const roomId = req.body.roomId;
-  const includeMarkdown = req.body.includeMarkdown;
+  const knowledgeGroupId = req.body.knowledgeGroupId!;
 
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: scrapeId, userId },
   });
 
+  const knowledgeGroup = await prisma.knowledgeGroup.findFirstOrThrow({
+    where: { id: knowledgeGroupId, userId },
+  });
+
   console.log("Scraping for", scrape.id);
+
+  const url = req.body.url ? cleanUrl(req.body.url) : req.body.url;
+  const roomId = req.body.roomId;
+  const includeMarkdown = req.body.includeMarkdown;
 
   (async function () {
     function getLimit() {
@@ -72,166 +83,38 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
       if (req.body.maxLinks) {
         return parseInt(req.body.maxLinks);
       }
+      if (knowledgeGroup.maxPages !== null) {
+        return knowledgeGroup.maxPages;
+      }
       if (url) {
         return 1;
       }
       return undefined;
     }
 
-    const roomIds = getRoomIds({ userKey: userId, roomId });
-
-    roomIds.forEach((roomId) =>
-      broadcast(roomId, makeMessage("scrape-start", { scrapeId }))
-    );
-    await prisma.scrape.update({
-      where: { id: scrape.id },
-      data: { status: "scraping" },
-    });
-
-    const store: ScrapeStore = {
-      urls: {},
-      urlSet: new OrderedSet(),
+    const broadcastRoom = (type: string, data: any) => {
+      getRoomIds({
+        userKey: userId,
+        roomId,
+        knowledgeGroupId,
+      }).forEach((roomId) => broadcast(roomId, makeMessage(type, data)));
     };
-    store.urlSet.add(url ?? scrape.url);
 
-    const urlToScrape = cleanUrl(req.body.url ?? scrape.url);
-    await scrapeLoop(store, urlToScrape, {
-      removeHtmlTags: req.body.removeHtmlTags,
-      dynamicFallbackContentLength,
-      limit: getLimit(),
-      skipRegex: req.body.skipRegex
-        ? req.body.skipRegex
-            .split(",")
-            .map((regex: string) => new RegExp(regex))
-        : undefined,
-      allowOnlyRegex: req.body.allowOnlyRegex
-        ? new RegExp(req.body.allowOnlyRegex)
-        : undefined,
-      onComplete: async () => {
-        roomIds.forEach((roomId) =>
-          broadcast(roomId, makeMessage("scrape-complete", { scrapeId }))
-        );
-      },
-      shouldScrape: async () => {
-        const user = await prisma.user.findFirstOrThrow({
-          where: { id: userId },
-        });
-        return (user.plan?.credits?.scrapes ?? 0) > 0;
-      },
-      afterScrape: async (url, { markdown, error }) => {
-        try {
-          if (error) {
-            throw new Error(error);
-          }
-
-          const scrapedUrlCount = Object.values(store.urls).length;
-          const maxLinks = req.body.maxLinks
-            ? parseInt(req.body.maxLinks)
-            : undefined;
-          const actualRemainingUrlCount = store.urlSet.size() - scrapedUrlCount;
-          const remainingUrlCount = maxLinks
-            ? Math.min(maxLinks, actualRemainingUrlCount)
-            : actualRemainingUrlCount;
-
-          const chunks = await splitMarkdown(markdown);
-
-          const indexer = makeIndexer({ key: scrape.indexer });
-          const documents = chunks.map((chunk) => ({
-            id: makeRecordId(scrape.id, uuidv4()),
-            text: chunk,
-            metadata: { content: chunk, url },
-          }));
-          await indexer.upsert(scrape.id, documents);
-
-          if (scrape.url === url) {
-            await prisma.scrape.update({
-              where: { id: scrape.id },
-              data: { title: getMetaTitle(store.urls[url]?.metaTags ?? []) },
-            });
-          }
-
-          const existingItem = await prisma.scrapeItem.findFirst({
-            where: { scrapeId: scrape.id, url },
-          });
-          if (existingItem) {
-            await deleteByIds(
-              indexer.getKey(),
-              existingItem.embeddings.map((embedding) => embedding.id)
-            );
-          }
-
-          await prisma.scrapeItem.upsert({
-            where: { scrapeId_url: { scrapeId: scrape.id, url } },
-            update: {
-              markdown,
-              title: getMetaTitle(store.urls[url]?.metaTags ?? []),
-              metaTags: store.urls[url]?.metaTags,
-              embeddings: documents.map((doc) => ({
-                id: doc.id,
-              })),
-              status: "completed",
-            },
-            create: {
-              userId,
-              scrapeId: scrape.id,
-              url,
-              markdown,
-              title: getMetaTitle(store.urls[url]?.metaTags ?? []),
-              metaTags: store.urls[url]?.metaTags,
-              embeddings: documents.map((doc) => ({
-                id: doc.id,
-              })),
-              status: "completed",
-            },
-          });
-
-          await consumeCredits(userId, "scrapes", 1);
-
-          roomIds.forEach((roomId) =>
-            broadcast(
-              roomId,
-              makeMessage("scrape-pre", {
-                url,
-                scrapedUrlCount,
-                remainingUrlCount,
-                markdown: includeMarkdown ? markdown : undefined,
-              })
-            )
-          );
-        } catch (error: any) {
-          console.error(error);
-          store.urls[url] = {
-            metaTags: [],
-            text: "ERROR",
-          };
-          await prisma.scrapeItem.upsert({
-            where: { scrapeId_url: { scrapeId: scrape.id, url } },
-            update: {
-              status: "failed",
-              error: error.message.toString(),
-            },
-            create: {
-              userId,
-              scrapeId: scrape.id,
-              url,
-              status: "failed",
-              error: error.message.toString(),
-            },
-          });
-        }
-      },
-    });
-
-    await prisma.scrape.update({
-      where: { id: scrape.id },
-      data: {
-        status: "done",
-      },
-    });
-
-    roomIds.forEach((roomId) =>
-      broadcast(roomId, makeMessage("saved", { scrapeId }))
+    const listener = new BaseKbProcesserListener(
+      scrape,
+      knowledgeGroup,
+      broadcastRoom,
+      {
+        includeMarkdown,
+      }
     );
+
+    const processer = makeKbProcesser(listener, scrape, knowledgeGroup, {
+      hasCredits: () => hasEnoughCredits(userId, "scrapes"),
+      limit: getLimit(),
+    });
+
+    await processer.start();
   })();
 
   res.json({ message: "ok" });
@@ -261,6 +144,43 @@ app.delete(
       const indexer = makeIndexer({ key: scrape.indexer });
       await deleteScrape(indexer.getKey(), scrapeId);
     } catch (error) {}
+    res.json({ message: "ok" });
+  }
+);
+
+app.delete(
+  "/knowledge-group",
+  authenticate,
+  async function (req: Request, res: Response) {
+    const knowledgeGroupId = req.body.knowledgeGroupId;
+
+    const knowledgeGroup = await prisma.knowledgeGroup.findFirstOrThrow({
+      where: { id: knowledgeGroupId },
+      include: {
+        scrape: true,
+      },
+    });
+
+    const items = await prisma.scrapeItem.findMany({
+      where: { knowledgeGroupId },
+    });
+
+    const indexer = makeIndexer({ key: knowledgeGroup.scrape.indexer });
+    const ids = items.flatMap((item) => item.embeddings.map((e) => e.id));
+
+    const chunks = chunk(ids, 800);
+    for (const chunk of chunks) {
+      await deleteByIds(indexer.getKey(), chunk);
+    }
+
+    await prisma.scrapeItem.deleteMany({
+      where: { knowledgeGroupId },
+    });
+
+    await prisma.knowledgeGroup.delete({
+      where: { id: knowledgeGroupId },
+    });
+
     res.json({ message: "ok" });
   }
 );
@@ -369,10 +289,17 @@ expressWs.app.ws("/", (ws: any, req) => {
 
         const links: MessageSourceLink[] = [];
         for (const match of matches) {
+          const where: Prisma.ScrapeItemWhereInput = {
+            scrapeId: scrape.id,
+          };
+
+          if (match.scrapeItemId) {
+            where.id = match.scrapeItemId;
+          } else if (match.url) {
+            where.url = match.url;
+          }
           const item = await prisma.scrapeItem.findFirst({
-            where: {
-              OR: [{ url: match.url }, { id: match.scrapeItemId }],
-            },
+            where,
           });
           if (item) {
             links.push({
@@ -381,6 +308,7 @@ expressWs.app.ws("/", (ws: any, req) => {
               score: match.score,
               scrapeItemId: item.id,
               fetchUniqueId: match.fetchUniqueId ?? null,
+              knowledgeGroupId: item.knowledgeGroupId,
             });
           }
         }
@@ -467,12 +395,30 @@ app.get("/mcp/:scrapeId", async (req, res) => {
 app.post("/resource/:scrapeId", authenticate, async (req, res) => {
   const userId = req.user!.id;
   const scrapeId = req.params.scrapeId;
+  const knowledgeGroupType = req.body.knowledgeGroupType;
+  const defaultGroupTitle = req.body.defaultGroupTitle;
   const markdown = req.body.markdown;
   const title = req.body.title;
 
   if (!scrapeId || !markdown || !title) {
     res.status(400).json({ message: "Missing scrapeId or markdown or title" });
     return;
+  }
+
+  let knowledgeGroup = await prisma.knowledgeGroup.findFirst({
+    where: { userId, type: knowledgeGroupType },
+  });
+
+  if (!knowledgeGroup) {
+    knowledgeGroup = await prisma.knowledgeGroup.create({
+      data: {
+        userId,
+        type: knowledgeGroupType,
+        scrapeId,
+        status: "done",
+        title: defaultGroupTitle ?? "Default",
+      },
+    });
   }
 
   const scrape = await prisma.scrape.findFirstOrThrow({
@@ -486,6 +432,7 @@ app.post("/resource/:scrapeId", authenticate, async (req, res) => {
     data: {
       userId,
       scrapeId: scrape.id,
+      knowledgeGroupId: knowledgeGroup.id,
       markdown,
       title,
       metaTags: [],
@@ -541,8 +488,6 @@ app.post("/answer/:scrapeId", async (req, res) => {
     query = messages[messages.length - 1].content;
   }
 
-  console.log({ channel });
-
   await prisma.message.create({
     data: {
       threadId: thread.id,
@@ -581,10 +526,18 @@ app.post("/answer/:scrapeId", async (req, res) => {
 
   const links: MessageSourceLink[] = [];
   for (const match of matches) {
+    const where: Prisma.ScrapeItemWhereInput = {
+      scrapeId: scrape.id,
+    };
+
+    if (match.scrapeItemId) {
+      where.id = match.scrapeItemId;
+    } else if (match.url) {
+      where.url = match.url;
+    }
+
     const item = await prisma.scrapeItem.findFirst({
-      where: {
-        OR: [{ url: match.url }, { id: match.scrapeItemId }],
-      },
+      where,
     });
     if (item) {
       links.push({
@@ -593,6 +546,7 @@ app.post("/answer/:scrapeId", async (req, res) => {
         score: match.score,
         scrapeItemId: item.id,
         fetchUniqueId: match.fetchUniqueId ?? null,
+        knowledgeGroupId: item.knowledgeGroupId,
       });
     }
   }

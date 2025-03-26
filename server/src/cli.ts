@@ -109,7 +109,102 @@ async function citing() {
   console.log(matches.length);
 }
 
+async function fillKnowledgeGroup() {
+  const scrapeItems = await prisma.scrapeItem.findMany({
+    where: {},
+    include: {
+      scrape: true,
+    },
+  });
+
+  const skipIdx: number[] = [];
+
+  for (let i = 0; i < scrapeItems.length; i++) {
+    if (skipIdx.includes(i)) {
+      continue;
+    }
+
+    const item = scrapeItems[i];
+
+    if (item.knowledgeGroupId) {
+      continue;
+    }
+
+    console.log(`[${i}/${scrapeItems.length}]`, "Filling scrapeItem", item.id);
+    let defaultGroup = await prisma.knowledgeGroup.findFirst({
+      where: {
+        scrapeId: item.scrapeId,
+        title: "Default",
+      },
+    });
+
+    if (!defaultGroup) {
+      defaultGroup = await prisma.knowledgeGroup.create({
+        data: {
+          scrapeId: item.scrapeId,
+          title: "Default",
+          userId: item.userId,
+          type: "scrape_web",
+          status: "done",
+          url: item.scrape.url,
+        },
+      });
+    }
+
+    await prisma.scrapeItem.update({
+      where: { id: item.id },
+      data: { knowledgeGroupId: defaultGroup.id },
+    });
+  }
+}
+
+async function fillKnowledgeGroup2() {
+  const scrapes = await prisma.scrape.findMany({
+    where: {},
+  });
+
+  for (const scrape of scrapes) {
+    let group = await prisma.knowledgeGroup.findFirst({
+      where: {
+        scrapeId: scrape.id,
+        title: "Default",
+      },
+    });
+
+    if (!group) {
+      console.log("Creating group", scrape.id);
+      group = await prisma.knowledgeGroup.create({
+        data: {
+          scrapeId: scrape.id,
+          title: "Default",
+          userId: scrape.userId,
+          type: "scrape_web",
+          status: "done",
+          url: scrape.url,
+        }
+      });
+    }
+
+    await prisma.scrapeItem.updateMany({
+      where: { scrapeId: scrape.id },
+      data: { knowledgeGroupId: group!.id },
+    });
+  }
+}
+
+async function testKnowledgeGroup() {
+  const scrapeItems = await prisma.scrapeItem.count({
+    where: {
+      knowledgeGroupId: null,
+    },
+  });
+
+  console.log(scrapeItems);
+}
+
 console.log("Starting...");
 // main();
 // cleanupThreads();
-citing();
+// citing();
+// fillKnowledgeGroup2();
+testKnowledgeGroup();
