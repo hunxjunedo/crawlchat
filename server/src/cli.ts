@@ -192,19 +192,8 @@ async function fillKnowledgeGroup2() {
   }
 }
 
-async function testKnowledgeGroup() {
-  const scrapeItems = await prisma.scrapeItem.count({
-    where: {
-      knowledgeGroupId: null,
-    },
-  });
-
-  console.log(scrapeItems);
-}
-
 console.log("Starting...");
 // main();
 // cleanupThreads();
 // citing();
 // fillKnowledgeGroup2();
-testKnowledgeGroup();
