@@ -7,23 +7,13 @@ import {
   Text,
   Center,
 } from "@chakra-ui/react";
-import type { Route } from "./+types/links";
+import type { Route } from "./+types/items";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
 import moment from "moment";
-import {
-  TbArrowLeft,
-  TbBook,
-  TbCheck,
-  TbPlus,
-  TbRefresh,
-  TbX,
-} from "react-icons/tb";
-import { Tooltip } from "~/components/ui/tooltip";
+import { TbCheck, TbRefresh, TbX, TbStack } from "react-icons/tb";
 import { Link, Outlet } from "react-router";
 import { getSessionScrapeId } from "~/scrapes/util";
-import { Page } from "~/components/page";
-import { Button } from "~/components/ui/button";
 import { EmptyState } from "~/components/ui/empty-state";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -62,39 +52,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return { scrape, items, knowledgeGroup };
 }
 
-function LinkRefresh({ scrapeId, url }: { scrapeId: string; url: string }) {
-  return (
-    <Tooltip
-      content="Refresh content"
-      positioning={{ placement: "top" }}
-      showArrow
-    >
-      <Link to={`/knowledge/scrape?url=${url}&collection=${scrapeId}&links=1`}>
-        <TbRefresh />
-      </Link>
-    </Tooltip>
-  );
-}
-
 export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
   return (
-    <Page
-      title={loaderData.knowledgeGroup.title ?? "Untitled"}
-      icon={<TbBook />}
-    >
+    <>
       {loaderData.items.length === 0 && (
         <Center w="full" h="full">
           <EmptyState
             title="No items"
             description="Scrape your documents to get started."
-          >
-            <Button asChild colorPalette={"brand"} variant={"subtle"}>
-              <Link to="/knowledge">
-                <TbArrowLeft />
-                Go to groups
-              </Link>
-            </Button>
-          </EmptyState>
+            icon={<TbStack />}
+          />
         </Center>
       )}
       {loaderData.items.length > 0 && (
@@ -102,7 +69,9 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
           <Table.Root size="sm">
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader w="300px" truncate>Url</Table.ColumnHeader>
+                <Table.ColumnHeader w="300px" truncate>
+                  Url
+                </Table.ColumnHeader>
                 <Table.ColumnHeader>Title</Table.ColumnHeader>
                 <Table.ColumnHeader w="120px">Status</Table.ColumnHeader>
                 <Table.ColumnHeader w="200px">Updated</Table.ColumnHeader>
@@ -122,12 +91,6 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
                           item.id
                         )}
                       </Text>
-                      {item.url && (
-                        <LinkRefresh
-                          scrapeId={loaderData.scrape.id}
-                          url={item.url}
-                        />
-                      )}
                     </Group>
                   </Table.Cell>
                   <Table.Cell>
@@ -167,6 +130,6 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
           <Outlet />
         </Stack>
       )}
-    </Page>
+    </>
   );
 }
