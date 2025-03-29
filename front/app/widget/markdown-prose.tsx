@@ -13,12 +13,14 @@ export function MarkdownProse({
   children,
   noMarginCode,
   sources,
+  size = "md",
 }: PropsWithChildren<{
   noMarginCode?: boolean;
   sources?: Array<{ title: string; url?: string }>;
+  size?: "md" | "lg";
 }>) {
   return (
-    <Prose maxW="full">
+    <Prose maxW="full" size={size}>
       <Markdown
         remarkPlugins={[remarkGfm, linkifyRegex(/\!\![0-9]+!!/)]}
         components={{

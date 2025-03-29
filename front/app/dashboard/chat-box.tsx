@@ -13,7 +13,7 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { Stack, Text } from "@chakra-ui/react";
-import type { Message, MessageSourceLink, Scrape, Thread } from "libs/prisma";
+import type { Message, MessageSourceLink, Scrape, Thread, WidgetSize } from "libs/prisma";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   TbArrowUp,
@@ -211,6 +211,7 @@ function AssistantMessage({
   onUnpin,
   onDelete,
   onRefresh,
+  size,
 }: {
   content: string;
   links: MessageSourceLink[];
@@ -219,6 +220,7 @@ function AssistantMessage({
   onUnpin: () => void;
   onDelete: () => void;
   onRefresh: () => void;
+  size?: WidgetSize
 }) {
   const [cleanedLinks, cleanedContent] = useMemo(() => {
     const citation = extractCitations(content, links);
@@ -229,6 +231,7 @@ function AssistantMessage({
     <Stack>
       <Stack px={4} gap={0}>
         <MarkdownProse
+          size={size === "large" ? "lg" : "md"}
           sources={Object.values(cleanedLinks).map((link) => ({
             title: link?.title ?? link?.url ?? "Source",
             url: link?.url ?? undefined,
@@ -760,6 +763,7 @@ export default function ScrapeWidget({
                     <UserMessage content={message.content} />
                   ) : (
                     <AssistantMessage
+                      size={scrape.widgetConfig?.size}
                       content={message.content}
                       links={message.links}
                       pinned={chat.allMessages[index - 1]?.pinned}
