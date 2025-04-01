@@ -1108,6 +1108,12 @@ function Features() {
           "It's not a chatbot, it also provides you in-deep analytics to understand your customer queries and make your documentation better.",
         new: true,
       },
+      {
+        title: "Reactive bot",
+        icon: <TbBrandDiscord/>,
+        description: "The Discord bot checks messages in a channel and reacts to it if it knows the answer.",
+        new: true,
+      }
     ],
     []
   );
