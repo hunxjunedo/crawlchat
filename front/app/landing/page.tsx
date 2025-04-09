@@ -48,6 +48,7 @@ import {
   TbLink,
   TbChartArea,
   TbPlug,
+  TbBrandGithub,
 } from "react-icons/tb";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -739,6 +740,7 @@ export function Pricing() {
                 { label: "MCP not available", excluded: true },
                 { label: "Discord bot", excluded: true },
                 { label: "Reactive Discord", excluded: true },
+                { label: "GitHub issues", excluded: true },
               ]}
               href="/login"
             />
@@ -751,8 +753,9 @@ export function Pricing() {
                 { label: "15,000 messages per month" },
                 { label: "API available" },
                 { label: "MCP available" },
-                { label: "Discord bot", },
+                { label: "Discord bot" },
                 { label: "Reactive Discord", excluded: true },
+                { label: "GitHub issues", excluded: true },
               ]}
               href="https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
               newTab
@@ -768,6 +771,7 @@ export function Pricing() {
                 { label: "MCP available" },
                 { label: "Discord bot" },
                 { label: "Reactive Discord", new: true },
+                { label: "GitHub issues", new: true },
               ]}
               href="https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
               newTab
@@ -1046,7 +1050,6 @@ function Features() {
       {
         title: "Discord bot",
         icon: <TbBrandDiscord />,
-        new: true,
         description:
           "Have a community on Discord? CrawlChat Discord Bot is here to answer all the questions for you.",
       },
@@ -1087,7 +1090,6 @@ function Features() {
         icon: <TbMessage />,
         description:
           "Get full visibility into the conversations happening on your website so that you can fine tune your documentation.",
-        new: true,
       },
       {
         title: "Find data gaps",
@@ -1119,6 +1121,13 @@ function Features() {
         icon: <TbBrandDiscord />,
         description:
           "The Discord bot checks messages in a channel and reacts to it if it knows the answer.",
+        new: true,
+      },
+      {
+        title: "GitHub issues",
+        icon: <TbBrandGithub />,
+        description:
+          "Fetch the Github issues and add them to your knowledge base instantly!",
         new: true,
       },
     ],

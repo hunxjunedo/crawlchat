@@ -1,6 +1,10 @@
 import { KnowledgeGroup } from "libs/prisma";
 import { BaseKbProcesser, KbProcesserListener } from "./kb-processer";
-import { getIssueMarkdown, getIssues, getIssueTimeline } from "../github-api";
+import {
+  getIssueMarkdown,
+  getIssueTimeline,
+  getJustIssues,
+} from "../github-api";
 import { getLimiter } from "../rate-limiter";
 
 export class GithubIssuesKbProcesser extends BaseKbProcesser {
@@ -28,9 +32,10 @@ export class GithubIssuesKbProcesser extends BaseKbProcesser {
 
     const [, , username, repo] = match;
 
-    const { issues } = await getIssues({
+    const issues = await getJustIssues({
       repo,
       username,
+      n: 100,
     });
 
     for (let i = 0; i < issues.length; i++) {

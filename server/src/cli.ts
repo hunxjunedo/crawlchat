@@ -3,15 +3,20 @@ dotenv.config();
 
 import { cleanupThreads } from "./scripts/thread-cleanup";
 import { getLimiter, wait } from "./rate-limiter";
-import { getIssue, getIssues, GithubPagination } from "./github-api";
+import {
+  getIssue,
+  getIssues,
+  getJustIssues,
+  GithubPagination,
+} from "./github-api";
 
 async function main() {
-  const issue = await getIssue({
+  const issues = await getJustIssues({
     username: "remotion-dev",
     repo: "remotion",
-    issueNumber: 5071,
+    n: 100,
   });
-  console.log(issue);
+  console.log(issues.length);
 }
 
 console.log("Starting...");

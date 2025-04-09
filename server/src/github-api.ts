@@ -1,3 +1,5 @@
+import { getLimiter } from "./rate-limiter";
+
 type GithubIssue = {
   url: string;
   id: number;
@@ -132,4 +134,33 @@ export function getIssueMarkdown(
     }
   }
   return entries.join("\n---\n");
+}
+
+export async function getJustIssues({
+  n,
+  repo,
+  username,
+  state = "closed",
+}: {
+  n: number;
+  repo: string;
+  username: string;
+  state?: "open" | "closed" | "all";
+}): Promise<GithubIssue[]> {
+  const issues: GithubIssue[] = [];
+  let pagination: GithubPagination = {};
+  do {
+    console.log(`Fetching issues ${issues.length} - ${issues.length + 100}...`);
+    const { issues: newIssues, pagination: newPagination } = await getIssues({
+      repo,
+      username,
+      state,
+      pageUrl: pagination.nextUrl,
+    });
+    issues.push(...newIssues.filter((issue) => !issue.pull_request));
+    pagination = newPagination;
+    await getLimiter("github-api").wait();
+  } while (issues.length < n && pagination.nextUrl);
+
+  return issues.slice(0, n);
 }
