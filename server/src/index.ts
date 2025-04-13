@@ -22,9 +22,8 @@ import { extractCitations } from "libs/citation";
 import { BaseKbProcesserListener } from "./kb/listener";
 import { makeKbProcesser } from "./kb/factory";
 import { FlowMessage } from "./llm/agentic";
-import { assignCategory } from "./collection";
-import { effect } from "./effect";
 import { makeTestQueryFlow } from "./llm/flow-test-query";
+import { getConfig } from "./llm/config";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -298,6 +297,8 @@ expressWs.app.ws("/", (ws: any, req) => {
 
         ws.send(makeMessage("query-message", newQueryMessage));
 
+        const llmConfig = getConfig(scrape.llmModel);
+
         const flow = makeFlow(
           scrape.id,
           scrape.chatPrompt ?? "",
@@ -315,6 +316,10 @@ expressWs.app.ws("/", (ws: any, req) => {
                 })
               );
             },
+            model: llmConfig.model,
+            baseURL: llmConfig.baseURL,
+            apiKey: llmConfig.apiKey,
+            topN: llmConfig.ragTopN,
           }
         );
 
@@ -336,7 +341,11 @@ expressWs.app.ws("/", (ws: any, req) => {
           flow.flowState.state.messages
         );
 
-        await consumeCredits(scrape.userId, "messages", 1);
+        await consumeCredits(
+          scrape.userId,
+          "messages",
+          llmConfig.creditsPerMessage
+        );
         const newAnswerMessage = await prisma.message.create({
           data: {
             threadId,
@@ -353,7 +362,7 @@ expressWs.app.ws("/", (ws: any, req) => {
             message: newAnswerMessage,
           })
         );
-        effect(assignCategory(scrape.id, newQueryMessage.id));
+        // effect(assignCategory(scrape.id, newQueryMessage.id));
       }
     } catch (error) {
       console.error(error);
@@ -429,8 +438,6 @@ app.get("/mcp/:scrapeId", async (req, res) => {
       channel: "mcp",
     },
   });
-
-  effect(assignCategory(scrape.id, userMessage.id));
 
   res.json(processed);
 });
@@ -545,6 +552,8 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     .filter(Boolean)
     .join("\n\n");
 
+  const llmConfig = getConfig(scrape.llmModel);
+
   const flow = makeFlow(
     scrape.id,
     prompt,
@@ -555,7 +564,13 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
         content: m.content,
       },
     })),
-    scrape.indexer
+    scrape.indexer,
+    {
+      model: llmConfig.model,
+      baseURL: llmConfig.baseURL,
+      apiKey: llmConfig.apiKey,
+      topN: llmConfig.ragTopN,
+    }
   );
 
   while (await flow.stream()) {}
@@ -567,7 +582,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     flow.flowState.state.messages
   );
 
-  await consumeCredits(scrape.userId, "messages", 1);
+  await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
   const newAnswerMessage = await prisma.message.create({
     data: {
       threadId: thread.id,
@@ -588,8 +603,6 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
         .map((l) => l.url)
         .join("\n");
   }
-
-  effect(assignCategory(scrape.id, userMessage.id));
 
   res.json({ message: newAnswerMessage, content: updatedContent });
 });
