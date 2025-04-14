@@ -739,7 +739,7 @@ export function Pricing() {
                 { label: "API not available", excluded: true },
                 { label: "MCP not available", excluded: true },
                 { label: "Discord bot", excluded: true },
-                { label: "Reactive Discord", excluded: true },
+                { label: "Discord drafting", excluded: true },
                 { label: "GitHub issues", excluded: true },
               ]}
               href="/login"
@@ -754,7 +754,7 @@ export function Pricing() {
                 { label: "API available" },
                 { label: "MCP available" },
                 { label: "Discord bot" },
-                { label: "Reactive Discord", excluded: true },
+                { label: "Discord drafting", excluded: true },
                 { label: "GitHub issues", excluded: true },
               ]}
               href="https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
@@ -770,7 +770,7 @@ export function Pricing() {
                 { label: "API available" },
                 { label: "MCP available" },
                 { label: "Discord bot" },
-                { label: "Reactive Discord", new: true },
+                { label: "Discord drafting", new: true },
                 { label: "GitHub issues", new: true },
               ]}
               href="https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
@@ -1116,10 +1116,10 @@ function Features() {
           "It's not a chatbot, it also provides you in-deep analytics to understand your customer queries and make your documentation better.",
       },
       {
-        title: "Reactive bot",
+        title: "Discord drafting",
         icon: <TbBrandDiscord />,
         description:
-          "The Discord bot checks messages in a channel and reacts to it if it knows the answer.",
+          "Use CrawlChat to draft answers manually yet taking help from AI!",
         new: true,
       },
       {
