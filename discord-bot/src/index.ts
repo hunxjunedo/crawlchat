@@ -27,6 +27,8 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
+const allBotUserIds = process.env.ALL_BOT_USER_IDS!.split(",");
+
 const defaultPrompt = `Keep the response very short and very concised.
 It should be under 1000 charecters.`;
 
@@ -153,7 +155,7 @@ client.on(Events.MessageCreate, async (message) => {
   } else if (
     message.channel.type === ChannelType.PublicThread &&
     message.channel.parent?.id &&
-    message.author.id !== process.env.BOT_USER_ID
+    !allBotUserIds.includes(message.author.id)
   ) {
     const { scrapeId, userId, draftDestinationChannelId } =
       await getDiscordDetails(message.guildId!);
