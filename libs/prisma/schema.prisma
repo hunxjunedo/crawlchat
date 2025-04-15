@@ -51,10 +51,11 @@ type WidgetQuestion {
 }
 
 type WidgetConfig {
-  size                WidgetSize
-  questions           WidgetQuestion[]
-  welcomeMessage      String?
-  showMcpSetup        Boolean?
+  size                  WidgetSize
+  questions             WidgetQuestion[]
+  welcomeMessage        String?
+  showMcpSetup          Boolean?
+  textInputPlaceholder  String?
 }
 
 type ScrapeAnalyticsCategoryMessageId {
@@ -101,6 +102,7 @@ model Scrape {
   indexer               String?
   discordServerId       String?
   discordDraftConfig    DiscordDraftConfig?
+  logoUrl               String?
 
   analytics             ScrapeAnalytics?
   llmModel              LlmModel?
