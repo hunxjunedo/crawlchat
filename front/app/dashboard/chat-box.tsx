@@ -50,19 +50,7 @@ import { Link as RouterLink } from "react-router";
 import { extractCitations } from "libs/citation";
 import { Button } from "~/components/ui/button";
 import { makeCursorMcpJson, makeMcpCommand, makeMcpName } from "~/mcp/setup";
-
-function getScoreColor(score: number) {
-  if (score < 0.25) {
-    return "red";
-  }
-  if (score < 0.5) {
-    return "orange";
-  }
-  if (score < 0.75) {
-    return "blue";
-  }
-  return "brand";
-}
+import { getScoreColor, getMessagesScore } from "~/score";
 
 function ChatInput({
   onAsk,
@@ -691,12 +679,7 @@ export default function ScrapeWidget({
   });
   const [screen, setScreen] = useState<"chat" | "mcp">("chat");
   const readOnly = useMemo(() => userToken === "NA", [userToken]);
-  const overallScore = useMemo(() => {
-    const scores = chat.allMessages.map((m) => {
-      return Math.max(...Object.values(m.links).map((l) => l?.score ?? 0), 0);
-    });
-    return scores.reduce((a, b) => a + b, 0) / (scores.length / 2);
-  }, [chat.allMessages]);
+  const overallScore = useMemo(() => getMessagesScore(messages), [messages]);
 
   useEffect(
     function () {

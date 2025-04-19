@@ -52,6 +52,7 @@ import { makeMessagePairs } from "./analyse";
 import { Tooltip } from "~/components/ui/tooltip";
 import { getSessionScrapeId } from "~/scrapes/util";
 import type { Message, MessageChannel } from "libs/prisma";
+import { getScoreColor } from "~/score";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -228,19 +229,6 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
     }
     setPairs(filteredPairs);
   }, [channels, baseFilteredPairs, filters]);
-
-  function getScoreColor(score: number) {
-    if (score < 0.25) {
-      return "red";
-    }
-    if (score < 0.5) {
-      return "orange";
-    }
-    if (score < 0.75) {
-      return "blue";
-    }
-    return "brand";
-  }
 
   return (
     <Page title="Messages" icon={<TbMessage />}>

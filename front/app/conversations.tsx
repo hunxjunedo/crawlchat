@@ -9,7 +9,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Page } from "./components/page";
-import { TbMessages } from "react-icons/tb";
+import { TbMessage, TbMessages } from "react-icons/tb";
 import type { Route } from "./+types/conversations";
 import { getAuthUser } from "./auth/middleware";
 import { getSessionScrapeId } from "./scrapes/util";
@@ -18,6 +18,8 @@ import { prisma } from "libs/prisma";
 import moment from "moment";
 import { useState } from "react";
 import ChatBox from "./dashboard/chat-box";
+import { getMessagesScore, getScoreColor } from "./score";
+import { Tooltip } from "./components/ui/tooltip";
 
 type ThreadWithMessages = Prisma.ThreadGetPayload<{
   include: {
@@ -135,9 +137,22 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                       {thread.id.substring(thread.id.length - 4)}
                     </Text>
                   </Group>
-                  <Badge colorPalette={"brand"} variant={"surface"}>
-                    {thread.messages.length}
-                  </Badge>
+                  <Group>
+                    <Tooltip content="Avg score of all the messages" showArrow>
+                      <Badge
+                        colorPalette={getScoreColor(
+                          getMessagesScore(thread.messages)
+                        )}
+                        variant={"surface"}
+                      >
+                        {getMessagesScore(thread.messages).toFixed(2)}
+                      </Badge>
+                    </Tooltip>
+                    <Badge colorPalette={"brand"} variant={"surface"}>
+                      <TbMessage />
+                      {thread.messages.length}
+                    </Badge>
+                  </Group>
                 </Group>
                 <Text opacity={0.5} fontSize={"sm"}>
                   {moment(thread.createdAt).fromNow()}
