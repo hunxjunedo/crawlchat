@@ -1196,27 +1196,71 @@ function Testimonials() {
       <Container>
         <Stack alignItems={"center"} w="full" gap={6}>
           <LandingHeading>People love CrawlChat</LandingHeading>
-          <blockquote className="twitter-tweet">
-            <p lang="en" dir="ltr">
-              MCP, llms.txt and{" "}
-              <a href="https://t.co/wvTaGlv99L">https://t.co/wvTaGlv99L</a> are
-              now live!
-              <br />
-              <br />
-              Thanks to{" "}
-              <a href="https://twitter.com/pramodk73?ref_src=twsrc%5Etfw">
-                @pramodk73
-              </a>{" "}
-              and <a href="https://t.co/dv2PDLzt2V">https://t.co/dv2PDLzt2V</a>{" "}
-              for getting us up to speed with AI integrations.{" "}
-              <a href="https://t.co/Sornu9aIFi">https://t.co/Sornu9aIFi</a>
-            </p>
-            &mdash; Jonny Burger (@JNYBGR){" "}
-            <a href="https://twitter.com/JNYBGR/status/1899786274635927674?ref_src=twsrc%5Etfw">
-              March 12, 2025
-            </a>
-          </blockquote>
-          <script async src="https://platform.twitter.com/widgets.js" />
+          <Flex flexDir={["column", "row"]} gap={6}>
+            <Stack>
+              <Box>
+                <blockquote className="twitter-tweet">
+                  <p lang="en" dir="ltr">
+                    MCP, llms.txt and{" "}
+                    <a href="https://t.co/wvTaGlv99L">
+                      https://t.co/wvTaGlv99L
+                    </a>{" "}
+                    are now live!
+                    <br />
+                    <br />
+                    Thanks to{" "}
+                    <a href="https://twitter.com/pramodk73?ref_src=twsrc%5Etfw">
+                      @pramodk73
+                    </a>{" "}
+                    and{" "}
+                    <a href="https://t.co/dv2PDLzt2V">
+                      https://t.co/dv2PDLzt2V
+                    </a>{" "}
+                    for getting us up to speed with AI integrations.{" "}
+                    <a href="https://t.co/Sornu9aIFi">
+                      https://t.co/Sornu9aIFi
+                    </a>
+                  </p>
+                  &mdash; Jonny Burger (@JNYBGR){" "}
+                  <a href="https://twitter.com/JNYBGR/status/1899786274635927674?ref_src=twsrc%5Etfw">
+                    March 12, 2025
+                  </a>
+                </blockquote>
+                <script async src="https://platform.twitter.com/widgets.js" />
+              </Box>
+            </Stack>
+            <Stack>
+              <Box>
+                <blockquote className="twitter-tweet">
+                  <p lang="en" dir="ltr">
+                    Integrated{" "}
+                    <a href="https://t.co/uKP4sKdbjV">
+                      https://t.co/uKP4sKdbjV
+                    </a>{" "}
+                    into the new Konva docs – hats off to{" "}
+                    <a href="https://twitter.com/pramodk73?ref_src=twsrc%5Etfw">
+                      @pramodk73
+                    </a>{" "}
+                    for making it insanely useful.
+                    <br />
+                    <br />
+                    It now powers:
+                    <br />- &quot;Ask AI&quot; widget on site
+                    <br />- MCP server for docs
+                    <br />- Discord bot for community
+                    <br />
+                    <br />
+                    Smarter docs. Better support.
+                  </p>
+                  &mdash; Anton Lavrenov (@lavrton){" "}
+                  <a href="https://twitter.com/lavrton/status/1915467775734350149?ref_src=twsrc%5Etfw">
+                    April 24, 2025
+                  </a>
+                </blockquote>{" "}
+                <script async src="https://platform.twitter.com/widgets.js" />
+              </Box>
+            </Stack>
+          </Flex>
         </Stack>
       </Container>
     </Stack>
