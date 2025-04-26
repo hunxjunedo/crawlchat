@@ -656,7 +656,7 @@ function PricingBox({
       <div
         className={cn(
           "p-6 border-b border-outline",
-          popular && "border-brand border-opacity-20"
+          popular && "border-brand border-opacity-10"
         )}
       >
         <h4 className="text-2xl font-bold font-radio-grotesk">{title}</h4>
