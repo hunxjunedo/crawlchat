@@ -90,7 +90,7 @@ function DemoWindow() {
 function StatsItem({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex gap-4 py-6 px-6 items-center border-b border-outline last:border-b-0">
-      <div className="flex-1 text-6xl font-bold font-radio-grotesk">
+      <div className="flex-1 text-5xl md:text-6xl font-bold font-radio-grotesk">
         {value}
       </div>
       <div className="flex-1 flex justify-end">{label}</div>
@@ -100,13 +100,13 @@ function StatsItem({ label, value }: { label: string; value: number }) {
 
 function Stats() {
   return (
-    <div className="flex gap-8 w-full mt-8 items-center">
+    <div className="flex flex-col md:flex-row gap-8 w-full mt-8 md:items-center">
       <div className="flex-1 flex flex-col gap-10">
-        <div className="text-xl font-medium px-6 py-3 shadow-md rounded-2xl bg-white w-fit flex items-center gap-4 -rotate-[4deg]">
+        <div className="text-md md:text-xl font-medium px-6 py-3 shadow-md rounded-2xl bg-white w-fit flex items-center gap-4 -rotate-[4deg]">
           <div className="w-3 h-3 bg-green-500 rounded-full outline-2 outline-green-300 outline" />
           Answering questions continuously
         </div>
-        <h3 className="text-5xl font-radio-grotesk font-bold leading-[1.2]">
+        <h3 className="text-4xl md:text-5xl font-radio-grotesk font-bold leading-[1.2]">
           Answering <br />
           <span className="text-brand">questions</span> <br />
           continuously
@@ -129,7 +129,7 @@ function UsedBy() {
         Already used by awesome companies!
       </h3>
 
-      <div className="flex justify-center items-center gap-16">
+      <div className="flex justify-center items-center gap-8 md:gap-16">
         <img
           src="/used-by/remotion.png"
           alt="Remotion"
@@ -151,7 +151,7 @@ function UsedBy() {
 
 function Heading({ children }: PropsWithChildren) {
   return (
-    <h3 className="text-center text-6xl font-bold max-w-[640px] mx-auto font-radio-grotesk leading-[1.3]">
+    <h3 className="text-center text-4xl md:text-6xl font-bold max-w-[300px] md:max-w-[640px] mx-auto font-radio-grotesk leading-[1.3]">
       {children}
     </h3>
   );
@@ -159,7 +159,7 @@ function Heading({ children }: PropsWithChildren) {
 
 function HeadingHighlight({ children }: PropsWithChildren) {
   return (
-    <span className="text-brand bg-brand-subtle px-4 py-1 rounded-lg">
+    <span className="text-brand bg-brand-subtle px-4 rounded-lg md:leading-[1.4]">
       {children}
     </span>
   );
@@ -235,7 +235,7 @@ function Works() {
         you can turn your docs into LLM ready for your community.
       </HeadingDescription>
 
-      <div className="flex gap-8">
+      <div className="flex flex-col md:flex-row gap-8">
         <WorksBox
           title="Add knowledge"
           description="Bring your docs to CrawlChat as a knowledge base. The LLMs will answer your community questions with the provided knowledge without any hallucination."
@@ -275,7 +275,7 @@ function Works() {
           title="Integrate"
           description="You can integrate the LLM ready docs into your community as a “Ask AI” chat widget on your website, a Discord/Slack bot, and as a MCP server."
         >
-          <div className="flex flex-col relative">
+          <div className="flex flex-col relative mb-8 md:mb-0">
             <div className="flex justify-center">
               <img
                 src="new-landing/integrate-lines.png"
@@ -357,7 +357,7 @@ function Tab({ children, active }: PropsWithChildren & { active?: boolean }) {
 
 function ImportKnowledgePreview() {
   return (
-    <div className="w-full h-[700px] bg-ash-subtle rounded-2xl bg-white bg-opacity-50 flex flex-col gap-4 p-4 border border-outline">
+    <div className="w-full bg-ash-subtle rounded-2xl bg-white bg-opacity-50 flex flex-col gap-4 p-4 border border-outline">
       <div className="flex flex-col gap-2">
         <p className="text-2xl font-bold">Group</p>
         <p className="font-medium opacity-50">
@@ -365,7 +365,9 @@ function ImportKnowledgePreview() {
           set up auto updates on the groups & get analytics on each group.
         </p>
       </div>
-      <div className="w-full flex-1 bg-white rounded-xl p-4">Inside</div>
+      <div className="w-full flex-1 bg-white rounded-xl p-4 aspect-square">
+        Inside
+      </div>
     </div>
   );
 }
@@ -435,7 +437,7 @@ function Integrations() {
       </HeadingDescription>
 
       <div className="flex flex-col gap-6">
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           <IntegrationCard
             flex={4}
             title="Ask AI button"
@@ -448,7 +450,7 @@ function Integrations() {
           />
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           <IntegrationCard
             flex={6}
             title="Slack bot"
@@ -506,7 +508,7 @@ function ChatWidget() {
         they want
       </HeadingDescription>
 
-      <div className="flex gap-10">
+      <div className="flex flex-col md:flex-row gap-10">
         <div className="flex-1 flex flex-col gap-4">
           <ChatWidgetFeature
             active={true}
@@ -534,25 +536,23 @@ function ChatWidget() {
 }
 
 function ToolsRow({ children }: PropsWithChildren) {
-  return <div className="flex">{children}</div>;
+  return <div className="grid grid-cols-1 md:grid-cols-3">{children}</div>;
 }
 
 function ToolItem({
   title,
   description,
   icon,
-  noBorderBottom,
 }: {
   title: string;
   description: string;
   icon: string;
-  noBorderBottom?: boolean;
 }) {
   return (
     <div
       className={cn(
-        "flex-1 flex flex-col gap-2 p-6 border-r border-opacity-60 border-outline last:border-r-0",
-        !noBorderBottom && "border-b"
+        "flex-1 flex flex-col gap-2 p-6 border-opacity-60 border-outline",
+        "md:border-r border-b no-border-last-3 no-border-every-3 last:border-b-0"
       )}
     >
       <div className="flex flex-col gap-2">
@@ -593,25 +593,20 @@ function Tools() {
             description="You get to know how each knowledge group is performing against the questions asked. You can always improve them if they are not performing as expected"
             icon="/new-landing/heirarchy-square.png"
           />
-        </ToolsRow>
-        <ToolsRow>
           <ToolItem
             title="@CrawlChat to answer"
             description="You don’t have to be available on the channels all the time. Members and just tag @crawlchat to get the answer for the questions they have."
             icon="/new-landing/chat-bubble.png"
-            noBorderBottom
           />
           <ToolItem
             title="Learn"
             description="Turn the conversations you have on the channels into a knowledge base with just a @crawlchat learn message. The bot adds the whole conversation into the knowledge group so that it uses it in the upcoming answers"
             icon="/new-landing/online-learning.png"
-            noBorderBottom
           />
           <ToolItem
             title="Drafting"
             description="Get more control on the help you provide on your channels. Use CrawlChat to draft answers for the questions so that you can minimise your efforts in answering them end to end. Automate manually!"
             icon="/new-landing/edit-pen.png"
-            noBorderBottom
           />
         </ToolsRow>
       </div>
@@ -704,7 +699,7 @@ function Pricing() {
         <HeadingHighlight>Pricing</HeadingHighlight> for everyone
       </Heading>
 
-      <div className="flex gap-6 mt-20">
+      <div className="flex flex-col md:flex-row md:gap-6 gap-10 mt-20">
         <PricingBox
           free
           title="Free"
@@ -749,7 +744,7 @@ function Testimonials() {
         People <HeadingHighlight>love</HeadingHighlight> CrawlChat
       </Heading>
 
-      <div className="flex gap-6 mt-20">
+      <div className="flex flex-col md:flex-row gap-6 mt-20">
         <div>
           <div>
             <blockquote className="twitter-tweet">
@@ -814,7 +809,7 @@ function CTA() {
   return (
     <div className="mt-32">
       <div className="w-full bg-gradient-to-b from-white to-ash shadow-md rounded-2xl py-20 relative">
-        <div className="absolute top-[20%] left-[8%] rotate-[-24deg] scale-120 opacity-50">
+        <div className="absolute top-[10%] md:top-[20%] left-[4%] md:left-[8%] rotate-[-24deg] scale-120 opacity-50">
           <IntegrateChip label="Ask AI" icon="/new-landing/ai.png" />
         </div>
 
@@ -865,7 +860,7 @@ function Footer() {
   return (
     <div className="bg-white mt-32 border-t border-outline">
       <Container>
-        <div className="py-8 flex">
+        <div className="py-8 flex flex-col md:flex-row gap-10">
           <div className="flex-[2] flex flex-col gap-4">
             <Logo />
             <p className="font-medium opacity-60">Deliver your docs with AI!</p>
@@ -1016,7 +1011,7 @@ export default function LandingV2() {
           <Hero />
         </Container>
 
-        {/* <Container>
+        <Container>
           <UsedBy />
         </Container>
 
@@ -1056,7 +1051,7 @@ export default function LandingV2() {
           <CTA />
         </Container>
 
-        <Footer /> */}
+        <Footer />
       </div>
     </div>
   );
