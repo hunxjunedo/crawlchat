@@ -1,7 +1,8 @@
 import { useMemo, useState, type PropsWithChildren } from "react";
 import cn from "@meltdownjs/cn";
 import "../tailwind.css";
-import { TbArrowRight } from "react-icons/tb";
+import { TbArrowRight, TbLoader, TbLoader2, TbMessage } from "react-icons/tb";
+import { useOpenScrape } from "~/landing/use-open-scrape";
 
 function Container({ children }: PropsWithChildren) {
   return (
@@ -49,24 +50,103 @@ function Button({
   );
 }
 
+function HeroScrapeButton({
+  children,
+  disabled,
+  type,
+  onClick,
+  loading,
+}: PropsWithChildren<{
+  disabled?: boolean;
+  type?: "submit" | "reset" | "button" | undefined;
+  onClick?: () => void;
+  loading?: boolean;
+}>) {
+  return (
+    <button
+      className={cn(
+        "bg-brand text-canvas px-6 py-4 rounded-2xl flex-shrink-0 font-medium flex items-center gap-2",
+        disabled && "opacity-50"
+      )}
+      disabled={disabled}
+      type={type}
+      onClick={onClick}
+    >
+      {children}
+      {loading && <TbLoader2 className="animate-spin" />}
+    </button>
+  );
+}
+
 function Scrape() {
+  const {
+    scrapeFetcher,
+    scraping,
+    stage,
+    roomId,
+    disable,
+    openChat,
+  } = useOpenScrape();
+
+  function getNote() {
+    if (scrapeFetcher.data?.error) {
+      return scrapeFetcher.data.error;
+    }
+
+    if (stage === "scraping") {
+      return `Scraping ${scraping?.scrapedCount ?? 0} / 25`;
+    }
+
+    return "Fetches 25 pages and makes it LLM ready!";
+  }
+
   return (
     <div>
-      <div className="flex items-center gap-2 justify-center max-w-[400px] mx-auto mb-8">
-        <div className="border border-outline rounded-2xl p-1 shadow-lg flex items-center gap-2 pl-6 text-xl w-full bg-canvas">
-          <input
-            type="text"
-            className="w-full bg-transparent outline-none"
-            placeholder="https://example.com"
-          />
-          <button className="bg-brand text-canvas px-6 py-4 rounded-2xl flex-shrink-0 font-medium">
-            Try it
-          </button>
-        </div>
+      <div className="flex items-center gap-2 justify-center max-w-[500px] mx-auto mb-8">
+        <scrapeFetcher.Form
+          className="w-full"
+          method="post"
+          action="/open-scrape"
+          style={{ width: "100%" }}
+        >
+          <div className="border border-outline rounded-2xl p-1 shadow-lg flex items-center gap-2 pl-6 text-xl w-full bg-canvas">
+            <input type="hidden" name="intent" value="scrape" />
+            <input type="hidden" name="roomId" value={roomId} />
+            <input
+              name="url"
+              required
+              pattern="https?://.*"
+              type="text"
+              className="w-full bg-transparent outline-none"
+              placeholder="Enter your docs URL"
+              disabled={stage !== "idle"}
+            />
+            {stage !== "saved" && (
+              <HeroScrapeButton
+                disabled={disable}
+                type="submit"
+                loading={disable}
+              >
+                Try it
+              </HeroScrapeButton>
+            )}
+            {stage === "saved" && (
+              <HeroScrapeButton type="button" onClick={openChat}>
+                Chat
+                <TbMessage />
+              </HeroScrapeButton>
+            )}
+          </div>
+        </scrapeFetcher.Form>
       </div>
 
-      <p className="text-center text-sm opacity-40">
-        Fetches 25 pages and makes it LLM ready!
+      <p
+        className={cn(
+          "text-center text-sm opacity-40",
+          scrapeFetcher.data?.error && "text-red-500"
+        )}
+      >
+        {getNote()}
       </p>
     </div>
   );
