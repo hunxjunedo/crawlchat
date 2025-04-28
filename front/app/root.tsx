@@ -101,7 +101,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const isEmbedDemo = matches.some(
     (match) => match.id === "landing/embed-demo"
   );
-  const isLandingPage = matches.some((match) => match.id === "landing/page");
+  const isLandingPage = matches.some((match) => match.id === "landing-v2/page");
 
   return (
     <html lang="en">
