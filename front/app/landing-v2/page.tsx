@@ -418,10 +418,10 @@ function ImportKnowledge() {
           "Scrape your docs website to get the knowledge base ready for your community. You can scrape your docs website to get the knowledge base ready for your community.",
         img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/scrape-gif.gif",
       },
-      think: {
-        title: "Think",
+      docusaurus: {
+        title: "Docusaurus",
         description:
-          "Scrape your docs website to get the knowledge base ready for your community. You can scrape your docs website to get the knowledge base ready for your community.",
+          "Quickly import your Docusaurus based docs to CrawlChat. Just give your docs URL and CrawlChat will load the docs as knowledge base and keep it updated automatically.",
         img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/scrape-gif.gif",
       },
     }),
@@ -455,10 +455,10 @@ function ImportKnowledge() {
               Scrape
             </Tab>
             <Tab
-              active={activeTab === "think"}
-              onClick={() => setActiveTab("think")}
+              active={activeTab === "docusaurus"}
+              onClick={() => setActiveTab("docusaurus")}
             >
-              Think
+              Docusaurus
             </Tab>
           </Tabs>
         </div>
@@ -485,14 +485,14 @@ function ImportKnowledge() {
             }
           />
         </div>
-        <div className={cn("hidden", activeTab === "think" && "block")}>
+        <div className={cn("hidden", activeTab === "docusaurus" && "block")}>
           <ImportKnowledgePreview
-            title={"Think"}
+            title={"Docusaurus"}
             description={
               "Scrape your docs website to get the knowledge base ready for your community. You can scrape your docs website to get the knowledge base ready for your community."
             }
             img={
-              "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/scrape-gif.gif"
+              "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/docusaurus-gif.gif"
             }
           />
         </div>
