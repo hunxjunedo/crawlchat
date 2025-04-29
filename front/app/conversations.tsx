@@ -4,12 +4,18 @@ import {
   EmptyState,
   Flex,
   Group,
+  IconButton,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { Page } from "./components/page";
-import { TbMessage, TbMessages } from "react-icons/tb";
+import {
+  TbChevronLeft,
+  TbChevronRight,
+  TbMessage,
+  TbMessages,
+} from "react-icons/tb";
 import type { Route } from "./+types/conversations";
 import { getAuthUser } from "./auth/middleware";
 import { getSessionScrapeId } from "./scrapes/util";
@@ -20,7 +26,7 @@ import { useState } from "react";
 import ChatBox from "./dashboard/chat-box";
 import { getMessagesScore, getScoreColor } from "./score";
 import { Tooltip } from "./components/ui/tooltip";
-import { chunk } from "libs/chunk";
+import { Link, redirect } from "react-router";
 
 type ThreadWithMessages = Prisma.ThreadGetPayload<{
   include: {
@@ -32,51 +38,66 @@ export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
   const scrapeId = await getSessionScrapeId(request);
 
-  const ONE_WEEK_AGO = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
-
-  const messages = await prisma.message.findMany({
-    where: {
-      ownerUserId: user!.id,
-      scrapeId,
-      createdAt: {
-        gte: ONE_WEEK_AGO,
-      },
-    },
-    select: {
-      threadId: true,
-    },
-  });
-
-  const threads: Record<string, ThreadWithMessages> = {};
-
-  const chunks = chunk(messages, 1);
-
-  for (const chunk of chunks) {
-    const _threads = await prisma.thread.findMany({
-      where: {
-        id: { in: chunk.map((m) => m.threadId).filter((id) => !threads[id]) },
-      },
-      include: {
-        messages: true,
-      },
-    });
-
-    for (const thread of _threads) {
-      threads[thread.id] = thread;
-    }
-  }
-
   const scrape = await prisma.scrape.findUnique({
     where: {
+      userId: user!.id,
       id: scrapeId,
     },
   });
 
+  if (!scrape) {
+    throw redirect("/dashboard");
+  }
+
+  const ONE_WEEK_AGO = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
+  const url = new URL(request.url);
+  const searchParams = new URLSearchParams(url.search);
+  const page = parseInt(searchParams.get("page") ?? "1");
+  const pageSize = 10;
+
+  const where: Prisma.ThreadWhereInput = {
+    scrapeId,
+    lastMessageAt: {
+      gte: ONE_WEEK_AGO,
+    },
+    OR: [
+      {
+        isDefault: false,
+      },
+      {
+        isDefault: {
+          isSet: false,
+        },
+      },
+    ],
+  };
+
+  const totalThreads = await prisma.thread.count({
+    where,
+  });
+
+  const totalPages = Math.ceil(totalThreads / pageSize);
+
+  const threads = await prisma.thread.findMany({
+    where,
+    include: {
+      messages: true,
+    },
+    orderBy: {
+      lastMessageAt: "desc",
+    },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
+
   return {
-    threads: Object.values(threads)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .filter((thread) => !thread.isDefault),
+    threads,
     scrape,
+    totalThreads,
+    totalPages,
+    page,
+    from: (page - 1) * pageSize + 1,
+    to: (page - 1) * pageSize + pageSize,
   };
 }
 
@@ -119,10 +140,52 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
               Here are the conversations made by your customers or community on
               your website
             </Text>
+
+            <Group p={4}>
+              <IconButton
+                size={"sm"}
+                variant={"subtle"}
+                disabled={loaderData.page === 1}
+              >
+                <Link
+                  to={
+                    loaderData.page > 1
+                      ? `/conversations?page=${loaderData.page - 1}`
+                      : "#"
+                  }
+                >
+                  <TbChevronLeft />
+                </Link>
+              </IconButton>
+              <Group flex={1} justifyContent={"center"} gap={4} fontSize={"sm"}>
+                <Text>
+                  {loaderData.from} - {loaderData.to}
+                </Text>
+                <Text>
+                  {loaderData.page} / {loaderData.totalPages}
+                </Text>
+              </Group>
+              <IconButton
+                size={"sm"}
+                variant={"subtle"}
+                disabled={loaderData.page === loaderData.totalPages}
+              >
+                <Link
+                  to={
+                    loaderData.page < loaderData.totalPages
+                      ? `/conversations?page=${loaderData.page + 1}`
+                      : "#"
+                  }
+                >
+                  <TbChevronRight />
+                </Link>
+              </IconButton>
+            </Group>
+
             {loaderData.threads.map((thread) => (
               <Stack
                 key={thread.id}
-                borderBottom={"1px solid"}
+                borderTop={"1px solid"}
                 borderColor="brand.outline"
                 px={4}
                 py={2}
@@ -132,8 +195,8 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                   selectedThread?.id === thread.id ? "brand.gray.50" : undefined
                 }
                 _hover={{ bg: "brand.gray.50" }}
-                _first={{
-                  borderTop: "1px solid",
+                _last={{
+                  borderBottom: "1px solid",
                   borderColor: "brand.outline",
                 }}
                 onClick={() => setSelectedThread(thread)}
