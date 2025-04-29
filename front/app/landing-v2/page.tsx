@@ -2,7 +2,7 @@ import { useMemo, useState, type PropsWithChildren } from "react";
 import cn from "@meltdownjs/cn";
 import "../tailwind.css";
 import "../fonts.css";
-import { TbArrowRight, TbLoader2, TbMessage } from "react-icons/tb";
+import { TbArrowRight, TbBrandDiscord, TbLoader2, TbMessage } from "react-icons/tb";
 import { useOpenScrape } from "~/landing/use-open-scrape";
 import { prisma } from "libs/prisma";
 import type { Route } from "./+types/page";
@@ -1251,6 +1251,11 @@ function Footer() {
               <li>
                 <a href="https://x.com/pramodk73">
                   <img src="/new-landing/x.png" alt="X" className="w-4 h-4" />
+                </a>
+              </li>
+              <li>
+                <a href="https://discord.gg/zW3YmCRJkC">
+                  <TbBrandDiscord/>
                 </a>
               </li>
             </ul>
