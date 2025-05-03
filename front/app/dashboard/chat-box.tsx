@@ -8,6 +8,7 @@ import {
   Icon,
   IconButton,
   Link,
+  Separator,
   Skeleton,
   Textarea,
 } from "@chakra-ui/react";
@@ -17,6 +18,7 @@ import { useTheme } from "next-themes";
 import type {
   Message,
   MessageSourceLink,
+  MessageRating,
   Scrape,
   Thread,
   WidgetSize,
@@ -33,6 +35,8 @@ import {
   TbRobotFace,
   TbTrash,
   TbPointer,
+  TbThumbUp,
+  TbThumbDown,
 } from "react-icons/tb";
 import { useScrapeChat, type AskStage } from "~/widget/use-chat";
 import { MarkdownProse } from "~/widget/markdown-prose";
@@ -81,23 +85,13 @@ function ChatInput({
         }
       };
 
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === "Enter" && !inputRef.current?.matches(":focus")) {
-          inputRef.current?.focus();
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      };
-
       if (!embed) {
         inputRef.current?.focus();
       }
 
       window.addEventListener("message", handleOnMessage);
-      window.addEventListener("keydown", handleKeyDown);
       return () => {
         window.removeEventListener("message", handleOnMessage);
-        window.removeEventListener("keydown", handleKeyDown);
       };
     },
     [embed]
@@ -247,10 +241,12 @@ function AssistantMessage({
   content,
   links,
   pinned,
+  rating,
   onPin,
   onUnpin,
   onDelete,
   onRefresh,
+  onRate,
   size,
   disabled,
   showScore,
@@ -258,10 +254,12 @@ function AssistantMessage({
   content: string;
   links: MessageSourceLink[];
   pinned: boolean;
+  rating: MessageRating | null;
   onPin: () => void;
   onUnpin: () => void;
   onDelete: () => void;
   onRefresh: () => void;
+  onRate: (rating: MessageRating) => void;
   size?: WidgetSize;
   disabled?: boolean;
   showScore?: boolean;
@@ -271,6 +269,16 @@ function AssistantMessage({
     const score = Math.max(...links.map((l) => l.score ?? 0), 0);
     return [citation.citedLinks, citation.content, score];
   }, [links]);
+  const [currentRating, setCurrentRating] = useState<MessageRating | null>(
+    rating
+  );
+
+  function handleRate(rating: MessageRating) {
+    setCurrentRating(rating);
+    if (rating !== currentRating) {
+      onRate(rating);
+    }
+  }
 
   return (
     <Stack>
@@ -318,6 +326,33 @@ function AssistantMessage({
               <TbRefresh />
             </IconButton>
           </Tooltip>
+
+          <Separator orientation="vertical" h="50%" mx={2} />
+
+          <Tooltip content="Helpful" showArrow>
+            <IconButton
+              size={"xs"}
+              rounded={"full"}
+              variant={currentRating === "up" ? "solid" : "subtle"}
+              onClick={() => handleRate("up")}
+              disabled={disabled}
+            >
+              <TbThumbUp />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip content="Not helpful" showArrow>
+            <IconButton
+              size={"xs"}
+              rounded={"full"}
+              variant={currentRating === "down" ? "solid" : "subtle"}
+              onClick={() => handleRate("down")}
+              disabled={disabled}
+            >
+              <TbThumbDown />
+            </IconButton>
+          </Tooltip>
+
           {showScore && (
             <Tooltip content="Score of this message" showArrow>
               <Badge colorPalette={getScoreColor(score)} variant={"surface"}>
@@ -759,6 +794,7 @@ export default function ScrapeWidget({
   onUnpin,
   onErase,
   onDelete,
+  onRate,
   showScore,
   embed,
 }: {
@@ -771,6 +807,7 @@ export default function ScrapeWidget({
   onUnpin: (id: string) => void;
   onErase: () => void;
   onDelete: (ids: string[]) => void;
+  onRate: (id: string, rating: MessageRating) => void;
   showScore?: boolean;
   embed?: boolean;
 }) {
@@ -935,6 +972,7 @@ export default function ScrapeWidget({
                       content={message.content}
                       links={message.links}
                       pinned={chat.allMessages[index - 1]?.pinned}
+                      rating={message.rating}
                       onPin={() => handlePin(chat.allMessages[index - 1]?.id)}
                       disabled={readOnly}
                       showScore={showScore}
@@ -953,6 +991,7 @@ export default function ScrapeWidget({
                           message.id
                         )
                       }
+                      onRate={(rating) => onRate(message.id, rating)}
                     />
                   )}
                   {(chat.askStage === "asked" ||
