@@ -92,6 +92,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       "67c0a28c5b075f0bb35e5366",
       "67bca5b7b57f15a3a6f8eac6",
       "67dbfc7258ed87c571a04b83",
+      "67e312247a822a2303f2b8a7",
     ];
 
     const shouldTrack = trackingExcludedScrapeIds.every(

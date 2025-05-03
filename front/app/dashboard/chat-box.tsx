@@ -238,6 +238,7 @@ function UserMessage({ content }: { content: string }) {
 }
 
 function AssistantMessage({
+  id,
   content,
   links,
   pinned,
@@ -251,6 +252,7 @@ function AssistantMessage({
   disabled,
   showScore,
 }: {
+  id: string;
   content: string;
   links: MessageSourceLink[];
   pinned: boolean;
@@ -276,6 +278,7 @@ function AssistantMessage({
   function handleRate(rating: MessageRating) {
     setCurrentRating(rating);
     if (rating !== currentRating) {
+      track("chat_rate", { rating, messageId: id });
       onRate(rating);
     }
   }
@@ -968,6 +971,7 @@ export default function ScrapeWidget({
                     <UserMessage content={message.content} />
                   ) : (
                     <AssistantMessage
+                      id={message.id}
                       size={scrape.widgetConfig?.size}
                       content={message.content}
                       links={message.links}
