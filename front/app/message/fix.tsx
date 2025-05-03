@@ -107,6 +107,13 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === "save") {
     const token = createToken(user!.id);
 
+    const title = formData.get("title");
+    const content = formData.get("content");
+
+    if (!title || !content) {
+      return Response.json({ error: "Title and content are required" });
+    }
+
     const message = await prisma.message.findUnique({
       where: {
         id: params.messageId,
@@ -118,15 +125,16 @@ export async function action({ request, params }: Route.ActionArgs) {
     }
 
     const markdown = `Updated on ${new Date().toLocaleDateString()}:
+## ${title}
 
-  ${formData.get("content")}`;
+${content}`;
 
     const response = await fetch(
       `${process.env.VITE_SERVER_URL}/resource/${message.scrapeId}`,
       {
         method: "POST",
         body: JSON.stringify({
-          title: formData.get("title"),
+          title,
           markdown,
           defaultGroupTitle: "Answer corrections",
           knowledgeGroupType: "answer_corrections",

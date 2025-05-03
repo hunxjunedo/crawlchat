@@ -21,7 +21,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
     return {
       model: "claude-3-5-sonnet-20241022",
       apiKey: process.env.ANTHROPIC_API_KEY!,
-      ragTopN: 1,
+      ragTopN: 2,
       baseURL: "https://api.anthropic.com/v1",
       creditsPerMessage: 4,
     };
@@ -30,7 +30,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
     return {
       model: "claude-3-7-sonnet-20250219",
       apiKey: process.env.ANTHROPIC_API_KEY!,
-      ragTopN: 1,
+      ragTopN: 2,
       baseURL: "https://api.anthropic.com/v1",
       creditsPerMessage: 4,
     };
