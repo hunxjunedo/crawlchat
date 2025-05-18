@@ -141,10 +141,6 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
           value: "never",
         },
         {
-          label: "Every minute",
-          value: "minutely",
-        },
-        {
           label: "Every hour",
           value: "hourly",
         },

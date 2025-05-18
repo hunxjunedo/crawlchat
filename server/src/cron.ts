@@ -47,14 +47,22 @@ async function updateKnowledgeBase() {
   const knowledgeGroups = await prisma.knowledgeGroup.findMany({
     where: {
       nextUpdateAt: {
-        // lte: new Date(),
-        isSet: true,
+        lte: new Date(),
       },
     },
   });
 
   for (const knowledgeGroup of knowledgeGroups) {
-    await updateKnowledgeGroup(knowledgeGroup.id);
+    if (["processing"].includes(knowledgeGroup.status)) {
+      continue;
+    }
+
+    try {
+      await updateKnowledgeGroup(knowledgeGroup.id);
+    } catch (error) {
+      console.log(`Error updating knowledge group ${knowledgeGroup.id}`);
+      console.error(error);
+    }
   }
 
   exit(0);
