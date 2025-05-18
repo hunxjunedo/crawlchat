@@ -52,6 +52,8 @@ async function updateKnowledgeBase() {
     },
   });
 
+  console.log(`Found ${knowledgeGroups.length} knowledge groups to update`);
+
   for (const knowledgeGroup of knowledgeGroups) {
     if (["processing"].includes(knowledgeGroup.status)) {
       continue;
