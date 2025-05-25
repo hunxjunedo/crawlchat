@@ -55,7 +55,17 @@ export function meta({ data }: Route.MetaArgs) {
   return [
     {
       title,
+    },
+    {
       description,
+    },
+    {
+      property: "og:title",
+      content: title,
+    },
+    {
+      property: "og:description",
+      content: description,
     },
   ];
 }
