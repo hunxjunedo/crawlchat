@@ -501,7 +501,7 @@ app.post("/resource/:scrapeId", authenticate, async (req, res) => {
   }
 
   let knowledgeGroup = await prisma.knowledgeGroup.findFirst({
-    where: { userId, type: knowledgeGroupType },
+    where: { userId, scrapeId, type: knowledgeGroupType },
   });
 
   if (!knowledgeGroup) {
