@@ -601,7 +601,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     .filter(Boolean)
     .join("\n\n");
 
-  const llmConfig = getConfig(scrape.llmModel);
+  const llmConfig = getConfig("gpt_4o_mini");
 
   const flow = makeFlow(
     scrape.id,
