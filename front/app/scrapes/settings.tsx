@@ -116,8 +116,14 @@ export async function action({ request }: Route.ActionArgs) {
     update.resolveNoLink = formData.get("resolveNoLink") as string;
   }
   if (formData.has("richBlocksJsonString")) {
+    const blocks = JSON.parse(
+      formData.get("richBlocksJsonString") as string
+    ) as RichBlockConfig[];
     update.richBlocksConfig = {
-      blocks: JSON.parse(formData.get("richBlocksJsonString") as string),
+      blocks: blocks.map((b) => ({
+        ...b,
+        prompt: makeRichBlockPrompt(b),
+      })) as any,
     };
   }
 
@@ -203,7 +209,7 @@ function RichBlockDrawer({
   const contentRef = useRef<HTMLDivElement>(null);
 
   function handleClose() {
-    onClose({ ...blockConfig, prompt: makeRichBlockPrompt(blockConfig) });
+    onClose(blockConfig);
   }
 
   return (
