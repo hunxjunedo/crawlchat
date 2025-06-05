@@ -85,6 +85,18 @@ enum LlmModel {
   o3_mini
   sonnet_3_7
   sonnet_3_5
+  gemini_2_5_flash
+}
+
+type RichBlockConfig {
+  name                String
+  key                 String
+  payload             Json
+  prompt              String
+}
+
+type RichBlocksConfig {
+  blocks              RichBlockConfig[]
 }
 
 model Scrape {
@@ -112,6 +124,7 @@ model Scrape {
 
   analytics             ScrapeAnalytics?
   llmModel              LlmModel?
+  richBlocksConfig      RichBlocksConfig?
 
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

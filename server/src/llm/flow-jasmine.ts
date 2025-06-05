@@ -1,4 +1,4 @@
-import { prisma } from "libs/prisma";
+import { prisma, RichBlockConfig } from "libs/prisma";
 import { makeIndexer } from "../indexer/factory";
 import {
   FlowMessage,
@@ -8,6 +8,8 @@ import {
 } from "./agentic";
 import { Flow } from "./flow";
 import { z } from "zod";
+import { richMessageBlocks } from "libs/rich-message-block";
+import zodToJsonSchema from "zod-to-json-schema";
 
 export type RAGAgentCustomMessage = {
   result?: {
@@ -80,9 +82,34 @@ export function makeFlow(
     baseURL?: string;
     apiKey?: string;
     topN?: number;
+    richBlocks?: RichBlockConfig[];
   }
 ) {
   const ragTool = makeRagTool(scrapeId, indexerKey, options);
+
+  const enabledRichBlocks = options?.richBlocks
+    ? options.richBlocks.map((rb) => ({
+        key: rb.key,
+        schema: richMessageBlocks[rb.key].schema,
+        usage: rb.prompt,
+      }))
+    : [];
+
+  const richBlocksPrompt = multiLinePrompt([
+    "You can use rich message blocks as code language in the answer.",
+    "Use the details only found in the context. Don't hallucinate.",
+    "This is how you use a block: ```json|<key>\n<json>\n``` Example: ```json|cta\n{...}\n```",
+    "Available blocks are:",
+
+    JSON.stringify(
+      enabledRichBlocks.map((block) => ({
+        ...block,
+        schema: zodToJsonSchema(block.schema as any),
+      })),
+      null,
+      2
+    ),
+  ]);
 
   const ragAgent = new SimpleAgent<RAGAgentCustomMessage>({
     id: "rag-agent",
@@ -118,6 +145,9 @@ export function makeFlow(
       "Cite only for the sources that are used to answer the query.",
       "Cite every fact that is used in the answer.",
       "Pick most relevant sources and cite them.",
+
+      enabledRichBlocks.length > 0 ? richBlocksPrompt : "",
+
       "Don't ask more than 3 questions for the entire answering flow.",
       systemPrompt,
     ]),
