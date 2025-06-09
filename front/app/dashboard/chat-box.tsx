@@ -43,6 +43,7 @@ import {
   TbX,
   TbTicket,
   TbArrowRight,
+  TbExternalLink,
 } from "react-icons/tb";
 import { useScrapeChat, type AskStage } from "~/widget/use-chat";
 import { MarkdownProse } from "~/widget/markdown-prose";
@@ -704,6 +705,7 @@ function Toolbar({
   onScreenChange,
   disabled,
   overallScore,
+  ticketNumber,
 }: {
   threadId: string;
   scrape: Scrape;
@@ -714,6 +716,7 @@ function Toolbar({
   onScreenChange: (screen: "chat" | "mcp" | "ticket-create") => void;
   disabled: boolean;
   overallScore?: number;
+  ticketNumber?: number;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
@@ -789,6 +792,22 @@ function Toolbar({
         </Group>
       </Group>
       <Group>
+        {ticketNumber && (
+          <Tooltip content="Go to ticket" showArrow>
+            <IconButton
+              size={"xs"}
+              rounded={"full"}
+              variant={"subtle"}
+              position={"relative"}
+              colorPalette={"brand"}
+              asChild
+            >
+              <a href={`/ticket/${ticketNumber}`} target="_blank">
+                <TbTicket />
+              </a>
+            </IconButton>
+          </Tooltip>
+        )}
         {pinnedCount > 0 && (
           <MenuRoot
             positioning={{ placement: "bottom-end" }}
@@ -1258,6 +1277,7 @@ export default function ScrapeWidget({
           scrape={scrape}
           disabled={readOnly}
           overallScore={showScore ? overallScore : undefined}
+          ticketNumber={thread.ticketNumber ?? undefined}
         />
         <Stack flex="1" overflow={"auto"} gap={0}>
           {screen === "chat" && (

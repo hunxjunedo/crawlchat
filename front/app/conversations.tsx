@@ -15,6 +15,7 @@ import {
   TbChevronRight,
   TbMessage,
   TbMessages,
+  TbTicket,
 } from "react-icons/tb";
 import type { Route } from "./+types/conversations";
 import { getAuthUser } from "./auth/middleware";
@@ -209,6 +210,13 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                     </Text>
                   </Group>
                   <Group>
+                    {thread.ticketStatus && (
+                      <Tooltip content="Ticket created" showArrow>
+                        <Badge colorPalette={"brand"} variant={"surface"}>
+                          <TbTicket />
+                        </Badge>
+                      </Tooltip>
+                    )}
                     <Tooltip content="Avg score of all the messages" showArrow>
                       <Badge
                         colorPalette={getScoreColor(
