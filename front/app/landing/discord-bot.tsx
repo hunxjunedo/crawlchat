@@ -16,9 +16,9 @@ import { TbArrowRight, TbBrandDiscordFilled, TbCheckbox } from "react-icons/tb";
 export function meta() {
   return [
     {
-      title: "CrawlChatDiscord Bot",
-      description:
-        "CrawlChat is an AI chatbot that can answer your community queries with the knowledge base made on CrawlChat.",
+      title: "CrawlChat Discord Bot",
+      content:
+        "Make AI chatbot from your documentation that handles your support queries. Embed it in your website, Discord, or Slack.",
     },
   ];
 }

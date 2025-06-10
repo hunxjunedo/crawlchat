@@ -21,6 +21,11 @@ export function meta() {
     {
       title: "CrawlChat",
     },
+    {
+      name: "description",
+      content:
+        "Make AI chatbot from your documentation that handles your support queries. Embed it in your website, Discord, or Slack.",
+    },
   ];
 }
 

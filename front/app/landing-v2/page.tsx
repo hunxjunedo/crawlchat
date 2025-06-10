@@ -1,5 +1,4 @@
 import {
-  useMemo,
   useState,
   type PropsWithChildren,
   type ReactNode,
@@ -16,7 +15,6 @@ import {
   TbClock,
   TbDatabase,
   TbFile,
-  TbLoader2,
   TbMessage,
   TbRobotFace,
   TbScoreboard,
@@ -24,7 +22,6 @@ import {
   TbSpider,
   TbWorld,
 } from "react-icons/tb";
-import { useOpenScrape } from "~/landing/use-open-scrape";
 import { prisma } from "libs/prisma";
 import type { Route } from "./+types/page";
 import { Box, Text } from "@chakra-ui/react";
@@ -32,8 +29,12 @@ import { Box, Text } from "@chakra-ui/react";
 export function meta() {
   return [
     {
-      title: "CrawlChat - Your documentation with AI!",
-      description: "AI Chatbot for your knowledge base and documentation",
+      title: "CrawlChat - AI Chatbot for your documentation and support",
+    },
+    {
+      name: "description",
+      content:
+        "Make AI chatbot from your documentation that handles your support queries. Embed it in your website, Discord, or Slack.",
     },
   ];
 }
@@ -138,124 +139,6 @@ function Button({
     >
       {children}
     </a>
-  );
-}
-
-function HeroScrapeButton({
-  children,
-  disabled,
-  type,
-  onClick,
-  loading,
-}: PropsWithChildren<{
-  disabled?: boolean;
-  type?: "submit" | "reset" | "button" | undefined;
-  onClick?: () => void;
-  loading?: boolean;
-}>) {
-  return (
-    <button
-      className={cn(
-        "bg-brand text-canvas px-6 py-4 rounded-2xl flex-shrink-0 font-medium flex items-center gap-2",
-        disabled && "opacity-50"
-      )}
-      disabled={disabled}
-      type={type}
-      onClick={onClick}
-    >
-      {children}
-      {loading && <TbLoader2 className="animate-spin" />}
-    </button>
-  );
-}
-
-function Scrape() {
-  const { scrapeFetcher, scraping, stage, roomId, disable, openChat } =
-    useOpenScrape();
-
-  function getNote() {
-    if (scrapeFetcher.data?.error) {
-      return scrapeFetcher.data.error;
-    }
-
-    if (stage === "scraping") {
-      return `Scraping ${scraping?.scrapedCount ?? 0} / 25`;
-    }
-
-    return "Fetches 25 pages and makes it LLM ready!";
-  }
-
-  return (
-    <div>
-      <div className="flex items-center gap-2 justify-center max-w-[500px] mx-auto mb-8">
-        <scrapeFetcher.Form
-          className="w-full"
-          method="post"
-          action="/open-scrape"
-          style={{ width: "100%" }}
-        >
-          <div className="border border-outline rounded-2xl p-1 shadow-lg flex items-center gap-2 pl-6 text-xl w-full bg-canvas">
-            <input type="hidden" name="intent" value="scrape" />
-            <input type="hidden" name="roomId" value={roomId} />
-            <input
-              name="url"
-              required
-              pattern="https?://.*"
-              type="text"
-              className="w-full bg-transparent outline-none"
-              placeholder="Enter your docs URL"
-              disabled={stage !== "idle"}
-            />
-            {stage !== "saved" && (
-              <HeroScrapeButton
-                disabled={disable}
-                type="submit"
-                loading={disable}
-              >
-                Try it
-              </HeroScrapeButton>
-            )}
-            {stage === "saved" && (
-              <HeroScrapeButton type="button" onClick={openChat}>
-                Chat
-                <TbMessage />
-              </HeroScrapeButton>
-            )}
-          </div>
-        </scrapeFetcher.Form>
-      </div>
-
-      <p
-        className={cn(
-          "text-center text-sm opacity-40",
-          scrapeFetcher.data?.error && "text-red-500"
-        )}
-      >
-        {getNote()}
-      </p>
-    </div>
-  );
-}
-
-function DemoWindow() {
-  return (
-    <div className="max-w-[900px] w-full mx-auto border border-outline shadow-md bg-ash mt-16 px-4 py-3 rounded-2xl">
-      <div>
-        <div className="flex items-center gap-1 mb-3">
-          <div className="w-[10px] h-[10px] bg-red-500 rounded-full" />
-          <div className="w-[10px] h-[10px] bg-yellow-500 rounded-full" />
-          <div className="w-[10px] h-[10px] bg-green-500 rounded-full" />
-        </div>
-      </div>
-      <div className="bg-canvas rounded-lg aspect-[960/600] overflow-hidden">
-        <video
-          src="https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/crawlchat-hero.mp4"
-          autoPlay
-          muted
-          loop
-        />
-      </div>
-    </div>
   );
 }
 
@@ -383,56 +266,6 @@ function HeadingDescription({ children }: PropsWithChildren) {
     <p className="text-center text-xl font-medium max-w-[760px] mx-auto py-8 opacity-60">
       {children}
     </p>
-  );
-}
-
-function WorksBox({
-  title,
-  description,
-  children,
-}: { title: string; description: string } & PropsWithChildren) {
-  return (
-    <div className="p-6 rounded-2xl bg-canvas shadow-md flex-1 pb-10">
-      <h4 className="text-2xl font-bold mb-2 font-radio-grotesk">{title}</h4>
-      <p className="opacity-60 mb-8 leading-tight">{description}</p>
-
-      {children}
-    </div>
-  );
-}
-
-function WorksChip({ label, icon }: { label: string; icon: string }) {
-  return (
-    <div className="flex items-center gap-2 p-1 px-2 shadow rounded-md w-fit">
-      <img src={icon} alt={label} className="w-4 h-4" />
-      <div className="text-xs font-medium text-brand">{label}</div>
-    </div>
-  );
-}
-
-function WorksChipRow({ children }: PropsWithChildren) {
-  return (
-    <div className="flex items-center gap-2 justify-center">{children}</div>
-  );
-}
-
-function IntegrateChip({ label, icon }: { label?: string; icon: string }) {
-  return (
-    <div className="flex items-center p-1 px-2 shadow rounded-md w-fit gap-1">
-      <img src={icon} alt={label} className="w-4 h-4" />
-      {label && <div className="text-sm font-medium text-brand">{label}</div>}
-    </div>
-  );
-}
-
-function CustomiseIcon({ src, rotate }: { src: string; rotate: number }) {
-  return (
-    <div
-      className="flex items-center justify-center w-10 h-10 rounded-lg shadow-md border border-outline"
-      style={{ transform: `rotate(${rotate}deg)` }}
-    >
-      <img src={src} alt="Grok" className="max-w-[24px]" />
-    </div>
   );
 }
 
@@ -627,166 +460,6 @@ function Works() {
           </span>{" "}
           as well.
         </WorksStep>
-      </div>
-    </div>
-  );
-}
-
-function Tabs({ children }: PropsWithChildren) {
-  return (
-    <div className="flex gap-2 items-center shadow-md w-fit p-2 rounded-2xl border border-outline">
-      {children}
-    </div>
-  );
-}
-
-function Tab({
-  children,
-  active,
-  onClick,
-}: PropsWithChildren & { active?: boolean; onClick?: () => void }) {
-  return (
-    <div
-      className={cn(
-        "px-4 py-1 rounded-xl font-bold opacity-60 text-lg font-radio-grotesk border border-transparent hover:border-outline cursor-pointer",
-        active && "bg-canvas shadow opacity-100 hover:border-transparent"
-      )}
-      onClick={onClick}
-    >
-      {children}
-    </div>
-  );
-}
-
-function ImportKnowledgePreview({
-  title,
-  description,
-  img,
-}: {
-  title: string;
-  description: string;
-  img: string;
-}) {
-  return (
-    <div className="w-full bg-ash-subtle rounded-2xl bg-canvas bg-opacity-50 flex flex-col gap-4 p-4 border border-outline">
-      <div className="flex flex-col gap-2">
-        <p className="text-2xl font-bold">{title}</p>
-        <p className="font-medium opacity-50">{description}</p>
-      </div>
-      <div className="w-full flex-1 bg-ash rounded-xl aspect-video">
-        <img
-          src={img}
-          alt={title}
-          className="w-full h-full object-cover rounded-md border border-outline"
-        />
-      </div>
-    </div>
-  );
-}
-
-function ImportKnowledge() {
-  const [activeTab, setActiveTab] = useState("groups");
-  const tabs = useMemo<
-    Record<
-      string,
-      {
-        title: string;
-        description: string;
-        img: string;
-      }
-    >
-  >(
-    () => ({
-      groups: {
-        title: "Groups",
-        description:
-          "Knowledge bases are maintained as groups for easy maintenance. You can set up auto updates on the groups & get analytics on each group.",
-        img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/groups-gif.gif",
-      },
-      scrape: {
-        title: "Scrape",
-        description:
-          "Scrape your docs website to get the knowledge base ready for your community. You can scrape your docs website to get the knowledge base ready for your community.",
-        img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/scrape-gif.gif",
-      },
-      docusaurus: {
-        title: "Docusaurus",
-        description:
-          "Quickly import your Docusaurus based docs to CrawlChat. Just give your docs URL and CrawlChat will load the docs as knowledge base and keep it updated automatically.",
-        img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/scrape-gif.gif",
-      },
-    }),
-    []
-  );
-
-  return (
-    <div className="mt-32">
-      <Heading>
-        Knowledge bases for quick <HeadingHighlight>import</HeadingHighlight>
-      </Heading>
-
-      <HeadingDescription>
-        CrawlChat has quick to import options for multiple sources that cover
-        most of your use cases.
-      </HeadingDescription>
-
-      <div className="flex flex-col gap-6">
-        <div className="flex justify-center">
-          <Tabs>
-            <Tab
-              active={activeTab === "groups"}
-              onClick={() => setActiveTab("groups")}
-            >
-              Groups
-            </Tab>
-            <Tab
-              active={activeTab === "scrape"}
-              onClick={() => setActiveTab("scrape")}
-            >
-              Scrape
-            </Tab>
-            <Tab
-              active={activeTab === "docusaurus"}
-              onClick={() => setActiveTab("docusaurus")}
-            >
-              Docusaurus
-            </Tab>
-          </Tabs>
-        </div>
-
-        <div className={cn("hidden", activeTab === "groups" && "block")}>
-          <ImportKnowledgePreview
-            title={"Groups"}
-            description={
-              "Knowledge bases are maintained as groups for easy maintenance. You can set up auto updates on the groups & get analytics on each group."
-            }
-            img={
-              "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/groups-gif.gif"
-            }
-          />
-        </div>
-        <div className={cn("hidden", activeTab === "scrape" && "block")}>
-          <ImportKnowledgePreview
-            title={"Scrape"}
-            description={
-              "Scrape your docs website to get the knowledge base ready for your community. You can scrape your docs website to get the knowledge base ready for your community."
-            }
-            img={
-              "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/scrape-gif.gif"
-            }
-          />
-        </div>
-        <div className={cn("hidden", activeTab === "docusaurus" && "block")}>
-          <ImportKnowledgePreview
-            title={"Docusaurus"}
-            description={
-              "Scrape your docs website to get the knowledge base ready for your community. You can scrape your docs website to get the knowledge base ready for your community."
-            }
-            img={
-              "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/docusaurus-gif.gif"
-            }
-          />
-        </div>
       </div>
     </div>
   );
