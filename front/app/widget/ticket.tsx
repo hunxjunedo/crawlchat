@@ -3,6 +3,7 @@ import type { Prisma, Scrape, TicketAuthorRole } from "libs/prisma";
 import type { Route } from "./+types/ticket";
 import {
   Badge,
+  Box,
   Group,
   Heading,
   Image,
@@ -11,7 +12,13 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { TbAlertCircle, TbCheck, TbMessage, TbUser } from "react-icons/tb";
+import {
+  TbAlertCircle,
+  TbArrowRight,
+  TbCheck,
+  TbMessage,
+  TbUser,
+} from "react-icons/tb";
 import { RiChatVoiceAiFill } from "react-icons/ri";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFetcher } from "react-router";
@@ -307,15 +314,43 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
             />
           ))}
           {loaderData.thread.ticketStatus === "closed" && (
-            <Group px={[0, 10]} opacity={0.5}>
-              <TbCheck />
-              <Text fontSize={"sm"}>
-                This ticket has been resolved and closed{" "}
-                <Text as="span" fontWeight={"medium"}>
-                  {moment(loaderData.thread.ticketClosedAt).fromNow()}
+            <Stack gap={4}>
+              {loaderData.thread.scrape.resolveYesConfig && (
+                <Stack
+                  border={"2px solid"}
+                  borderColor={"brand.outline"}
+                  rounded={"md"}
+                  p={4}
+                >
+                  <Text fontWeight={"bold"}>
+                    {loaderData.thread.scrape.resolveYesConfig.title}
+                  </Text>
+                  <Text>
+                    {loaderData.thread.scrape.resolveYesConfig.description}
+                  </Text>
+                  <Box>
+                    <Button asChild>
+                      <a
+                        href={loaderData.thread.scrape.resolveYesConfig.link}
+                        target="_blank"
+                      >
+                        {loaderData.thread.scrape.resolveYesConfig.btnLabel}
+                        <TbArrowRight />
+                      </a>
+                    </Button>
+                  </Box>
+                </Stack>
+              )}
+              <Group px={[0, 10]} opacity={0.5}>
+                <TbCheck />
+                <Text fontSize={"sm"}>
+                  This ticket has been resolved and closed{" "}
+                  <Text as="span" fontWeight={"medium"}>
+                    {moment(loaderData.thread.ticketClosedAt).fromNow()}
+                  </Text>
                 </Text>
-              </Text>
-            </Group>
+              </Group>
+            </Stack>
           )}
         </Stack>
 
