@@ -467,7 +467,7 @@ export function SideMenu({
       </Stack>
 
       <Stack p={4} gap={4}>
-        {scrapeId && <SetupProgress scrapeId={scrapeId} />}
+        {/* {scrapeId && <SetupProgress scrapeId={scrapeId} />} */}
         <Stack bg="brand.gray.100" rounded="md" px={3} py={2}>
           <CreditProgress
             title="Messages"
