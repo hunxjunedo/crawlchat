@@ -153,9 +153,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         )}
         {isLandingPage && (
           <script
-            src="/embed.js"
+            src="https://crawlchat.app/embed.js"
             id="crawlchat-script"
-            data-id="67d29ce750df5f4d86e1db33"
+            data-id="67dbfc7258ed87c571a04b83"
             data-ask-ai="true"
             data-ask-ai-background-color="#7b2cbf"
             data-ask-ai-color="#ffffff"
