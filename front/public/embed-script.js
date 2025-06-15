@@ -111,7 +111,8 @@ class CrawlChatEmbed {
   }
 
   async showAskAIButton() {
-    const widgetConfig = await this.getWidgetConfig();
+    // const widgetConfig = await this.getWidgetConfig();
+    const widgetConfig = {}
 
     const script = document.getElementById(this.scriptId);
 
