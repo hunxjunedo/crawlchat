@@ -18,6 +18,7 @@ import {
   TbBook,
   TbBrandDiscord,
   TbBrandGithub,
+  TbFile,
   TbPlus,
   TbRefresh,
   TbWorld,
@@ -107,6 +108,9 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
       } else if (group.type === "github_issues") {
         icon = <TbBrandGithub />;
         typeText = "GH Issues";
+      } else if (group.type === "upload") {
+        icon = <TbFile />;
+        typeText = "File";
       }
 
       const totalCited = Object.values(loaderData.citationCounts).reduce(

@@ -1,9 +1,4 @@
-import {
-  useState,
-  type PropsWithChildren,
-  type ReactElement,
-  type ReactNode,
-} from "react";
+import { useState, type PropsWithChildren, type ReactNode } from "react";
 import cn from "@meltdownjs/cn";
 import "../tailwind.css";
 import "../fonts.css";
@@ -18,7 +13,6 @@ import {
   TbDatabase,
   TbFile,
   TbMessage,
-  TbPlug,
   TbPlugConnected,
   TbRobotFace,
   TbScoreboard,
@@ -29,7 +23,6 @@ import {
 import { prisma } from "libs/prisma";
 import type { Route } from "./+types/page";
 import { Box, Text } from "@chakra-ui/react";
-import type { IconType } from "react-icons/lib";
 
 export function meta() {
   return [
@@ -381,86 +374,6 @@ function Works() {
           </span>{" "}
           as well.
         </WorksStep>
-      </div>
-    </div>
-  );
-}
-
-function IntegrationCard({
-  flex,
-  title,
-  description,
-  img,
-}: {
-  flex: number;
-  title: string;
-  description: string;
-  img: string;
-}) {
-  return (
-    <div
-      className={
-        "p-6 shadow-md border border-outline rounded-xl bg-canvas flex flex-col gap-6"
-      }
-      style={{ flex: flex }}
-    >
-      <div className="aspect-video bg-ash rounded-lg">
-        <img
-          src={img}
-          alt={title}
-          className="w-full h-full object-cover rounded-md"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <h3 className="text-2xl font-bold font-radio-grotesk">{title}</h3>
-        <p className="opacity-50 font-medium text-lg">{description}</p>
-      </div>
-    </div>
-  );
-}
-
-function Integrations() {
-  return (
-    <div className="mt-32">
-      <Heading>
-        Easy <HeadingHighlight>integrations</HeadingHighlight>
-      </Heading>
-
-      <HeadingDescription>
-        CrawlChat provides multiple options to bring your docs to your community
-        platforms easily. It takes only few minutes to integrate them
-      </HeadingDescription>
-
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          <IntegrationCard
-            flex={1}
-            title="Ask AI button"
-            description="A drop in embed code to add the Ask AI button on your docs website. All the visitors to your docs can now quickly ask their question."
-            img="/new-landing/integration-ask-ai.png"
-          />
-          <IntegrationCard
-            flex={1}
-            title="Discord bot"
-            description="CrawlChat focuses on giving a wholesome integration experience by providing Discord bot that can answer questions from your community by just tagging it."
-            img="/new-landing/integration-discord.png"
-          />
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-6">
-          <IntegrationCard
-            flex={1}
-            title="Slack bot"
-            description="CrawlChat focuses on giving a wholesome integration experience by providing Slack bot that can answer questions from your community by just tagging it."
-            img="/new-landing/integration-slack.png"
-          />
-          <IntegrationCard
-            flex={1}
-            title="MCP server"
-            description="You will not be missed by the next gen developers. CrawlChat provides the MCP server out of the box."
-            img="/new-landing/integration-mcp.png"
-          />
-        </div>
       </div>
     </div>
   );
@@ -865,12 +778,13 @@ function Testimonials() {
   );
 }
 
-export function CTA({text}: {text?: string}) {
+export function CTA({ text }: { text?: string }) {
   return (
     <div className="mt-32">
       <div className="w-full bg-gradient-to-b from-canvas to-ash shadow-md rounded-2xl py-20 px-10 relative">
         <h2 className="font-radio-grotesk text-[42px] md:text-[42px] leading-[1.2] font-bold text-center max-w-[800px] mx-auto">
-          {text || "Make your documents and knowledge base be powered by AI now!"}
+          {text ||
+            "Make your documents and knowledge base be powered by AI now!"}
         </h2>
 
         <div className="flex justify-center mt-8">
@@ -1114,6 +1028,95 @@ export function LandingPage({ children }: PropsWithChildren) {
   );
 }
 
+function FlowCard({
+  title,
+  description,
+  img,
+  cols,
+  rows,
+}: {
+  title: string;
+  description: string;
+  img: string;
+  cols: number;
+  rows: number;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl bg-canvas border border-outline p-6 flex flex-col justify-between gap-4",
+        cols === 1 && "md:col-span-1",
+        cols === 2 && "md:col-span-2",
+        cols === 3 && "md:col-span-3",
+        rows === 1 && "md:row-span-1",
+        rows === 2 && "md:row-span-2",
+        rows === 3 && "md:row-span-3"
+      )}
+    >
+      <div className="flex flex-col gap-2">
+        <h3 className="text-3xl font-medium font-radio-grotesk">{title}</h3>
+        <p className="text-lg opacity-60">{description}</p>
+      </div>
+      <div>
+        <img
+          src={img}
+          alt={title}
+          className="border border-outline rounded-lg"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function Flow() {
+  return (
+    <div className="mt-32">
+      <Heading>
+        A simple <HeadingHighlight>AI first</HeadingHighlight> support workflow
+      </Heading>
+
+      <HeadingDescription>
+        CrawlChat is a simple yet powerful, AI first support system for your
+        products and services. It includes a AI chatbot and traditional support
+        ticketing system for the best support experience for your customers.
+      </HeadingDescription>
+
+      <div
+        className={cn(`grid grid-cols-1 grid-rows-[4] md:grid-cols-3 gap-6`)}
+      >
+        <FlowCard
+          title="Knowledge base with your documentation"
+          description="It all starts with turning your documentation into a knowledge base for the AI chatbot. You can just pass your online documentation URL or upload files as the knowledge base."
+          img="/new-landing/flow-knowledge.png"
+          cols={2}
+          rows={1}
+        />
+        <FlowCard
+          title="First level AI support"
+          description="Let the AI chatbot answer the basic and repetitive questions so that your support time is reduced drastically."
+          img="/new-landing/flow-chatbot.png"
+          cols={1}
+          rows={1}
+        />
+        <FlowCard
+          title="Escalete to human support"
+          description="CrawlChat has a simple yet powerful AI driven support ticket system. The chatbot will create a ticket if query is not resolved by AI."
+          img="/new-landing/flow-support-ticket.png"
+          cols={1}
+          rows={1}
+        />
+        <FlowCard
+          title="Analyse and improve"
+          description="You get a detailed report of the chatbot's performance and the knowledge base against the queries your customers ask. You can find out the knowledge gaps on the basis of the scroes CrawlChat provides and improve your docs eventually."
+          img="/new-landing/flow-analyse.png"
+          cols={2}
+          rows={1}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Landing({ loaderData }: Route.ComponentProps) {
   return (
     <LandingPage>
@@ -1142,7 +1145,7 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
       </Container>
 
       <Container>
-        <Integrations />
+        <Flow />
       </Container>
 
       <Container>
