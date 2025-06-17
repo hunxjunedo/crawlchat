@@ -136,9 +136,10 @@ export async function action({ params, request }: Route.ActionArgs) {
       thread.ticketKey &&
       thread.title
     ) {
+      let subjectPrefix = resolve ? "Ticket resolved" : "New message on ticket";
       await sendReactEmail(
         thread.ticketUserEmail,
-        `New message on ticket (#${thread.ticketNumber})`,
+        `${subjectPrefix} (#${thread.ticketNumber})`,
         <TicketUserMessageEmail
           scrapeTitle={thread.scrape.title ?? "CrawlChat"}
           ticketNumber={thread.ticketNumber}
@@ -199,7 +200,7 @@ function Nav({ scrape }: { scrape: Scrape }) {
           gap={2}
         >
           Powered by{" "}
-          <Link href="https://crawlchat.com" fontWeight={"bold"}>
+          <Link href="https://crawlchat.com">
             <RiChatVoiceAiFill />
             CrawlChat
           </Link>
@@ -334,11 +335,15 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
                 {loaderData.thread.ticketStatus!.toUpperCase()}
               </Badge>
               <Separator h="4" orientation="vertical" />
-              <Text opacity={0.5}>Opened {moment(openedAt).fromNow()}</Text>
+              <Text opacity={0.5} fontSize="sm">
+                Opened {moment(openedAt).fromNow()}
+              </Text>
               {loaderData.role === "agent" && (
                 <>
                   <Separator h="4" orientation="vertical" />
-                  <Text opacity={0.5}>{loaderData.thread.ticketUserEmail}</Text>
+                  <Text opacity={0.5} fontSize="sm">
+                    {loaderData.thread.ticketUserEmail}
+                  </Text>
                 </>
               )}
             </Group>
