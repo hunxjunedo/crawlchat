@@ -46,7 +46,7 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
 
-          <div className="prose lg:prose-xl mx-auto mt-10">
+          <div className="prose-xl mx-auto mt-10">
             <Markdown remarkPlugins={[remarkGfm]}>
               {loaderData.post.markdown}
             </Markdown>
