@@ -204,7 +204,7 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                         {item.citedNum} / {item.totalCited}
                       </Text>
                       <Progress.Root
-                        w="100px"
+                        w="50px"
                         value={item.citationPct}
                         min={0}
                         max={100}
