@@ -190,7 +190,7 @@ class CrawlChatEmbed {
     div.style.fontSize = fontSize;
 
     div.style.scale = "1";
-    div.style.boxShadow = "rgba(0, 0, 0, 0.2) 0px 2px 4px";
+    div.style.boxShadow = "rgba(0, 0, 0, 0.1) 0px 2px 4px";
 
     div.style.display = "flex";
     div.style.flexDirection = "column";
