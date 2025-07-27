@@ -38,7 +38,7 @@ export function extractCitations(
     cleanedContent = cleanedContent.replace(/!!<fetchUniqueId>!!/g, "");
   }
 
-  if (addSourcesToMessage) {
+  if (addSourcesToMessage && Object.values(citedLinks).length > 0) {
     cleanedContent +=
       "\n\nSources:\n" +
       Object.values(citedLinks)

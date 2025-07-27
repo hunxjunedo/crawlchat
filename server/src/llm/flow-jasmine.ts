@@ -128,6 +128,7 @@ export function makeFlow(
     "Cite only for the sources that are used to answer the query.",
     "Cite every fact that is used in the answer.",
     "Pick most relevant sources and cite them.",
+    "You should definitely cite sources that you used to answer the query.",
   ]);
 
   const ragAgent = new SimpleAgent<RAGAgentCustomMessage>({
