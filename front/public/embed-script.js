@@ -25,6 +25,11 @@ class CrawlChatEmbed {
   }
 
   async mount() {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = `${this.host}/embed.css`;
+    document.head.appendChild(style);
+
     const iframe = document.createElement("iframe");
     iframe.id = this.iframeId;
 
@@ -35,26 +40,12 @@ class CrawlChatEmbed {
     }
 
     iframe.src = src;
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    iframe.style.border = "none";
-    iframe.style.backgroundColor = "transparent";
-    iframe.style.background = "transparent";
     iframe.allowTransparency = "true";
-    iframe.style.opacity = "1";
     iframe.allow = "clipboard-write";
+    iframe.className = "crawlchat-embed";
 
     const div = document.createElement("div");
     div.id = this.embedDivId;
-    div.style.position = "fixed";
-    div.style.top = "0px";
-    div.style.left = "0px";
-    div.style.width = "0px";
-    div.style.height = "0px";
-    div.style.border = "none";
-    div.style.zIndex = "1000";
-    div.style.transition = `opacity ${this.transitionDuration}ms ease`;
-    div.style.opacity = "0";
 
     div.appendChild(iframe);
     document.body.appendChild(div);
@@ -68,11 +59,8 @@ class CrawlChatEmbed {
 
   show() {
     const div = document.getElementById(this.embedDivId);
-    div.style.width = "100%";
-    div.style.height = "100%";
-    setTimeout(() => {
-      div.style.opacity = "1";
-    }, 0);
+    div.classList.add("open");
+
     this.lastScrollTop = window.scrollY;
     this.lastBodyStyle = document.body.style;
     document.body.style.position = "fixed";
@@ -89,10 +77,8 @@ class CrawlChatEmbed {
     window.scrollTo(0, this.lastScrollTop);
 
     const div = document.getElementById(this.embedDivId);
-    div.style.opacity = "0";
+    div.classList.remove("open");
     setTimeout(() => {
-      div.style.width = "0px";
-      div.style.height = "0px";
       window.focus();
     }, this.transitionDuration);
 
@@ -125,7 +111,7 @@ class CrawlChatEmbed {
 
   hideAskAIButton() {
     const button = document.getElementById(this.askAIButtonId);
-    button.style.opacity = "0";
+    button.classList.add("hidden");
   }
 
   async showAskAIButton() {
@@ -175,44 +161,23 @@ class CrawlChatEmbed {
 
     const div = document.createElement("div");
     div.id = this.askAIButtonId;
-    div.style.position = "fixed";
     div.style.bottom = bottom;
     div.style.right = right;
     div.style.left = left;
     div.style.top = top;
-    div.style.padding = "8px 20px";
 
     div.style.backgroundColor = backgroundColor;
     div.style.color = color;
     div.style.borderRadius = radius;
-    div.style.cursor = "pointer";
-    div.style.transition = "scale 0.1s ease, opacity 0.3s ease";
     div.style.fontSize = fontSize;
-
-    div.style.scale = "1";
-    div.style.boxShadow = "rgba(0, 0, 0, 0.1) 0px 2px 4px";
-
-    div.style.display = "flex";
-    div.style.flexDirection = "column";
-    div.style.alignItems = "center";
-    div.style.justifyContent = "center";
-
-    div.addEventListener("mouseover", function () {
-      div.style.scale = "1.05";
-    });
-
-    div.addEventListener("mouseout", function () {
-      div.style.scale = "1";
-    });
 
     if (logoUrl && this.widgetConfig.showLogo) {
       const logo = document.createElement("img");
+      logo.className = "logo";
       logo.src = logoUrl;
-      logo.style.width = "40px";
-      logo.style.height = "40px";
       div.appendChild(logo);
 
-      div.style.borderRadius = "10px";
+      div.classList.add("with-logo");
       div.style.border = `1px solid ${color}`;
     }
 
@@ -226,7 +191,7 @@ class CrawlChatEmbed {
 
     div.addEventListener("click", function () {
       window.crawlchatEmbed.show();
-      div.style.opacity = "0";
+      div.classList.add("hidden");
     });
 
     document.body.appendChild(div);
@@ -235,20 +200,7 @@ class CrawlChatEmbed {
   makeTooltip(text) {
     const div = document.createElement("div");
     div.innerText = text;
-    div.style.position = "absolute";
-    div.style.top = "-10px";
-    div.style.right = "0";
-    div.style.transform = "translateY(-100%)";
-    div.style.backgroundColor = "white";
-    div.style.color = "black";
-    div.style.padding = "10px 14px";
-    div.style.borderRadius = "10px";
-    div.style.border = "1px solid #e0e0e0";
-    div.style.textAlign = "right";
-    div.style.display = "flex";
-    div.style.whiteSpace = "nowrap";
-    div.style.fontSize = "14px";
-
+    div.className = "tooltip";
     return div;
   }
 }
