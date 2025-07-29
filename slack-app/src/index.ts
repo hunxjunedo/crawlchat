@@ -148,7 +148,7 @@ app.message(
     }
 
     const llmMessages = messages.map((m) => ({
-      role: m.user === botUserId ? "assistant" : "user",
+      role: m.user === context.botUserId ? "assistant" : "user",
       content: cleanText(m.text ?? ""),
     }));
 
