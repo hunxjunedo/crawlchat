@@ -254,7 +254,7 @@ export function UsedBy() {
           <div className="font-medium text-xl">270Degrees</div>
         </div>
 
-        <img
+        {/* <img
           src="/used-by/trustworks.png"
           alt="Trustworks"
           className="max-h-[38px] dark:hidden"
@@ -264,7 +264,7 @@ export function UsedBy() {
           src="/used-by/trustworks-white.png"
           alt="Trustworks"
           className="max-h-[38px] hidden dark:block"
-        />
+        /> */}
 
         <div className="flex items-center gap-2 dark:hidden">
           <img
