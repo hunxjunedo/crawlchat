@@ -1239,7 +1239,7 @@ function FAQ() {
     {
       question: "I already user other chatbot, why do I switch?",
       answer: (
-        <p>
+        <div>
           CrawlChat shines in three areas:
           <ul className="list-disc list-inside pl-4 my-4">
             <li>
@@ -1255,7 +1255,7 @@ function FAQ() {
               performance of the chatbot and fine tune your documentation.
             </li>
           </ul>
-        </p>
+        </div>
       ),
     },
     {
