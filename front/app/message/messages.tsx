@@ -36,15 +36,16 @@ import {
 } from "~/components/ui/accordion";
 import moment from "moment";
 import { truncate } from "~/util";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { makeMessagePairs } from "./analyse";
 import { Tooltip } from "~/components/ui/tooltip";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import type { Message, MessageChannel } from "libs/prisma";
+import type { Message, MessageChannel, MessageSourceLink } from "libs/prisma";
 import { getScoreColor } from "~/score";
 import { Link as RouterLink } from "react-router";
 import { ViewSwitch } from "./view-switch";
 import { CountryFlag } from "./country-flag";
+import { extractCitations } from "libs/citation";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -101,6 +102,84 @@ function ChannelIcon({ channel }: { channel?: MessageChannel | null }) {
       <Icon as={icon} />
       {text}
     </Badge>
+  );
+}
+
+function AssistantMessage({ message }: { message: Message }) {
+  const [hoveredUniqueId, setHoveredUniqueId] = useState<string | null>(null);
+  const citation = useMemo(
+    () => extractCitations(getMessageContent(message), message.links),
+    [message]
+  );
+
+  return (
+    <>
+      <MarkdownProse
+        sources={Object.values(citation.citedLinks).map((link) => ({
+          title: link?.title ?? link?.url ?? "Source",
+          url: link?.url ?? undefined,
+        }))}
+        options={{
+          disabled: true,
+          onSourceMouseEnter: (index) => {
+            for (let i = 0; i < Object.keys(citation.citedLinks).length; i++) {
+              if (
+                citation.citedLinks[i].fetchUniqueId ===
+                message.links[index].fetchUniqueId
+              ) {
+                setHoveredUniqueId(message.links[index].fetchUniqueId);
+                break;
+              }
+            }
+          },
+          onSourceMouseLeave: () => setHoveredUniqueId(null),
+        }}
+      >
+        {citation.content}
+      </MarkdownProse>
+
+      <Table.Root variant={"outline"}>
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader>Knowledge Item</Table.ColumnHeader>
+            <Table.ColumnHeader>Query</Table.ColumnHeader>
+            <Table.ColumnHeader textAlign="end">Score</Table.ColumnHeader>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body background={"brand.white"}>
+          {message.links.map((link, index) => (
+            <Table.Row
+              key={index}
+              bg={
+                hoveredUniqueId === link.fetchUniqueId
+                  ? "brand.gray.100"
+                  : "brand.white"
+              }
+            >
+              <Table.Cell>
+                <Group>
+                  <Link
+                    href={`/knowledge/item/${link.scrapeItemId}`}
+                    target="_blank"
+                  >
+                    {link.title || link.url}
+                  </Link>
+                </Group>
+              </Table.Cell>
+              <Table.Cell>{link.searchQuery ?? "-"}</Table.Cell>
+              <Table.Cell textAlign="end">
+                <Badge
+                  colorPalette={getScoreColor(link.score ?? 0)}
+                  variant={"surface"}
+                >
+                  {link.score?.toFixed(2)}
+                </Badge>
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table.Root>
+    </>
   );
 }
 
@@ -202,63 +281,7 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                         <Heading>
                           {getMessageContent(pair.queryMessage)}
                         </Heading>
-                        <MarkdownProse>
-                          {getMessageContent(pair.responseMessage)}
-                        </MarkdownProse>
-                        {pair.uniqueLinks.length > 0 && (
-                          <Stack>
-                            <Table.Root variant={"outline"}>
-                              <Table.Header>
-                                <Table.Row>
-                                  <Table.ColumnHeader>
-                                    Knowledge Item
-                                  </Table.ColumnHeader>
-                                  <Table.ColumnHeader>Query</Table.ColumnHeader>
-                                  <Table.ColumnHeader textAlign="end">
-                                    Score
-                                  </Table.ColumnHeader>
-                                </Table.Row>
-                              </Table.Header>
-                              <Table.Body background={"brand.white"}>
-                                {pair.uniqueLinks.map((link, index) => (
-                                  <Table.Row key={index}>
-                                    <Table.Cell>
-                                      <Group>
-                                        <Link
-                                          href={`/knowledge/item/${link.scrapeItemId}`}
-                                          target="_blank"
-                                        >
-                                          {link.title || link.url}
-                                        </Link>
-
-                                        <Tooltip
-                                          content="Citation number from above message"
-                                          showArrow
-                                        >
-                                          <Text>[{link.fetchUniqueId}]</Text>
-                                        </Tooltip>
-                                      </Group>
-                                    </Table.Cell>
-                                    <Table.Cell>
-                                      {link.searchQuery ?? "-"}
-                                    </Table.Cell>
-                                    <Table.Cell textAlign="end">
-                                      <Badge
-                                        colorPalette={getScoreColor(
-                                          link.score ?? 0
-                                        )}
-                                        variant={"surface"}
-                                      >
-                                        {link.score?.toFixed(2)}
-                                      </Badge>
-                                    </Table.Cell>
-                                  </Table.Row>
-                                ))}
-                              </Table.Body>
-                            </Table.Root>
-                          </Stack>
-                        )}
-
+                        <AssistantMessage message={pair.responseMessage} />
                         <Box>
                           <Button
                             asChild

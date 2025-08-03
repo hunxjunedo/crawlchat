@@ -171,6 +171,8 @@ export function MarkdownProse({
     ticketCreateLoading?: boolean;
     disabled?: boolean;
     customerEmail?: string;
+    onSourceMouseEnter?: (index: number) => void;
+    onSourceMouseLeave?: () => void;
   };
 }>) {
   return (
@@ -285,7 +287,12 @@ export function MarkdownProse({
 
             return (
               <Tooltip content={source?.title ?? "Loading..."} showArrow>
-                <Badge transform={"translateY(-6px)"} asChild>
+                <Badge
+                  transform={"translateY(-6px)"}
+                  asChild
+                  onMouseEnter={() => options?.onSourceMouseEnter?.(index)}
+                  onMouseLeave={() => options?.onSourceMouseLeave?.()}
+                >
                   {source?.url ? (
                     <a href={source.url} target="_blank">
                       {index + 1}
