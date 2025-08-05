@@ -154,6 +154,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
+  console.log({ itemCounts, topItemIds });
+
   const topItems: {
     item: ScrapeItem;
     count: number;
@@ -166,7 +168,6 @@ export async function loader({ request }: Route.LoaderArgs) {
         knowledgeGroup: true,
       },
     });
-    console.log({ itemId, item });
     if (item) {
       topItems.push({ item, count, knowledgeGroup: item.knowledgeGroup! });
     }
