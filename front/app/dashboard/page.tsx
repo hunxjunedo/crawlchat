@@ -150,11 +150,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
   }
 
-  const topItemIds = Object.entries(itemCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
-  console.log({ itemCounts, topItemIds });
+  const topItemIds = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
 
   const topItems: {
     item: ScrapeItem;
@@ -171,6 +167,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     if (item) {
       topItems.push({ item, count, knowledgeGroup: item.knowledgeGroup! });
     }
+    if (topItems.length >= 5) break;
   }
 
   const latestQuestions = messages
