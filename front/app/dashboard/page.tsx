@@ -655,7 +655,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Question</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="end" width="120px">
+                    <Table.ColumnHeader textAlign="end" width="200px">
                       Created at
                     </Table.ColumnHeader>
                   </Table.Row>
