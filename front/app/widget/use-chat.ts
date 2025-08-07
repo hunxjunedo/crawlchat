@@ -37,7 +37,10 @@ export function useScrapeChat({
             },
           ]
         : []),
-    ].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    ].sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
     return allMessages.map((message) => ({
       role: (message.llmMessage as any).role,
       content: (message.llmMessage as any).content,
