@@ -177,10 +177,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     const maxScore = Math.max(...links.map((l) => l.score ?? 0));
     if (links.length > 0 && maxScore < 0.3 && maxScore > 0) {
       const queries = links.map((l) => l.searchQuery);
+      const uniqueQueries = [...new Set(queries)];
       lowRatingQueries.push({
         message,
         maxScore,
-        queries,
+        queries: uniqueQueries,
         userMessage: lastUserMessage,
       });
     }
@@ -562,10 +563,17 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   {loaderData.lowRatingQueries.map((item) => (
                     <Table.Row key={item.message.id}>
                       <Table.Cell>
-                        {truncate(
-                          (item.userMessage?.llmMessage as any).content,
-                          100
-                        )}
+                        <ChakraTooltip
+                          showArrow
+                          content={
+                            (item.userMessage?.llmMessage as any).content
+                          }
+                        >
+                          {truncate(
+                            (item.userMessage?.llmMessage as any).content,
+                            50
+                          )}
+                        </ChakraTooltip>
                       </Table.Cell>
                       <Table.Cell>
                         <ChakraTooltip
