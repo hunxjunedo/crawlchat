@@ -11,11 +11,13 @@ import {
   Table,
   Drawer,
   Portal,
+  IconButton,
 } from "@chakra-ui/react";
 import {
   TbBox,
   TbBrandDiscord,
   TbBrandSlack,
+  TbCopy,
   TbMessage,
   TbRobotFace,
   TbSettingsBolt,
@@ -40,6 +42,8 @@ import { CountryFlag } from "./country-flag";
 import { extractCitations } from "libs/citation";
 import { SingleLineCell } from "~/components/single-line-cell";
 import { Button } from "~/components/ui/button";
+import { truncate } from "~/util";
+import { toaster } from "~/components/ui/toaster";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -189,6 +193,15 @@ function AssistantMessage({ message }: { message: Message }) {
 }
 
 function MessageDrawer({ messagePair }: { messagePair?: MessagePair | null }) {
+  function copyMessage() {
+    navigator.clipboard.writeText(
+      (messagePair?.queryMessage?.llmMessage as any)?.content ?? ""
+    );
+    toaster.success({
+      title: "Copied to clipboard",
+    });
+  }
+
   return (
     <Drawer.Root open={!!messagePair} size={"lg"}>
       <Portal>
@@ -197,21 +210,36 @@ function MessageDrawer({ messagePair }: { messagePair?: MessagePair | null }) {
           <Drawer.Content>
             <Drawer.Header>
               <Drawer.Title>
-                {(messagePair?.queryMessage?.llmMessage as any)?.content}
+                {truncate(
+                  (messagePair?.queryMessage?.llmMessage as any)?.content ?? "",
+                  500
+                )}
               </Drawer.Title>
-              <Group mt={2}>
-                <Text>
-                  {moment(messagePair?.queryMessage?.createdAt).fromNow()}
-                </Text>
-                <ChannelIcon channel={messagePair?.queryMessage?.channel} />
-                {messagePair?.queryMessage?.thread.location && (
-                  <CountryFlag
-                    location={messagePair?.queryMessage?.thread.location}
-                  />
-                )}
-                {messagePair?.responseMessage.rating && (
-                  <Rating rating={messagePair?.responseMessage.rating} />
-                )}
+              <Group mt={2} justifyContent={"space-between"} w="full">
+                <Group>
+                  <ChannelIcon channel={messagePair?.queryMessage?.channel} />
+                  {messagePair?.responseMessage.rating && (
+                    <Rating rating={messagePair?.responseMessage.rating} />
+                  )}
+                  {messagePair?.queryMessage?.thread.location && (
+                    <CountryFlag
+                      location={messagePair?.queryMessage?.thread.location}
+                    />
+                  )}
+                  <Text>
+                    {moment(messagePair?.queryMessage?.createdAt).fromNow()}
+                  </Text>
+                </Group>
+
+                <Group>
+                  <IconButton
+                    variant={"subtle"}
+                    size={"xs"}
+                    onClick={copyMessage}
+                  >
+                    <TbCopy />
+                  </IconButton>
+                </Group>
               </Group>
             </Drawer.Header>
             <Drawer.Body>
@@ -300,7 +328,7 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                     <Table.ColumnHeader w={"100px"}></Table.ColumnHeader>
                     <Table.ColumnHeader w={"100px"}>Channel</Table.ColumnHeader>
                     <Table.ColumnHeader w={"60px"}>Score</Table.ColumnHeader>
-                    <Table.ColumnHeader w={"140px"} textAlign={"end"}>
+                    <Table.ColumnHeader w={"180px"} textAlign={"end"}>
                       Time
                     </Table.ColumnHeader>
                   </Table.Row>
