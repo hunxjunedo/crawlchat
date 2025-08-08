@@ -441,7 +441,7 @@ export function SideMenu({
           ))}
         </Stack>
 
-        <Separator />
+        {/* <Separator />
 
         <Stack gap={1} w="full" px={3}>
           <SideMenuItem
@@ -460,7 +460,7 @@ export function SideMenu({
               external: true,
             }}
           />
-        </Stack>
+        </Stack> */}
       </Stack>
 
       <Stack p={4} gap={4}>

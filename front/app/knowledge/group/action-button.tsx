@@ -53,6 +53,7 @@ export function ActionButton({
                 colorPalette={"brand"}
                 type="submit"
                 disabled={refreshFetcher.state !== "idle"}
+                size={buttonSize}
               >
                 Fetch now
                 <TbArrowRight />

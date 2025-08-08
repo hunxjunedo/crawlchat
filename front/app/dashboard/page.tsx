@@ -633,11 +633,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                       <Table.Cell>
                         <SingleLineCell>{item[0] || "Untitled"}</SingleLineCell>
                       </Table.Cell>
-                      <Table.Cell textAlign="end">
-                        <Badge colorPalette={"brand"} variant={"surface"}>
-                          {item[1]}
-                        </Badge>
-                      </Table.Cell>
+                      <Table.Cell textAlign="end">{item[1]}</Table.Cell>
                     </Table.Row>
                   ))}
                 </Table.Body>
