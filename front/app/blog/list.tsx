@@ -11,7 +11,7 @@ const cache = new Cache(
 );
 
 export function loader() {
-  return { posts: cache.get() };
+  return { posts: cache.get().filter((b) => b.status === "published") };
 }
 
 export function meta() {

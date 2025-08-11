@@ -1,5 +1,7 @@
 import fs from "fs";
 
+export type BlogPostStatus = "draft" | "published";
+
 export type BlogPost = {
   title: string;
   slug: string;
@@ -7,6 +9,7 @@ export type BlogPost = {
   meta: Record<string, string>;
   date: Date;
   description: string;
+  status: BlogPostStatus;
   image?: string;
   type?: string;
 };
@@ -51,6 +54,7 @@ export function readPost(slug: string, path?: string): BlogPost {
     description: frontMatter.description,
     image: frontMatter.image,
     type: frontMatter.type ?? "blog",
+    status: (frontMatter.status ?? "published") as BlogPostStatus,
   };
 }
 

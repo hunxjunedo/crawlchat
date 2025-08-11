@@ -864,6 +864,11 @@ export function Footer() {
                   How Discord Bot helps?
                 </FooterLink>
               </li>
+              <li>
+                <FooterLink href="/blog/how-to-do-basic-rag">
+                  How to do a basic RAG?
+                </FooterLink>
+              </li>
             </ul>
           </div>
           <div className="flex-[1]">
