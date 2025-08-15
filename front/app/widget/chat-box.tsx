@@ -949,16 +949,17 @@ export function ChatboxContainer({
     >
       <Stack
         border={cover ? "none" : "1px solid"}
+        borderWidth={[0, cover ? 0 : 1]}
         borderColor={"brand.outline"}
-        rounded={cover ? "none" : "xl"}
+        rounded={["none", cover ? "none" : "xl"]}
         boxShadow={cover ? "none" : "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}
         bg="brand.white"
         gap={0}
         position={"relative"}
         overflow={"hidden"}
-        w={width ?? boxDimensions.width}
-        h={height ?? undefined}
-        maxH={height ?? boxDimensions.height}
+        w={["full", width ?? boxDimensions.width]}
+        h={["full", height ?? undefined]}
+        maxH={["full", height ?? boxDimensions.height]}
       >
         {children}
       </Stack>
