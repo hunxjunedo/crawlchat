@@ -702,7 +702,7 @@ function PricingBox({
   );
 }
 
-function Pricing() {
+export function Pricing() {
   const { freePlan, starterPlan, proPlan } = useLoaderData<typeof loader>();
 
   return (
@@ -877,7 +877,7 @@ export function Footer() {
                 <FooterLink href="/">Home</FooterLink>
               </li>
               <li>
-                <FooterLink href="/#pricing">Pricing</FooterLink>
+                <FooterLink href="/pricing">Pricing</FooterLink>
               </li>
               <li>
                 <FooterLink href="/#features">Features</FooterLink>
