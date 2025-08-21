@@ -34,3 +34,30 @@ export async function cleanupThreads() {
     });
   }
 }
+
+export async function cleanupMessages() {
+  const TWO_MONTHS_AGO = new Date(Date.now() - 2 * 30 * 24 * 60 * 60 * 1000);
+  const messages = await prisma.message.findMany({
+    where: {
+      createdAt: {
+        lt: TWO_MONTHS_AGO,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  console.log("Found", messages.length, "messages");
+
+  for (const ids of chunk(messages, 100)) {
+    console.log("Deleting chunk", ids.length, "messages");
+    await prisma.message.deleteMany({
+      where: {
+        id: {
+          in: ids.map((id) => id.id),
+        },
+      },
+    });
+  }
+}
