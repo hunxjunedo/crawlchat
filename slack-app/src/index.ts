@@ -157,10 +157,15 @@ async function getLearnMessages(message: any, client: any, botUserId: string) {
     }
   }
 
-  return messages.map((m) => ({
-    role: m.user === botUserId ? "assistant" : "user",
-    content: cleanText(m.text ?? ""),
-  }));
+  return messages.map((m) => {
+    const date = new Date(Number((m as any).ts.split(".")[0]));
+    return {
+      role: m.user === botUserId ? "assistant" : "user",
+      content: `User (${date.toLocaleString()}): ${cleanText(
+        m.text ?? ""
+      )}`,
+    };
+  });
 }
 
 app.message(async ({ message, say, client, context }) => {

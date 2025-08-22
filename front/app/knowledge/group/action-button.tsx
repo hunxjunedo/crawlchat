@@ -35,7 +35,11 @@ export function ActionButton({
     }
   }, [stopFetcher.data]);
 
-  if (["learn_discord", "answer_corrections", "upload"].includes(group.type)) {
+  if (
+    !["scrape_web", "scrape_github", "github_issues", "notion"].includes(
+      group.type
+    )
+  ) {
     return null;
   }
 

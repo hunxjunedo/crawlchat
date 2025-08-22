@@ -18,6 +18,7 @@ import {
   TbBrandDiscord,
   TbBrandGithub,
   TbBrandNotion,
+  TbBrandSlack,
   TbFile,
   TbPlus,
   TbRefresh,
@@ -105,6 +106,9 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
       } else if (group.type === "learn_discord") {
         icon = <TbBrandDiscord />;
         typeText = "Discord";
+      } else if (group.type === "learn_slack") {
+        icon = <TbBrandSlack />;
+        typeText = "Slack";
       } else if (group.type === "github_issues") {
         icon = <TbBrandGithub />;
         typeText = "GH Issues";
