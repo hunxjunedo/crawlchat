@@ -90,6 +90,10 @@ export default [
     route("pricing", "landing/pricing.tsx"),
   ]),
 
+  ...prefix("admin", [
+    index("admin/page.tsx"),
+  ]),
+
   route("email-alert", "email-alert.ts"),
 
   route("w/:id", "widget/page.tsx"),
