@@ -186,14 +186,14 @@ function AssistantMessage({
 
                 <DataList.Item>
                   <DataList.ItemLabel>Input</DataList.ItemLabel>
-                  <DataList.ItemValue>
-                    {JSON.stringify(call.data)}
+                  <DataList.ItemValue overflowX="auto">
+                    {JSON.stringify(call.data, null, 2)}
                   </DataList.ItemValue>
                 </DataList.Item>
 
                 <DataList.Item>
                   <DataList.ItemLabel>Output</DataList.ItemLabel>
-                  <DataList.ItemValue>
+                  <DataList.ItemValue overflowX="auto">
                     {call.response as string}
                   </DataList.ItemValue>
                 </DataList.Item>

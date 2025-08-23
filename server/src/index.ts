@@ -370,9 +370,23 @@ expressWs.app.ws("/", (ws: any, req) => {
           answerer(
             scrape,
             message.data.query,
-            thread.messages.map((message) => ({
-              llmMessage: message.llmMessage as any,
-            })),
+            thread.messages.map((message) => {
+              const llmMessage = message.llmMessage as any;
+              if (message.apiActionCalls.length > 0) {
+                llmMessage.content = `
+                ${llmMessage.content}
+                ${message.apiActionCalls
+                  .map((call) => {
+                    return `
+                  Data: ${JSON.stringify(call.data)}
+                  Response: ${call.response}
+                  `;
+                  })
+                  .join("\n\n")}
+                `;
+              }
+              return { llmMessage };
+            }),
             {
               listen: answerListener,
               actions,
