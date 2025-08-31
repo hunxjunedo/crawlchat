@@ -3,6 +3,20 @@ import { BaseKbProcesser, KbProcesserListener } from "./kb-processer";
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
 
+function getPageTitle(page: any): string | undefined {
+  if (!page.properties) {
+    return undefined;
+  }
+  
+  for (const key in page.properties) {
+    const prop = page.properties[key];
+    if (prop.type === "title" && prop.title?.length > 0) {
+      return prop.title.map((t: any) => t.plain_text).join("");
+    }
+  }
+  return undefined;
+}
+
 export class NotionKbProcesser extends BaseKbProcesser {
   private client: Client;
 
@@ -46,7 +60,9 @@ export class NotionKbProcesser extends BaseKbProcesser {
 
     for (let i = 0; i < filteredPages.length; i++) {
       const page = filteredPages[i];
-      const title = (page as any).properties?.title?.title?.[0]?.plain_text;
+      const title =
+        (page as any).properties?.title?.title?.[0]?.plain_text ??
+        getPageTitle(page);
       const url = (page as any).url;
       const mdblocks = await n2m.pageToMarkdown(page.id);
       const mdString = n2m.toMarkdownString(mdblocks);
