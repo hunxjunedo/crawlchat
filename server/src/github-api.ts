@@ -67,6 +67,10 @@ export async function getIssues({
     },
   });
 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch issues: ${response.statusText}`);
+  }
+
   return {
     issues: await response.json(),
     pagination: parsePagination(response.headers),
@@ -94,6 +98,10 @@ export async function getIssue({
     }
   );
 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch issue: ${response.statusText}`);
+  }
+
   return await response.json();
 }
 
@@ -119,6 +127,10 @@ export async function getIssueTimeline({
       },
     }
   );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch timeline: ${response.statusText}`);
+  }
 
   return await response.json();
 }
