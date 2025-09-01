@@ -27,6 +27,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const scrape = await prisma.scrape.findUnique({
     where: { id: scrapeId },
+    include: {
+      user: true,
+    },
   });
 
   if (!scrape) {
@@ -407,16 +410,19 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
             </div>
           </SettingsSection>
 
-          <AiModelSettings scrape={loaderData.scrape} user={loaderData.user} />
+          <AiModelSettings
+            scrape={loaderData.scrape}
+            user={loaderData.scrape.user}
+          />
 
           <AnalyseMessageSettings
             scrape={loaderData.scrape}
-            user={loaderData.user}
+            user={loaderData.scrape.user}
           />
 
           <ShowSourcesSetting
             scrape={loaderData.scrape}
-            user={loaderData.user}
+            user={loaderData.scrape.user}
           />
 
           <SettingsSection
