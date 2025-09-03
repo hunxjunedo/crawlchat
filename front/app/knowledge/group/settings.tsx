@@ -24,6 +24,20 @@ import { DataList } from "~/components/data-list";
 import { Select } from "~/components/select";
 import moment from "moment";
 
+function getNotionPageTitle(page: any): string | undefined {
+  if (!page.properties) {
+    return undefined;
+  }
+
+  for (const key in page.properties) {
+    const prop = page.properties[key];
+    if (prop.type === "title" && prop.title?.length > 0) {
+      return prop.title.map((t: any) => t.plain_text).join("");
+    }
+  }
+  return undefined;
+}
+
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
   const scrapeId = await getSessionScrapeId(request);
@@ -57,8 +71,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         timestamp: "last_edited_time",
       },
     });
-    notionPages = search.results.map((result) => {
-      const title = (result as any).properties?.title?.title?.[0]?.plain_text;
+    notionPages = search.results.map((result: any) => {
+      const title = getNotionPageTitle(result) || "Untitled";
       return { title, value: result.id };
     });
   }

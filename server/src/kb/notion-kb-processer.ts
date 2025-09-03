@@ -66,6 +66,9 @@ export class NotionKbProcesser extends BaseKbProcesser {
       const url = (page as any).url;
       const mdblocks = await n2m.pageToMarkdown(page.id);
       const mdString = n2m.toMarkdownString(mdblocks);
+
+      if (!mdString.parent) return;
+
       this.onContentAvailable(
         url,
         {

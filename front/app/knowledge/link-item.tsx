@@ -209,7 +209,7 @@ export default function ScrapeItem({ loaderData }: Route.ComponentProps) {
               <input type="hidden" name="intent" value="refresh" />
               <div className="tooltip tooltip-left" data-content={"Refetch"}>
                 <button
-                  className="btn btn-soft"
+                  className="btn btn-soft btn-square"
                   type={"submit"}
                   disabled={refreshFetcher.state !== "idle"}
                 >
@@ -228,7 +228,7 @@ export default function ScrapeItem({ loaderData }: Route.ComponentProps) {
               data-tip={deleteActive ? "Are you sure?" : "Delete"}
             >
               <button
-                className={cn("btn btn-error", !deleteActive && "btn-soft")}
+                className={cn("btn btn-error btn-square", !deleteActive && "btn-soft")}
                 type={deleteActive ? "submit" : "button"}
                 onClick={handleDelete}
                 disabled={deleteFetcher.state !== "idle"}
