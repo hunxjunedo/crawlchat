@@ -63,7 +63,7 @@ export class BaseKbProcesserListener implements KbProcesserListener {
       },
       update: {
         status: "failed",
-        error: error.message.toString(),
+        error: `${error.message.toString()}\n\n${error.stack}`,
       },
       create: {
         userId: this.scrape.userId,
