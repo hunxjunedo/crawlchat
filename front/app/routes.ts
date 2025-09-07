@@ -66,6 +66,8 @@ export default [
     route("actions/:actionId", "actions/edit.tsx"),
 
     route("data-gaps", "data-gaps/page.tsx"),
+
+    route("assistance", "assistance.tsx"),
   ]),
 
   layout("landing/layout.tsx", [

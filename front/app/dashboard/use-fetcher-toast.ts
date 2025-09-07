@@ -12,12 +12,17 @@ export function useFetcherToast(
   useEffect(() => {
     if (!fetcher.data) return;
 
-    if (fetcher.data) {
-      toast.success(options?.description ?? "Operation completed successfully");
-    }
-
     if (fetcher.data.error) {
       toast.error(fetcher.data.error);
+      return;
+    }
+
+    if (fetcher.data) {
+      toast.success(
+        options?.title ??
+          options?.description ??
+          "Operation completed successfully"
+      );
     }
   }, [fetcher.data]);
 }

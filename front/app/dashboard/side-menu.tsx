@@ -5,10 +5,12 @@ import {
   TbArrowDown,
   TbArrowRight,
   TbBook,
+  TbBrandDiscord,
   TbChartBarOff,
   TbChevronDown,
   TbChevronUp,
   TbCreditCard,
+  TbHelp,
   TbHome,
   TbLogout,
   TbMessage,
@@ -167,10 +169,7 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
             </button>
           </div>
         )}
-        <div
-          className="tooltip w-full"
-          data-tip={action.description}
-        >
+        <div className="tooltip w-full" data-tip={action.description}>
           <Link
             className="btn btn-primary btn-block"
             to={fetcher.data ? action.url(fetcher.data.input) : ""}
@@ -320,12 +319,7 @@ export function SideMenu({
   const visibleName = loggedInUser.name || loggedInUser.email;
 
   return (
-    <div
-      className={cn(
-        "flex flex-col h-full",
-        "gap-0 justify-between w-full"
-      )}
-    >
+    <div className={cn("flex flex-col h-full", "gap-0 justify-between w-full")}>
       <div className="flex flex-col py-4 gap-4">
         <div className="flex flex-col px-4 mb-4">
           <div className="flex justify-between">
@@ -380,6 +374,22 @@ export function SideMenu({
       </div>
 
       <div className="p-4 flex flex-col gap-4">
+        <div className="flex justify-center items-center gap-2">
+          <div className="tooltip" data-tip="Join on Discord">
+            <a
+              href="https://discord.gg/zW3YmCRJkC"
+              className="btn btn-sm btn-square"
+            >
+              <TbBrandDiscord />
+            </a>
+          </div>
+
+          <div className="tooltip" data-tip="Get assistance">
+            <Link to="/assistance" className="btn btn-sm btn-square">
+              <TbHelp />
+            </Link>
+          </div>
+        </div>
         {scrapeId && <SetupProgress scrapeId={scrapeId} />}
         <div
           className={cn(
