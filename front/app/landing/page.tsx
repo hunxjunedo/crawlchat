@@ -1056,8 +1056,8 @@ export function LandingPage({ children }: PropsWithChildren) {
     <div className="bg-base-200 font-aeonik">
       <div
         className={cn(
-          "hidden md:block aspect-[1440/960] w-full bg-[url('/new-landing/clouds.png')]",
-          "dark:bg-[url('/new-landing/clouds-dark.png')]",
+          "hidden md:block aspect-[1440/960] w-full bg-[url('https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/clouds.png')]",
+          "dark:bg-[url('https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/clouds-dark.png')]",
           "bg-contain bg-no-repeat absolute top-0 left-0"
         )}
       >
@@ -1474,42 +1474,42 @@ function Gallery() {
   const steps = [
     {
       title: "Dashboard",
-      img: "/gallery/dashboard.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/dashboard.png",
       icon: <TbDashboard />,
     },
     {
       title: "Add knowledge",
-      img: "/gallery/add-knowledge-group.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/add-knowledge-group.png",
       icon: <TbBook />,
     },
     {
       title: "View knowledge",
-      img: "/gallery/knowledge-groups.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/knowledge-groups.png",
       icon: <TbBook2 />,
     },
     {
       title: "Embed chatbot",
-      img: "/gallery/customise-chatbot.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/customise-chatbot.png",
       icon: <TbCode />,
     },
     {
       title: "Analytics",
-      img: "/gallery/analytics.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/analytics.png",
       icon: <TbChartBar />,
     },
     {
       title: "Conversations",
-      img: "/gallery/messages.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/messages.png",
       icon: <TbMessage />,
     },
     {
       title: "Performance",
-      img: "/gallery/performance.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/performance.png",
       icon: <TbChartLine />,
     },
     {
       title: "Data gaps",
-      img: "/gallery/data-gaps.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/data-gaps.png",
       icon: <TbChartBarOff />,
       new: true,
     },
