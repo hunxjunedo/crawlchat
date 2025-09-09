@@ -32,7 +32,7 @@ export function loader() {
       title: "TanStack Start",
       description:
         "TanStack Start is a full-stack React framework with type-safe routing and isomorphic data loading.",
-      logo: "https://tanstack.com/assets/splash-light-CHqMsyq8.png",
+      logo: "/tanstack.png",
     },
     {
       url: "https://crawlchat.app/w/demo-daisyui",
