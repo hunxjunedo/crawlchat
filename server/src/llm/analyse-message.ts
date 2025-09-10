@@ -256,7 +256,7 @@ export async function fillMessageAnalysis(
         message.scrape
       );
 
-      const dataGap = isDataGap(questionRelevanceScore.halfMaxavg);
+      const dataGap = isDataGap(questionRelevanceScore.avg);
 
       if (dataGap) {
         const dataGap = await getDataGap(question, answer);
