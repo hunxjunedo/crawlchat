@@ -7,7 +7,11 @@ import { TbArrowRight, TbCircleCheck, TbCircleX } from "react-icons/tb";
 import { getAuthUser } from "./middleware";
 import { Logo } from "~/dashboard/logo";
 import { makeMeta } from "~/meta";
-import { AntonTestimonial, JonnyTestimonial, MauritsTestimonial } from "~/landing/page";
+import {
+  AntonTestimonial,
+  JonnyTestimonial,
+  MauritsTestimonial,
+} from "~/landing/page";
 import cn from "@meltdownjs/cn";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -68,13 +72,29 @@ export default function LoginPage() {
         <div className="text-2xl font-bold text-center py-4">
           People love <span className="font-radio-grotesk">CrawlChat</span> ❤️
         </div>
-        <div className="max-w-500px overflow-y-auto no-scrollbar pb-4">
+        <div className="max-w-500px overflow-y-auto no-scrollbar pb-4 max-w-96">
           {testiIndex === 0 && <JonnyTestimonial />}
           {testiIndex === 1 && <AntonTestimonial />}
           {testiIndex === 2 && <MauritsTestimonial />}
         </div>
       </div>
       <div className="flex flex-col flex-1 gap-2 h-full justify-center items-center">
+        <div role="alert" className="alert alert-info w-82 mb-2 text-base-100">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="h-6 w-6 shrink-0 stroke-current"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span>Sign in to start your 7 days trial.</span>
+        </div>
         <fetcher.Form method="post">
           <div
             className={cn(
@@ -161,9 +181,6 @@ export default function LoginPage() {
               </svg>
               Login with Google
             </a>
-          </div>
-          <div className="text-center p-4 text-xs text-base-content/30">
-            Sign in & purchase a plan to get started
           </div>
         </fetcher.Form>
       </div>
