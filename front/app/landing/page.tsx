@@ -1481,6 +1481,25 @@ export function JonnyTestimonial() {
   );
 }
 
+export function EgelhausTestimonial() {
+  return (
+    <CustomTestimonial
+      text={
+        <div>
+          We can definitely recommend using CrawlChat, it's{" "}
+          <CTH>easy to set up</CTH>, really <CTH>affordable</CTH>, and has great
+          support. Thank you <CTHS>@pramodk73</CTHS> for making this!
+        </div>
+      }
+      author="Egelhaus"
+      authorImage="https://avatars.githubusercontent.com/u/156946629?v=4"
+      authorLink="https://github.com/egelhaus"
+      icon={<TbBrandDiscord />}
+      authorCompany="Postiz"
+    />
+  );
+}
+
 export function AntonTestimonial() {
   return (
     <CustomTestimonial
@@ -1522,10 +1541,19 @@ export function MauritsTestimonial() {
 
 export function CustomTestimonials() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 border border-base-300 rounded-2xl mt-32 bg-base-100">
-      <JonnyTestimonial />
-      <AntonTestimonial />
-      <MauritsTestimonial />
+    <div className="mt-32 flex flex-col gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 border border-base-300 rounded-2xl bg-base-100">
+        <JonnyTestimonial />
+        <AntonTestimonial />
+        <MauritsTestimonial />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3">
+        <div />
+        <div className="border border-base-300 rounded-2xl bg-base-100">
+          <EgelhausTestimonial />
+        </div>
+        <div />
+      </div>
     </div>
   );
 }

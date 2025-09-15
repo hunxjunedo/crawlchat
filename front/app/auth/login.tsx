@@ -9,6 +9,7 @@ import { Logo } from "~/dashboard/logo";
 import { makeMeta } from "~/meta";
 import {
   AntonTestimonial,
+  EgelhausTestimonial,
   JonnyTestimonial,
   MauritsTestimonial,
 } from "~/landing/page";
@@ -52,7 +53,7 @@ export default function LoginPage() {
   const fetcher = useFetcher();
   const { mailSent } = useLoaderData();
   const emailRef = useRef<HTMLInputElement>(null);
-  const [testiIndex, setTestiIndex] = useState(Math.floor(Math.random() * 3));
+  const [testiIndex, setTestiIndex] = useState(Math.floor(Math.random() * 4));
 
   useEffect(() => {
     if (mailSent && emailRef.current) {
@@ -76,6 +77,7 @@ export default function LoginPage() {
           {testiIndex === 0 && <JonnyTestimonial />}
           {testiIndex === 1 && <AntonTestimonial />}
           {testiIndex === 2 && <MauritsTestimonial />}
+          {testiIndex === 3 && <EgelhausTestimonial />}
         </div>
       </div>
       <div className="flex flex-col flex-1 gap-2 h-full justify-center items-center">
