@@ -749,14 +749,14 @@ function Tools() {
   return (
     <div className="mt-32" id="features">
       <Heading>
-        All the <HeadingHighlight>tools</HeadingHighlight> to reduce your
-        support tickets
+        All the <HeadingHighlight>AI tools</HeadingHighlight> to power up your
+        technical docs
       </Heading>
 
       <HeadingDescription>
-        CrawlChat cuts support tickets by letting users instantly chat with your
-        docs, getting answers without needing human help right from your site,
-        Discord, or Slack.
+        CrawlChat cuts technical queries by letting users instantly chat with
+        your docs, getting answers without needing human help right from your
+        website, Discord, or Slack.
       </HeadingDescription>
 
       <div className="bg-base-100 rounded-2xl border border-base-300">
@@ -1260,13 +1260,13 @@ function Hero() {
       )}
 
       <h1 className="font-radio-grotesk text-[42px] md:text-[64px] leading-[1.2] text-center max-w-[800px] mx-auto">
-        <span className="text-primary">AI Chatbot</span> for your documentation
-        and <span className="text-primary">support</span>
+        <span className="text-primary">AI Chatbot</span> for your technical{" "}
+        documentation
       </h1>
 
-      <h2 className="text-center text-xl max-w-[600px] mx-auto mt-8">
-        CrawlChat turns your documentation and other knowledge sources into a AI
-        chatbot that you can connect on your{" "}
+      <h2 className="text-center text-xl max-w-[700px] mx-auto mt-8">
+        Power up your technical documentation with CrawlChat AI chatbot that you
+        can connect on your{" "}
         <span className="bg-red-50 text-red-500 border border-red-500 px-3 py-1 inline-flex m-1 rounded-full leading-none items-center gap-1">
           <TbWorld />
           Website
@@ -1284,7 +1284,8 @@ function Hero() {
           <TbBrandSlack />
           Slack
         </span>
-        <span className="hidden">.</span>
+        <span className="hidden">.</span> so that your community, users &
+        clients get the help they need.
       </h2>
 
       <div
@@ -1368,13 +1369,13 @@ export function Flow() {
   return (
     <div className="mt-32">
       <Heading>
-        A simple <HeadingHighlight>AI first</HeadingHighlight> support workflow
+        A workfow for <HeadingHighlight>AI powered</HeadingHighlight> docs
       </Heading>
 
       <HeadingDescription>
-        CrawlChat is a simple yet powerful, AI first support system for your
-        products and services. It includes a AI chatbot and traditional support
-        ticketing system for the best support experience for your customers.
+        CrawlChat is a simple yet powerful, AI tool for your technical
+        documentation. You can configure it in few minutes and provides you
+        useful analytics to improve your docs.
       </HeadingDescription>
 
       <div
@@ -1778,7 +1779,7 @@ function Gallery() {
       icon: <TbDashboard />,
     },
     {
-      title: "Add knowledge",
+      title: "Add your docs",
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/add-knowledge-group.png",
       icon: <TbBook />,
     },
