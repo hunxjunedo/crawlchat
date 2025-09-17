@@ -59,7 +59,9 @@ const config: Config = {
       "attributes": {
         "src": "https://crawlchat.app/embed.js",
         "id": "crawlchat-script",
-        "data-id": "67dbfc7258ed87c571a04b83"
+        "data-id": "67dbfc7258ed87c571a04b83",
+        "data-tag-sidepanel": "true",
+        "data-hide-ask-ai": "true"
       },
     },
     {
@@ -108,6 +110,11 @@ const config: Config = {
           href: 'https://crawlchat.app/app',
           label: 'Dashboard',
           position: 'right',
+        },
+        {
+          type: 'html',
+          position: 'right',
+          value: '<button class="button button--primary" onclick="window.crawlchatEmbed.toggleSidePanel()">Ask AI</button>',
         },
       ],
     },
