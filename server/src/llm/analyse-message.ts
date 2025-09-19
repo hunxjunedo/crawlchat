@@ -1,5 +1,4 @@
 import {
-  Message,
   MessageAnalysis,
   MessageSourceLink,
   prisma,
@@ -12,20 +11,8 @@ import { Flow } from "./flow";
 import { makeIndexer } from "../indexer/factory";
 import { getConfig } from "./config";
 
-const friction = {
-  low: {
-    questionRelevanceScore: 0.1,
-    contextRelevanceScore: 0.5,
-  },
-  medium: {
-    questionRelevanceScore: 0.2,
-    contextRelevanceScore: 0.4,
-  },
-  high: {
-    questionRelevanceScore: 0.3,
-    contextRelevanceScore: 0.3,
-  },
-};
+const MAX_ANSWER_SCORE = 0.3;
+const MIN_QUESTION_SCORE = 0.5;
 
 export async function decomposeQuestion(question: string) {
   const agent = new SimpleAgent({
@@ -83,19 +70,14 @@ export async function getRelevantScore(
       return Math.max(...processed.map((p) => p.score));
     })
   );
-  const avg = scores.reduce((acc, s) => acc + s, 0) / scores.length;
-  const max = Math.max(...scores);
 
-  const halfMax = scores
-    .sort((a, b) => b - a)
-    .splice(0, Math.floor(scores.length / 2));
-  const halfMaxavg = halfMax.reduce((acc, s) => acc + s, 0) / halfMax.length;
+  const hit = scores.some((s) => s >= MIN_QUESTION_SCORE);
+
+  const avg = scores.reduce((acc, s) => acc + s, 0) / scores.length;
   const result = {
     avg,
     scores,
-    max,
-    halfMax,
-    halfMaxavg,
+    hit,
   };
   console.log("scores", result);
   return result;
@@ -109,6 +91,9 @@ async function getDataGap(question: string, answer: string) {
     prompt: `
     You are a helpful assistant that detects data gaps in the answer provided for the question.
     You may leave title and description empty if there is no data gap.
+    The data gap should be very specific and should not be generic.
+    The description should be not more than 5 points.
+    The data gap can be absance of data or partial data.
     `,
     schema: z.object({
       title: z.string({
@@ -208,16 +193,9 @@ export async function analyseMessage(question: string, answer: string) {
 }
 
 function shouldCheckForDataGap(sources: MessageSourceLink[]) {
-  const frictionLevel = friction["high"];
   const avgScore =
     sources.reduce((acc, s) => acc + (s.score ?? 0), 0) / sources.length;
-  return avgScore <= frictionLevel.contextRelevanceScore;
-}
-
-function isDataGap(questionRelevanceScore: number) {
-  const frictionLevel = friction["high"];
-
-  return questionRelevanceScore >= frictionLevel.questionRelevanceScore;
+  return avgScore <= MAX_ANSWER_SCORE;
 }
 
 export async function fillMessageAnalysis(
@@ -251,22 +229,19 @@ export async function fillMessageAnalysis(
     const checkForDataGap = shouldCheckForDataGap(sources);
 
     if (checkForDataGap) {
-      const questionRelevanceScore = await getRelevantScore(
+      const questionRelevance = await getRelevantScore(
         await decomposeQuestion(question),
         message.scrape
       );
 
-      const dataGap = isDataGap(questionRelevanceScore.avg);
-
-      if (dataGap) {
+      if (questionRelevance.hit) {
         const dataGap = await getDataGap(question, answer);
+        console.log("dataGap", dataGap);
         if (dataGap.title && dataGap.description) {
           analysis.dataGapTitle = dataGap.title;
           analysis.dataGapDescription = dataGap.description;
         }
       }
-
-      console.log({ dataGap, analysis });
     }
 
     await prisma.message.update({
