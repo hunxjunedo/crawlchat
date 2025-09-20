@@ -91,7 +91,9 @@ export class BaseKbProcesserListener implements KbProcesserListener {
     });
 
     console.log("Checking credits for", chunks.length);
-    if (!(await this.options?.hasCredits(chunks.length))) {
+    const hasCredits = await this.options?.hasCredits(chunks.length)
+    console.log("Has credits", hasCredits);
+    if (!hasCredits) {
       console.log("Throwing error for not enough credits");
       throw new Error("Not enough credits");
     }
