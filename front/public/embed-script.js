@@ -220,6 +220,9 @@ class CrawlChatEmbed {
       .getElementById("__docusaurus")
       ?.classList.add("crawlchat-sidepanel-open");
     document.getElementById(this.sidepanelId)?.classList.remove("hidden");
+
+    const iframe = document.getElementById(this.iframeId);
+    iframe.contentWindow.postMessage("focus", "*");
   }
 
   hideSidePanel() {

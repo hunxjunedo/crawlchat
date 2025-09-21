@@ -114,7 +114,15 @@ const config: Config = {
         {
           type: 'html',
           position: 'right',
-          value: '<button class="button button--primary" onclick="window.crawlchatEmbed.toggleSidePanel()">Ask AI</button>',
+          value: `<button 
+          class="crawlchat-nav-askai" 
+          onclick="window.crawlchatEmbed.toggleSidePanel()">
+            Ask AI
+            <span class="keyboard-keys">
+              <kbd>⌘</kbd>
+              <kbd>I</kbd>
+            </span>
+          </button>`,
         },
       ],
     },
