@@ -172,7 +172,7 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                 <th>Type</th>
                 <th>Title</th>
                 <th>Citation</th>
-                <th># Items</th>
+                <th>Pages</th>
                 <th>Status</th>
                 <th>Updated</th>
                 <th>Actions</th>

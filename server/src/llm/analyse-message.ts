@@ -12,8 +12,8 @@ import { makeIndexer } from "../indexer/factory";
 import { getConfig } from "./config";
 import { createToken } from "libs/jwt";
 
-const MAX_ANSWER_SCORE = 0.3;
-const MIN_QUESTION_SCORE = 0.6;
+const MAX_ANSWER_SCORE = 0.2;
+const MIN_QUESTION_SCORE = 0.8;
 
 export async function decomposeQuestion(question: string) {
   const agent = new SimpleAgent({
