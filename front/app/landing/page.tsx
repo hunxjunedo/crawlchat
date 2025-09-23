@@ -36,6 +36,7 @@ import {
   TbSpider,
   TbThumbUp,
   TbUserHeart,
+  TbVideo,
   TbWorld,
 } from "react-icons/tb";
 import { prisma } from "libs/prisma";
@@ -1791,6 +1792,15 @@ function Gallery() {
       icon: <TbDashboard />,
     },
     {
+      title: "Demo",
+      video:
+        "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/landing-page-demo.mp4",
+      poster:
+        "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/landing-page-demo-poster.png",
+      icon: <TbVideo />,
+      new: true,
+    },
+    {
       title: "Add your docs",
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/add-knowledge-group.png",
       icon: <TbBook />,
@@ -1805,11 +1815,11 @@ function Gallery() {
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/customise-chatbot.png",
       icon: <TbCode />,
     },
-    {
-      title: "Analytics",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/analytics.png",
-      icon: <TbChartBar />,
-    },
+    // {
+    //   title: "Analytics",
+    //   img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/analytics.png",
+    //   icon: <TbChartBar />,
+    // },
     {
       title: "Conversations",
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/messages.png",
@@ -1833,14 +1843,14 @@ function Gallery() {
 
   const handleStepChange = (index: number) => {
     if (index === activeStep) return;
-
     track("gallery-click", {
       step: steps[index].title,
     });
-
-    setIsLoading(true);
     setActiveStep(index);
 
+    if (!steps[index].img) return;
+
+    setIsLoading(true);
     const img = new Image();
     img.onload = () => {
       setIsLoading(false);
@@ -1848,6 +1858,7 @@ function Gallery() {
     img.onerror = () => {
       setIsLoading(false);
     };
+
     img.src = steps[index].img;
   };
 
@@ -1861,7 +1872,7 @@ function Gallery() {
           "border border-base-300"
         )}
       >
-        {isLoading && (
+        {steps[activeStep].img && isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-50 z-10">
             <div className="flex flex-col items-center gap-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -1869,14 +1880,26 @@ function Gallery() {
             </div>
           </div>
         )}
-        <img
-          src={steps[activeStep].img}
-          alt={steps[activeStep].title}
-          className={cn(
-            "w-full h-full object-cover",
-            isLoading && "opacity-50"
-          )}
-        />
+        {steps[activeStep].img && (
+          <img
+            src={steps[activeStep].img}
+            alt={steps[activeStep].title}
+            className={cn(
+              "w-full h-full object-cover",
+              isLoading && "opacity-50"
+            )}
+          />
+        )}
+
+        {steps[activeStep].video && (
+          <video
+            autoPlay
+            controls
+            src={steps[activeStep].video}
+            poster={steps[activeStep].poster}
+            className={cn("w-full h-full object-cover")}
+          />
+        )}
       </div>
 
       <div
