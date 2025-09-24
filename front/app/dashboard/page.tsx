@@ -87,7 +87,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   for (const message of messages) {
     if (!message.createdAt) continue;
-    if ((message.llmMessage as any).role === "user") continue;
+    if ((message.llmMessage as any)?.role === "user") continue;
     const date = new Date(message.createdAt);
     const key = date.toISOString().split("T")[0];
     dailyMessages[key] = (dailyMessages[key] ?? 0) + 1;
