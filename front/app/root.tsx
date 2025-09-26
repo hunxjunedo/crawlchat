@@ -58,6 +58,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       "680e1be3148c99bff1f7711b", // 270degrees
       "6875d6818d356651a9d4a41e", // guideroll
       "68ac269d2961657c4b7924a9", // Postiz
+      "crawlchat",
     ];
 
     const shouldTrack = trackingExcludedScrapeIds.every(
