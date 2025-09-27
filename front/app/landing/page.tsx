@@ -1170,11 +1170,11 @@ export function Footer() {
             </ul>
           </div>
           <div className="flex-[1]">
-            <ul className="flex flex-col gap-4 mb-6">
+            {/* <ul className="flex flex-col gap-4 mb-6">
               <li>
                 <FooterLink href="/tool/draft">AI Draft tool</FooterLink>
               </li>
-            </ul>
+            </ul> */}
 
             <ul className="flex flex-col gap-4">
               <li>
