@@ -88,6 +88,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             data-code="aO7kKYfA1oQ3g4FLHanketwYCWPu2cE0"
           ></script>
         )}
+        {shouldTrack && (
+          <script
+            defer
+            data-website-id="68d9179f8d984d2b4523ee5b"
+            data-domain="crawlchat.app"
+            src="https://datafa.st/js/script.js"
+          ></script>
+        )}
         <script>
           {"window.lemonSqueezyAffiliateConfig = { store: 'beestack' };"}
         </script>
