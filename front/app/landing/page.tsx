@@ -1093,6 +1093,11 @@ export function Footer() {
           </div>
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
+            <li>
+                <FooterLink href="/blog/crawlchat-vs-kapa-ai">
+                  CrawlChat vs Kapa.ai
+                </FooterLink>
+              </li>
               <li>
                 <FooterLink href="/blog/actions-on-crawlchat">
                   Introducing Actions
@@ -1116,11 +1121,6 @@ export function Footer() {
               <li>
                 <FooterLink href="/blog/how-to-embed-ai-chatbot">
                   How to add AI Chatbot for your docs
-                </FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/blog/how-remotion-uses-crawlchat">
-                  Documentation - Use case
                 </FooterLink>
               </li>
               <li>
