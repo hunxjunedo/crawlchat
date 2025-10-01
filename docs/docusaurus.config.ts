@@ -75,7 +75,7 @@ const config: Config = {
       "tagName": "script",
       "attributes": {
         "src": "https://datafa.st/js/script.js",
-        "data-domain": "crawlchat.app",
+        "data-domain": "docs.crawlchat.app",
         "data-website-id": "aO7kKYfA1oQ3g4FLHanketwYCWPu2cE0"
       },
     },
