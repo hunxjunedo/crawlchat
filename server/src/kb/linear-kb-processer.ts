@@ -1,6 +1,6 @@
 import { KnowledgeGroup } from "libs/prisma";
 import { BaseKbProcesser, KbProcesserListener } from "./kb-processer";
-import { getLinearIssues, LinearClient } from "libs/linear";
+import { getLinearIssues, getLinearProjects, LinearClient } from "libs/linear";
 
 export class LinearKbProcesser extends BaseKbProcesser {
   private readonly client: LinearClient;
@@ -25,50 +25,20 @@ export class LinearKbProcesser extends BaseKbProcesser {
   }
 
   async process() {
-    let issues = await getLinearIssues(this.client);
+    let issues = await getLinearIssues(
+      this.client,
+      this.knowledgeGroup.linearSkipIssueStatuses?.split(",") ?? []
+    );
 
-    const skipRegexes = (
-      this.knowledgeGroup.skipPageRegex?.split(",") ?? []
-    ).filter(Boolean);
+    const projects = await getLinearProjects(
+      this.client,
+      this.knowledgeGroup.linearSkipProjectStatuses?.split(",") ?? []
+    );
 
-    let filteredIssues = issues.filter((issue) => {
-      return !skipRegexes.some((regex) => {
-        const r = new RegExp(regex.trim());
-        return r.test(issue.id);
-      });
-    });
+    const totalPages = issues.length + projects.length;
 
-    if (this.knowledgeGroup.linearSkipIssueStatuses) {
-      const skipIssueStatuses = this.knowledgeGroup.linearSkipIssueStatuses
-        .split(",")
-        .filter(Boolean);
-      filteredIssues = filteredIssues
-        .filter((issue) => issue.stateId)
-        .filter((issue) => {
-          return !skipIssueStatuses.includes(issue.stateId!);
-        });
-    }
-
-    const projects = await this.client.projects();
-    do {
-      await projects.fetchNext();
-    } while (projects.pageInfo.hasNextPage);
-
-    let filteredProjects = projects.nodes;
-    if (this.knowledgeGroup.linearSkipProjectStatuses) {
-      const skipProjectStatuses = this.knowledgeGroup.linearSkipProjectStatuses
-        .split(",")
-        .filter(Boolean);
-
-      filteredProjects = filteredProjects.filter((project) => {
-        return !skipProjectStatuses.includes(project.statusId!);
-      });
-    }
-
-    const totalPages = filteredIssues.length + filteredProjects.length;
-
-    for (let i = 0; i < filteredIssues.length; i++) {
-      const issue = filteredIssues[i];
+    for (let i = 0; i < issues.length; i++) {
+      const issue = issues[i];
       const parts: string[] = [];
 
       const linearPage = await this.client.issue(issue.id);
@@ -113,8 +83,8 @@ export class LinearKbProcesser extends BaseKbProcesser {
       );
     }
 
-    for (let i = 0; i < filteredProjects.length; i++) {
-      const project = filteredProjects[i];
+    for (let i = 0; i < projects.length; i++) {
+      const project = projects[i];
       const updates = await project.projectUpdates();
       do {
         await updates.fetchNext();
@@ -148,8 +118,8 @@ export class LinearKbProcesser extends BaseKbProcesser {
           title: project.name || "Untitled",
         },
         {
-          remaining: totalPages - (i + filteredIssues.length),
-          completed: i + filteredIssues.length,
+          remaining: totalPages - (i + issues.length),
+          completed: i + issues.length,
         }
       );
     }

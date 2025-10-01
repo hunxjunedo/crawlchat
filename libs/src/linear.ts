@@ -1,12 +1,21 @@
-import { LinearClient } from "@linear/sdk";
+import { LinearClient, PaginationOrderBy } from "@linear/sdk";
 
 export { LinearClient };
 
-export async function getLinearIssues(client: LinearClient) {
+export async function getLinearIssues(
+  client: LinearClient,
+  skipStatuses: string[] = []
+) {
   const issues = await client.issues({
     filter: {
-      state: {},
+      state: {
+        id: {
+          nin: skipStatuses,
+        },
+      },
     },
+    orderBy: PaginationOrderBy.UpdatedAt,
+    first: 500,
   });
 
   do {
@@ -16,8 +25,21 @@ export async function getLinearIssues(client: LinearClient) {
   return issues.nodes;
 }
 
-export async function getLinearProjects(client: LinearClient) {
-  const projects = await client.projects();
+export async function getLinearProjects(
+  client: LinearClient,
+  skipStatuses: string[] = []
+) {
+  const projects = await client.projects({
+    filter: {
+      status: {
+        id: {
+          nin: skipStatuses,
+        },
+      },
+    },
+    orderBy: PaginationOrderBy.UpdatedAt,
+    first: 500,
+  });
   return projects.nodes;
 }
 
