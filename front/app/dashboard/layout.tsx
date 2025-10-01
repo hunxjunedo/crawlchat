@@ -1,5 +1,5 @@
 import type { Route } from "./+types/layout";
-import { Outlet, useFetcher } from "react-router";
+import { Outlet, redirect, useFetcher } from "react-router";
 import { AppContext, useApp } from "./context";
 import { getAuthUser } from "~/auth/middleware";
 import { SideMenu } from "./side-menu";
@@ -28,6 +28,23 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const session = await getSession(request.headers.get("cookie"));
   const scrapeId = session.get("scrapeId");
+
+  const url = new URL(request.url);
+  const skipOnboarding = url.searchParams.get("skip-onboarding");
+
+  if (skipOnboarding) {
+    await prisma.user.update({
+      where: { id: user!.id },
+      data: { showOnboarding: false },
+    });
+    throw redirect("/app");
+  }
+
+  const isWelcome = request.url.endsWith("/welcome");
+
+  if (user!.showOnboarding && !isWelcome) {
+    throw redirect("/welcome");
+  }
 
   const scrapes = await prisma.scrapeUser
     .findMany({
@@ -81,6 +98,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     starterPlan: PLAN_STARTER,
     proPlan: PLAN_PRO,
     hobbyPlan: PLAN_HOBBY,
+    isWelcome,
   };
 }
 
@@ -107,7 +125,10 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     <AppContext.Provider value={app}>
       <div
         data-theme="brand"
-        className="min-h-screen drawer md:drawer-open bg-base-100"
+        className={cn(
+          "min-h-screen drawer bg-base-100",
+          !loaderData.isWelcome && "md:drawer-open"
+        )}
       >
         <input
           type="checkbox"
