@@ -1,6 +1,6 @@
 import { prisma } from "libs/prisma";
 import type { PaymentGateway } from "./gateway";
-import { activatePlan, PLAN_FREE, resetCredits } from "libs/user-plan";
+import { activatePlan, PLAN_FREE, planMap, resetCredits } from "libs/user-plan";
 
 export async function handleWebhook(request: Request, gateway: PaymentGateway) {
   const body = await request.text();
@@ -85,8 +85,12 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
       return Response.json({ message: "Updated plan to expired" });
     }
 
-    if (webhook.plan && webhook.type === "renewed") {
-      await resetCredits(user.id, webhook.plan.id);
+    if (webhook.type === "renewed") {
+      if (!user.plan?.planId || !planMap[user.plan.planId]) {
+        return Response.json({ message: "Plan not found" }, { status: 400 });
+      }
+
+      await resetCredits(user.id, user.plan.planId);
 
       return Response.json({ message: "Updated plan to active" });
     }

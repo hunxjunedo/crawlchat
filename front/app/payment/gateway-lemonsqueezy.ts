@@ -49,7 +49,7 @@ export const lemonsqueezyGateway: PaymentGateway = {
     const plan = productIdPlanMap[productId];
     const subscriptionId = payload.data.id;
 
-    if (!plan) {
+    if (type !== "renewed" && !plan) {
       throw new Error(JSON.stringify({ error: "Plan not found", status: 401 }));
     }
 
