@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { prisma } from "libs/prisma";
+import fs from "fs";
 
 async function clearDataGaps() {
   const dataGapMessages = await prisma.message.findMany({
@@ -29,8 +30,26 @@ async function clearDataGaps() {
   }
 }
 
-async function main() {
+async function saveUsersCsv() {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      name: true,
+    },
+    where: {
+      createdAt: {
+        gte: new Date("2025-08-01"),
+      }
+    }
+  });
 
+  const text = `email\n${users.map((user) => user.email).join("\n")}`;   
+  fs.writeFileSync("users.csv", text);
+}
+
+async function main() {
+  await saveUsersCsv();
 }
 
 console.log("Starting...");

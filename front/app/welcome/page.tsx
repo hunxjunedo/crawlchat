@@ -234,8 +234,9 @@ function CreateCollectionStep() {
             "w-full"
           )}
         >
-          <p className="text-base-content/50 text-center">
-            Start creating a collection for your company
+          <p className="text-base-content/50 text-center max-w-md">
+            Collection contains your knowledge base, integrations, and
+            connectors. Create one for your company.
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-2 w-full">
             <input type="hidden" name="intent" value="create-collection" />
