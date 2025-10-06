@@ -1,4 +1,4 @@
-import { PLAN_FREE, PLAN_PRO, PLAN_STARTER } from "libs/user-plan";
+import { PLAN_FREE, PLAN_HOBBY, PLAN_PRO, PLAN_STARTER } from "libs/user-plan";
 import { Container, Pricing } from "./page";
 import { makeMeta } from "~/meta";
 
@@ -15,6 +15,7 @@ export async function loader() {
     freePlan: PLAN_FREE,
     starterPlan: PLAN_STARTER,
     proPlan: PLAN_PRO,
+    hobbyPlan: PLAN_HOBBY,
   };
 }
 
