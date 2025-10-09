@@ -716,12 +716,14 @@ function Toolbar() {
               "z-1 w-34 p-2 shadow-sm text-base-content"
             )}
           >
-            <li>
-              <a onClick={() => handleMenuSelect("share")}>
-                <TbShare2 />
-                Share chat
-              </a>
-            </li>
+            {chat.messages.length > 0 && (
+              <li>
+                <a onClick={() => handleMenuSelect("share")}>
+                  <TbShare2 />
+                  Share chat
+                </a>
+              </li>
+            )}
             {(scrape.widgetConfig?.showMcpSetup ?? true) && (
               <li>
                 <a onClick={() => handleMenuSelect("mcp")}>
