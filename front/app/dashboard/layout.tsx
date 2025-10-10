@@ -104,7 +104,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   const { user } = loaderData;
-  const app = useApp({ user, scrapeId: loaderData.scrapeId });
+  const app = useApp({
+    user,
+    scrapeId: loaderData.scrapeId,
+    scrape: loaderData.scrape,
+  });
   const scrapeIdFetcher = useFetcher();
 
   useEffect(() => {

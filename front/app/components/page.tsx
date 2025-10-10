@@ -1,7 +1,23 @@
 import cn from "@meltdownjs/cn";
+import type { LlmModel } from "libs/prisma";
 import { useContext, useEffect, useRef } from "react";
-import { TbMenu2 } from "react-icons/tb";
+import { TbAlertTriangle, TbMenu2, TbX } from "react-icons/tb";
+import { Link } from "react-router";
 import { AppContext } from "~/dashboard/context";
+
+const LlmNameMap: Record<LlmModel, string> = {
+  gpt_4o_mini: "OpenAI 4o-mini",
+  gpt_5_nano: "OpenAI GPT 5-nano",
+  gpt_5: "OpenAI GPT 5",
+  gpt_5_mini: "OpenAI GPT 5-mini",
+  sonnet_4_5: "Claude Sonnet 4.5",
+  o3_mini: "OpenAI o3-mini",
+  sonnet_3_7: "Claude Sonnet 3.7",
+  sonnet_3_5: "Claude Sonnet 3.5",
+  gemini_2_5_flash: "Gemini 2.5 Flash",
+  gemini_2_5_flash_lite: "Gemini 2.5 Flash Lite",
+  o4_mini: "OpenAI o4-mini",
+};
 
 export function Page({
   title,
@@ -16,7 +32,7 @@ export function Page({
   right?: React.ReactNode;
   noPadding?: boolean;
 }) {
-  const { setContainerWidth } = useContext(AppContext);
+  const { setContainerWidth, scrape } = useContext(AppContext);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,6 +45,9 @@ export function Page({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const productionLlmModels: LlmModel[] = ["sonnet_4_5", "gpt_5", "gpt_5_mini"];
+  const currentLlmModel = scrape?.llmModel ?? "gpt_4o_mini";
 
   return (
     <div className="flex flex-col flex-1 max-w-[1200px] w-full mx-auto">
@@ -58,6 +77,25 @@ export function Page({
         className={cn("flex-1 flex flex-col", !noPadding && "p-4")}
         ref={containerRef}
       >
+        {scrape?.llmModel && !productionLlmModels.includes(scrape.llmModel) && (
+          <div role="alert" className="alert alert-warning alert-dash mb-4">
+            <TbAlertTriangle size={20} />
+            <span>
+              You are using{" "}
+              <span className="font-medium">
+                {LlmNameMap[currentLlmModel] ?? currentLlmModel}
+              </span>{" "}
+              model. This is not fit for public usage. Use one of{" "}
+              {productionLlmModels
+                .map((model) => LlmNameMap[model] ?? model)
+                .join(", ")}{" "}
+              for better results from{" "}
+              <Link to="/settings#ai-model" className="link">
+                here
+              </Link>
+            </span>
+          </div>
+        )}
         {children}
       </div>
     </div>
