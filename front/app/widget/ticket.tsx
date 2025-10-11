@@ -433,7 +433,7 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
                 <button
                   className="btn"
                   onClick={handleResolve}
-                  type="submit"
+                  type="button"
                   disabled={commentFetcher.state !== "idle"}
                 >
                   {commentFetcher.state !== "idle" && resolve && (
