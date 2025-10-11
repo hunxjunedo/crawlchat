@@ -40,7 +40,6 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "compose") {
     const prompt = formData.get("prompt");
     const messages = formData.get("messages");
-    const format = formData.get("format");
     const formatText = formData.get("format-text");
 
     const token = createToken(user!.id);
@@ -51,7 +50,6 @@ export async function action({ request }: Route.ActionArgs) {
         body: JSON.stringify({
           prompt,
           messages,
-          format,
           formatText,
         }),
         headers: {

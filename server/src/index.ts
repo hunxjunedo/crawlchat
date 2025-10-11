@@ -914,11 +914,10 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
     Don't overwrite the answer with delta. Always apply the delta.
 
+    Just give the answer. Don't give any other text other than the answer.
+
     <format-text>${formatText}</format-text>
     `,
-    schema: z.object({
-      answer: z.string(),
-    }),
     tools: [makeRagTool(scrape.id, scrape.indexer, { queryContext }).make()],
     ...llmConfig,
   });
@@ -940,7 +939,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
   await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
 
   res.json({
-    content: JSON.parse(content).answer,
+    content,
     messages: [
       ...messages,
       {
