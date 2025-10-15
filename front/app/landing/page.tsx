@@ -939,7 +939,7 @@ export function PricingBoxes({
         description="Explore the platform"
         price={`$${hobbyPlan.price}`}
         items={[
-          { text: `${hobbyPlan.credits.scrapes} page credits/month` },
+          { text: `${hobbyPlan.credits.scrapes} pages` },
           { text: `${hobbyPlan.credits.messages} message credits/month` },
           { text: `${hobbyPlan.limits.scrapes} collections` },
           { text: `${hobbyPlan.limits.teamMembers} team members` },
@@ -963,7 +963,7 @@ export function PricingBoxes({
         description="Start your journey with CrawlChat"
         price={`$${starterPlan.price}`}
         items={[
-          { text: `${starterPlan.credits.scrapes} page credits/month` },
+          { text: `${starterPlan.credits.scrapes} pages` },
           { text: `${starterPlan.credits.messages} message credits/month` },
           { text: `${starterPlan.limits.scrapes} collections` },
           { text: `${starterPlan.limits.teamMembers} team members` },
@@ -987,7 +987,7 @@ export function PricingBoxes({
         popular
         price={`$${proPlan.price}`}
         items={[
-          { text: `${proPlan.credits.scrapes} page credits/month` },
+          { text: `${proPlan.credits.scrapes} pages` },
           { text: `${proPlan.credits.messages} message credits/month` },
           { text: `${proPlan.limits.scrapes} collections` },
           { text: `${proPlan.limits.teamMembers} team members` },
@@ -1797,20 +1797,14 @@ function FAQ() {
       ),
     },
     {
-      question: "How does Support Ticket System work?",
+      question: "What happens if the message credits run out?",
       answer: (
-        <div className="flex flex-col gap-4">
-          <p>
-            CrawlChat's goal is to direct the queries to the humans if the
-            documentation does not have answer for any query. So, when it has no
-            answer, it prompts the user to give their email to create the
-            support ticket. Once the support ticket is created, you can view
-            them from the dashboard and work on the resolution. CrawlChat sends
-            email notifications to the user whenever there is an update.
-          </p>
-          <p>You can close the ticket once the query is resolved.</p>
-          <p>You can enable or disable this module as per your requirement</p>
-        </div>
+        <p>
+          The message credits are reset every month whenever the subscription is
+          renewed. Whereas the pages is the number of unique pages (maxed to a
+          set of charecters) you have at any given point of time. Choose the
+          plan that best suits your needs.
+        </p>
       ),
     },
     {
