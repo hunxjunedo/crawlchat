@@ -615,6 +615,26 @@ function Toolbar() {
     close,
   } = useChatBoxContext();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const menuItems = useMemo(() => {
+    const items = [];
+    if (chat.messages.length > 0) {
+      items.push({
+        key: "share",
+        label: "Share chat",
+        icon: <TbShare2 />,
+        onClick: handleShare,
+      });
+    }
+    if (scrape.widgetConfig?.showMcpSetup ?? true) {
+      items.push({
+        key: "mcp",
+        label: "As MCP",
+        icon: <TbRobotFace />,
+        onClick: () => setScreen("mcp"),
+      });
+    }
+    return items;
+  }, [chat.messages.length, scrape.widgetConfig?.showMcpSetup]);
 
   useEffect(
     function () {
@@ -712,35 +732,28 @@ function Toolbar() {
           </div>
         )}
 
-        <div className="dropdown dropdown-end">
-          <ToolbarButton>
-            <TbMenu2 />
-          </ToolbarButton>
-          <ul
-            tabIndex={0}
-            className={cn(
-              "menu dropdown-content bg-base-100 rounded-box",
-              "z-1 w-34 p-2 shadow-sm text-base-content"
-            )}
-          >
-            {chat.messages.length > 0 && (
-              <li>
-                <a onClick={() => handleMenuSelect("share")}>
-                  <TbShare2 />
-                  Share chat
-                </a>
-              </li>
-            )}
-            {(scrape.widgetConfig?.showMcpSetup ?? true) && (
-              <li>
-                <a onClick={() => handleMenuSelect("mcp")}>
-                  <TbRobotFace />
-                  As MCP
-                </a>
-              </li>
-            )}
-          </ul>
-        </div>
+        {menuItems.length > 0 && (
+          <div className="dropdown dropdown-end">
+            <ToolbarButton>
+              <TbMenu2 />
+            </ToolbarButton>
+            <ul
+              tabIndex={0}
+              className={cn(
+                "menu dropdown-content bg-base-100 rounded-box",
+                "z-1 w-34 p-2 shadow-sm text-base-content"
+              )}
+            >
+              {menuItems.map((item) => (
+                <li key={item.key}>
+                  <a onClick={() => handleMenuSelect(item.key)}>
+                    {item.icon} {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
