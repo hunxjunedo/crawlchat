@@ -35,6 +35,7 @@ import { makeCursorMcpJson, makeMcpCommand, makeMcpName } from "~/mcp/setup";
 import { useChatBoxContext } from "./use-chat-box";
 import cn from "@meltdownjs/cn";
 import toast from "react-hot-toast";
+import { RiChatVoiceAiFill } from "react-icons/ri";
 
 export function useChatBoxDimensions(
   size: WidgetSize | null,
@@ -749,13 +750,22 @@ function PoweredBy() {
   const { titleSlug, sidePanel } = useChatBoxContext();
 
   return (
-    <div className={cn("text-xs", sidePanel && "flex justify-center gap-1")}>
-      <span className="opacity-40">Powered by </span>
+    <div
+      className={cn(
+        "text-xs flex items-center gap-1",
+        sidePanel && "justify-center"
+      )}
+    >
+      <span className="opacity-40">Made by </span>
       <a
-        className="link link-primary link-hover"
+        className={cn(
+          "opacity-40 flex items-center gap-1",
+          "hover:opacity-100 transition-all"
+        )}
         href={`https://crawlchat.app?ref=powered-by-${titleSlug}`}
         target="_blank"
       >
+        <RiChatVoiceAiFill />
         CrawlChat
       </a>
     </div>
