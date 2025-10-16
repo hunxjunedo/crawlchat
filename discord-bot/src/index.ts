@@ -84,6 +84,7 @@ const removeBotMentions = (content: string) => {
 };
 
 const getImageBase64 = async (url: string) => {
+  console.log("getting image base64 for", url);
   const response = await fetch(url);
   const buffer = await response.arrayBuffer();
   const base64 = Buffer.from(buffer).toString("base64");
