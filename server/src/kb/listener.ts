@@ -7,7 +7,7 @@ import { deleteByIds, makeRecordId } from "../scrape/pinecone";
 import { v4 as uuidv4 } from "uuid";
 import { getPagesCount, PLAN_FREE } from "libs/user-plan";
 
-const assertLimit = async (
+export const assertLimit = async (
   url: string,
   n: number,
   scrapeId: string,

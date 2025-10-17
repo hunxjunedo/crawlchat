@@ -25,7 +25,7 @@ import {
   RAGAgentCustomMessage,
 } from "./llm/flow-jasmine";
 import { extractCitations } from "libs/citation";
-import { makeKbProcesserListener } from "./kb/listener";
+import { assertLimit, makeKbProcesserListener } from "./kb/listener";
 import { makeKbProcesser } from "./kb/factory";
 import { FlowMessage, multiLinePrompt, SimpleAgent } from "./llm/agentic";
 import { chunk } from "libs/chunk";
@@ -545,6 +545,9 @@ app.post("/resource/:scrapeId", authenticate, async (req, res) => {
 
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: scrapeId },
+    include: {
+      user: true,
+    },
   });
 
   let knowledgeGroup = await prisma.knowledgeGroup.findFirst({
@@ -584,6 +587,19 @@ app.post("/resource/:scrapeId", authenticate, async (req, res) => {
     });
   }
 
+  try {
+    await assertLimit(
+      new Date().toISOString(),
+      chunks.length,
+      scrape.id,
+      scrape.userId,
+      scrape.user.plan
+    );
+  } catch (error) {
+    res.status(400).json({ message: "Pages limit reached for the plan" });
+    return;
+  }
+
   const indexer = makeIndexer({ key: scrape.indexer });
   let scrapeItem = await prisma.scrapeItem.create({
     data: {
@@ -612,8 +628,6 @@ app.post("/resource/:scrapeId", authenticate, async (req, res) => {
       })),
     },
   });
-
-  await consumeCredits(scrape.userId, "scrapes", chunks.length);
 
   res.json({ scrapeItem });
 });
