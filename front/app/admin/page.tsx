@@ -159,6 +159,7 @@ function MessagesTable({
             <th>Message</th>
             <th>Scrape</th>
             <th>User</th>
+            <th>Category</th>
             <th>Score</th>
             <th>Channel</th>
             <th>Data gap</th>
@@ -178,6 +179,7 @@ function MessagesTable({
               </td>
               <td>{messageDetail.scrape.title}</td>
               <td>{messageDetail.user.email}</td>
+              <td>{messageDetail.message.analysis?.category}</td>
               <td>
                 <Score message={messageDetail.message} />
               </td>
