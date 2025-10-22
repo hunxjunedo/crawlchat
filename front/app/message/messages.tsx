@@ -2,7 +2,6 @@ import type {
   CategorySuggestion,
   Message,
   Scrape,
-  ScrapeMessageCategory,
 } from "libs/prisma";
 import type { Route } from "./+types/messages";
 import { TbFolder, TbMessage, TbMessages, TbPointer } from "react-icons/tb";
@@ -82,7 +81,10 @@ function CategorySuggestionCount({
   if (filtered.length === 0) return null;
 
   return (
-    <div className="tooltip" data-tip="Category suggestions">
+    <div
+      className="tooltip"
+      data-tip={filtered.map((suggestion) => suggestion.title).join(", ")}
+    >
       <span className="text-base-content/50">+{filtered.length}</span>
     </div>
   );

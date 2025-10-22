@@ -485,14 +485,13 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             {Object.entries(loaderData.categories).map(([category, count]) => (
               <div
                 key={category}
-                className="badge badge-accent badge-soft badge-xl"
+                className="badge badge-accent badge-soft pr-0"
               >
                 <TbFolder />
                 <span>{category}</span>
                 <span
                   className={cn(
-                    "badge badge-neutral badge-soft",
-                    "rounded-full -mr-2 border-neutral-300 border"
+                    "bg-accent text-accent-content border-left-base-300 px-1.5 rounded-full"
                   )}
                 >
                   {count}
@@ -509,9 +508,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             >
               <a
                 href="/settings#categories"
-                className="btn btn-primary btn-soft btn-sm"
+                className="btn btn-primary btn-soft btn-xs btn-square"
               >
-                Add category
                 <TbPlus />
               </a>
             </div>
