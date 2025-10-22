@@ -379,18 +379,24 @@ expressWs.app.ws("/", (ws: any, req) => {
                 })
               );
 
-              await fillMessageAnalysis(
-                newAnswerMessage.id,
-                message.data.query,
-                event.content,
-                event.sources,
-                event.context,
-                {
-                  onFollowUpQuestion: (questions) => {
-                    ws?.send(makeMessage("follow-up-questions", { questions }));
-                  },
-                }
-              );
+              if (questionMessage) {
+                await fillMessageAnalysis(
+                  newAnswerMessage.id,
+                  questionMessage.id,
+                  message.data.query,
+                  event.content,
+                  event.sources,
+                  event.context,
+                  {
+                    categories: scrape.messageCategories,
+                    onFollowUpQuestion: (questions) => {
+                      ws?.send(
+                        makeMessage("follow-up-questions", { questions })
+                      );
+                    },
+                  }
+                );
+              }
           }
         };
 
@@ -686,7 +692,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
       ? "api"
       : (req.body.channel as MessageChannel);
 
-  await prisma.message.create({
+  const questionMessage = await prisma.message.create({
     data: {
       threadId: thread.id,
       scrapeId: scrape.id,
@@ -735,10 +741,14 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
 
   fillMessageAnalysis(
     newAnswerMessage.id,
+    questionMessage.id,
     getQueryString(query),
     answer!.content,
     answer!.sources,
-    answer!.context
+    answer!.context,
+    {
+      categories: scrape.messageCategories,
+    }
   );
 
   if (!answer) {

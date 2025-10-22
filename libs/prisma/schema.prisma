@@ -144,6 +144,12 @@ type SlackConfig {
   replyBroadcast        Boolean?
 }
 
+type ScrapeMessageCategory {
+  title String
+  createdAt DateTime
+  description String
+}
+
 model Scrape {
   id                    String   @id @default(auto()) @map("_id") @db.ObjectId
   userId                String   @db.ObjectId
@@ -181,6 +187,8 @@ model Scrape {
   showSources           Boolean?
   analyseMessage        Boolean?
   lowCreditsMailSentAt  DateTime?
+
+  messageCategories     ScrapeMessageCategory[]
 
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -238,6 +246,11 @@ enum QuestionSentiment {
   happy
 }
 
+type CategorySuggestion {
+  title String
+  description String
+}
+
 type MessageAnalysis {
   category  String?
   questionRelevanceScore Float?
@@ -249,6 +262,8 @@ type MessageAnalysis {
   
   shortQuestion String?
   followUpQuestions String[]
+
+  categorySuggestions CategorySuggestion[]
 }
 
 model Message {
