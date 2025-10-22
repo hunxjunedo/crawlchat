@@ -172,13 +172,21 @@ export async function loader({ request }: Route.LoaderArgs) {
       })
     : 0;
 
+  const scrape = scrapes.find((s) => s.id === scrapeId);
   const categories: Record<string, number> = {};
   for (const message of messages) {
-    if (!message.analysis?.category) continue;
+    if (
+      !message.analysis?.category ||
+      !scrape?.messageCategories.some(
+        (c) =>
+          c.title.trim().toLowerCase() ===
+          message.analysis?.category?.trim().toLowerCase()
+      )
+    )
+      continue;
     categories[message.analysis.category] =
       (categories[message.analysis.category] ?? 0) + 1;
   }
-  const scrape = scrapes.find((s) => s.id === scrapeId);
   if (scrape?.messageCategories) {
     for (const category of scrape.messageCategories) {
       if (!categories[category.title]) {
@@ -481,7 +489,12 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               >
                 <TbFolder />
                 <span>{category}</span>
-                <span className="badge badge-neutral badge-soft rounded-full -mr-2">
+                <span
+                  className={cn(
+                    "badge badge-neutral badge-soft",
+                    "rounded-full -mr-2 border-neutral-300 border"
+                  )}
+                >
                   {count}
                 </span>
               </div>
