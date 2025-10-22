@@ -233,13 +233,14 @@ export async function analyseMessage(
         score: z.number().describe(`
           The confidence score of the category description for the question.
           It should be a number between 0 and 1.
-          It should be greater than 0.8.
+          You need to match the answer with the category description and get a best match.
+          Calculate score by how relevant the answer is to the category description.
         `),
       })
       .optional()
       .describe(
         `
-        The category of the question.
+        The category of the answer.
         Give the category only if it is a perfect match for the category description.
         Don't give the category if it is not a perfect match.
       `
@@ -371,9 +372,10 @@ export async function fillMessageAnalysis(
         ? partialAnalysis.category
         : null;
     const category =
-      cleanedCategory && cleanedCategory.score > 0.8
+      cleanedCategory && cleanedCategory.score > 0.9
         ? cleanedCategory.title
         : null;
+    console.log("categoryScore", cleanedCategory?.score);
 
     const analysis: MessageAnalysis = {
       questionRelevanceScore: null,
