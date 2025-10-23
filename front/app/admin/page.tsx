@@ -169,6 +169,7 @@ function MessagesTable({
             <th>Category</th>
             <th>Score</th>
             <th>Channel</th>
+            <th>LLM</th>
             <th>Data gap</th>
             <th>Created At</th>
           </tr>
@@ -191,6 +192,9 @@ function MessagesTable({
                 <Score message={messageDetail.message} />
               </td>
               <td>{messageDetail.message.channel ?? "chatbot"}</td>
+              <td>{`${messageDetail.message.llmModel ?? "-"}, ${
+                messageDetail.message.creditsUsed ?? "-"
+              }`}</td>
               <td>
                 {messageDetail.message.analysis?.dataGapTitle && (
                   <div className="dropdown dropdown-end">
