@@ -676,7 +676,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
   }
   let query = req.body.query as string | MultimodalContent[];
 
-  if (JSON.stringify(query).length > 1000) {
+  if (query && JSON.stringify(query).length > 3000) {
     res.status(400).json({ message: "Question too long" });
     return;
   }
