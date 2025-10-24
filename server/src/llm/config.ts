@@ -65,29 +65,32 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
   }
   if (model === LlmModel.gpt_5_nano) {
     return {
-      model: "gpt-5-nano",
-      apiKey: process.env.OPENAI_API_KEY!,
+      model: "openai/gpt-5-nano",
+      apiKey: process.env.OPENROUTER_API_KEY!,
       ragTopN: 4,
       creditsPerMessage: 1,
       supportsImages: true,
+      baseURL: "https://openrouter.ai/api/v1",
     };
   }
   if (model === LlmModel.gpt_5_mini) {
     return {
-      model: "gpt-5-mini",
-      apiKey: process.env.OPENAI_API_KEY!,
+      model: "openai/gpt-5-mini",
+      apiKey: process.env.OPENROUTER_API_KEY!,
       ragTopN: 4,
       creditsPerMessage: 1,
       supportsImages: true,
+      baseURL: "https://openrouter.ai/api/v1",
     };
   }
   if (model === LlmModel.gpt_5) {
     return {
-      model: "gpt-5",
-      apiKey: process.env.OPENAI_API_KEY!,
+      model: "openai/gpt-5",
+      apiKey: process.env.OPENROUTER_API_KEY!,
       ragTopN: 4,
       creditsPerMessage: 2,
       supportsImages: true,
+      baseURL: "https://openrouter.ai/api/v1",
     };
   }
   if (model === LlmModel.sonnet_4_5) {
