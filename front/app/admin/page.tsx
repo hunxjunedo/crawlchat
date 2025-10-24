@@ -39,6 +39,13 @@ type MessageDetail = {
   thread: Thread;
 };
 
+function cleanName(name: string) {
+  if (name.length < 20) {
+    return name;
+  }
+  return name.slice(0, 20) + "...";
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
 
@@ -132,7 +139,9 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
     const scrapes: Record<string, string> = {};
     for (const message of messages) {
-      scrapes[message.scrape.id] = message.scrape.title ?? message.scrape.id;
+      scrapes[message.scrape.id] = cleanName(
+        message.scrape.title ?? message.scrape.id
+      );
     }
     const total = Object.values(counts).reduce((acc, count) => acc + count, 0);
     return { counts, scrapes, total };
