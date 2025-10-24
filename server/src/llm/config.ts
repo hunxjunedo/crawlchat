@@ -67,7 +67,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
     return {
       model: "gpt-5-nano",
       apiKey: process.env.OPENAI_API_KEY!,
-      ragTopN: 6,
+      ragTopN: 4,
       creditsPerMessage: 1,
       supportsImages: true,
     };
@@ -76,7 +76,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
     return {
       model: "gpt-5-mini",
       apiKey: process.env.OPENAI_API_KEY!,
-      ragTopN: 6,
+      ragTopN: 4,
       creditsPerMessage: 1,
       supportsImages: true,
     };
@@ -85,7 +85,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
     return {
       model: "gpt-5",
       apiKey: process.env.OPENAI_API_KEY!,
-      ragTopN: 6,
+      ragTopN: 4,
       creditsPerMessage: 2,
       supportsImages: true,
     };
@@ -104,7 +104,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
     return {
       model: "anthropic/claude-haiku-4.5",
       apiKey: process.env.OPENROUTER_API_KEY!,
-      ragTopN: 6,
+      ragTopN: 4,
       creditsPerMessage: 2,
       baseURL: "https://openrouter.ai/api/v1",
       supportsImages: true
