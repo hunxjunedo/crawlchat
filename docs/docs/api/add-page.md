@@ -38,6 +38,8 @@ Pass the following information in the body of the request
 | `knowledgeGroupId` (required) | `STRING` | The knowledge group ID to which this page should get added                                         |
 | `key` (optional)              | `STRING` | Unique key for the page. If passed overrides the page if exists. Else it auto creates an unique id |
 
+You can find the `knowledgeGroupId` in the URL when you navigate to any group page. Example: https://crawlchat.app/knowledge/group/**68fe11c9cf9ce8a3c8911f71**
+
 ### CURL Request
 
 ```bash
