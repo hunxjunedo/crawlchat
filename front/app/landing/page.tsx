@@ -2283,6 +2283,73 @@ function SourcesChannels() {
   );
 }
 
+function SecondaryCTA({
+  title,
+  description,
+  icon,
+  href,
+  ctaLabel,
+}: {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  href: string;
+  ctaLabel: string;
+}) {
+  return (
+    <div className={cn("border border-primary/20 rounded-box overflow-hidden")}>
+      <div
+        className={cn(
+          "p-4 border-b border-primary/20",
+          "bg-gradient-to-br from-primary/5 to-primary/10"
+        )}
+      >
+        <h3 className="text-2xl font-medium font-radio-grotesk">{title}</h3>
+        <p className="text-base-content/50">{description}</p>
+      </div>
+      <div
+        className={cn(
+          "p-4 flex justify-between items-center w-full",
+          "bg-gradient-to-r from-primary/20 to-primary/5",
+          "overflow-hidden"
+        )}
+      >
+        <div
+          className={cn(
+            "text-4xl text-primary scale-400 -rotate-20",
+            "overflow-hidden opacity-10"
+          )}
+        >
+          {icon}
+        </div>
+        <Button href={href}>{ctaLabel}</Button>
+      </div>
+    </div>
+  );
+}
+
+function SecondaryCTAs() {
+  return (
+    <div className="flex flex-col items-center md:flex-row gap-4 justify-center">
+      <SecondaryCTA
+        title="Join on Discord"
+        description="Interested? Join the Discord server to get updates and find out more about the product from the community."
+        icon={<TbBrandDiscord />}
+        href="https://discord.gg/zW3YmCRJkC"
+        ctaLabel="Join now"
+      />
+
+      <SecondaryCTA
+        title="Automate with n8n"
+        description="Use the CrawlChat n8n node in your workflows to get answers from your docs and add content to your knowledge base."
+        icon={<SiN8N />}
+        href="https://docs.crawlchat.app/n8n-node"
+        ctaLabel="Read more"
+      />
+    </div>
+  );
+}
+
 export default function Landing({ loaderData }: Route.ComponentProps) {
   return (
     <>
@@ -2340,6 +2407,10 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
 
       <Container>
         <Pricing />
+      </Container>
+
+      <Container>
+        <SecondaryCTAs />
       </Container>
 
       <Container>
