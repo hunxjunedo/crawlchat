@@ -123,6 +123,7 @@ export function MailTemplate({
                       padding: "10px 20px",
                       background: emailConfig.colors.primary,
                       borderRadius: "6px",
+                      fontSize: "16px",
                     }}
                     href={cta.href}
                   >

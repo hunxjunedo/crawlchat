@@ -8,7 +8,9 @@ import {
   sendNewTicketAdminEmail,
   sendNewTicketUserEmail,
   sendReactEmail,
+  sendWeeklyUpdateEmail,
 } from "./email";
+import { getMessagesSummary, type MessagesSummary } from "./messages-summary";
 
 export async function action({ request }: Route.LoaderArgs) {
   const user = await getJwtAuthUser(request);
@@ -141,6 +143,54 @@ export async function action({ request }: Route.LoaderArgs) {
           thread.title,
           message,
           thread.ticketUserEmail
+        );
+      }
+    }
+  }
+
+  if (intent === "weekly-update") {
+    const scrape = await prisma.scrape.findFirstOrThrow({
+      where: { id: body.scrapeId },
+      include: {
+        scrapeUsers: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    authoriseScrapeUser(user!.scrapeUsers, scrape.id);
+
+    const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
+    const oneWeekAgo = new Date(Date.now() - ONE_WEEK);
+    const messages = await prisma.message.findMany({
+      where: {
+        scrapeId: scrape.id,
+        createdAt: { gte: oneWeekAgo },
+      },
+    });
+    const summary = getMessagesSummary(messages);
+    const categoriesSummary: { name: string; summary: MessagesSummary }[] = [];
+    for (const category of scrape.messageCategories) {
+      categoriesSummary.push({
+        name: category.title,
+        summary: getMessagesSummary(
+          messages.filter((m) => m.analysis?.category === category.title)
+        ),
+      });
+    }
+
+    for (const scrapeUser of scrape.scrapeUsers) {
+      if (
+        scrapeUser.user &&
+        (scrapeUser.user.settings?.weeklyUpdates ?? true)
+      ) {
+        await sendWeeklyUpdateEmail(
+          scrapeUser.user.email,
+          scrape.title,
+          summary,
+          categoriesSummary
         );
       }
     }

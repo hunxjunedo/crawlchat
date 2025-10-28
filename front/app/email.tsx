@@ -8,6 +8,8 @@ import DataGapAlertEmail from "emails/data-gap-alert";
 import TicketUserCreateEmail from "emails/ticket-user-create";
 import TicketAdminCreateEmail from "emails/ticket-admin-create";
 import ChatVerifyEmail from "emails/chat-verify-email";
+import WeeklyEmail from "emails/weekly";
+import type { MessagesSummary } from "./messages-summary";
 
 export const sendEmail = async (to: string, subject: string, text: string) => {
   try {
@@ -150,4 +152,31 @@ export const sendNewTicketAdminEmail = async (
 
 export const sendChatVerifyEmail = async (to: string, otp: string) => {
   await sendReactEmail(to, "Verify email", <ChatVerifyEmail otp={otp} />);
+};
+
+export const sendWeeklyUpdateEmail = async (
+  to: string,
+  scrapeTitle: string | null,
+  summary: MessagesSummary,
+  categoriesSummary: { name: string; summary: MessagesSummary }[]
+) => {
+  await sendReactEmail(
+    to,
+    `${scrapeTitle || "CrawlChat"} Weekly report`,
+    <WeeklyEmail
+      scrapeTitle={scrapeTitle}
+      questions={summary.questions}
+      avgScore={summary.avgScore}
+      helpfulAnswers={summary.helpfulAnswers}
+      notHelpfulAnswers={summary.notHelpfulAnswers}
+      topCategories={categoriesSummary
+        .sort((a, b) => b.summary.questions - a.summary.questions)
+        .slice(0, 5)
+        .map((category) => ({
+          name: category.name,
+          count: category.summary.questions,
+          avgScore: category.summary.avgScore,
+        }))}
+    />
+  );
 };

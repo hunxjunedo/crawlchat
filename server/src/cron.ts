@@ -6,6 +6,7 @@ import { makeKbProcesser } from "./kb/factory";
 import { makeKbProcesserListener } from "./kb/listener";
 import { exit } from "process";
 import { cleanupMessages } from "./scripts/thread-cleanup";
+import { createToken } from "libs/jwt";
 
 async function updateKnowledgeGroup(groupId: string) {
   console.log(`Updating knowledge group ${groupId}`);
@@ -75,25 +76,59 @@ async function updateKnowledgeBase() {
 function getCliArg(argName: string): string | null {
   const args = process.argv;
   const argIndex = args.indexOf(`--${argName}`);
-  
+
   if (argIndex !== -1 && argIndex + 1 < args.length) {
     return args[argIndex + 1];
   }
-  
+
   return null;
 }
 
-async function main() {
-  const jobName = getCliArg('job-name');
+async function weeklyUpdate() {
+  const scrapes = await prisma.scrape.findMany({
+    where: {
+      user: {
+        email: "pramodkumar.damam73@gmail.com",
+      },
+    },
+  });
 
-  if (jobName === 'update-knowledge-base') {
+  for (const scrape of scrapes) {
+    if (scrape.title !== "CrawlChat") {
+      continue;
+    }
+    console.log(`Sending weekly update for scrape ${scrape.id}`);
+    const response = await fetch(`${process.env.FRONT_URL}/email-alert`, {
+      method: "POST",
+      body: JSON.stringify({
+        intent: "weekly-update",
+        scrapeId: scrape.id,
+      }),
+      headers: {
+        Authorization: `Bearer ${createToken(scrape.userId)}`,
+      },
+    });
+    if (!response.ok) {
+      console.error(`Error sending weekly update for scrape ${scrape.id}`);
+      console.error(response.statusText);
+    }
+  }
+}
+
+async function main() {
+  const jobName = getCliArg("job-name");
+
+  if (jobName === "update-knowledge-base") {
     return await updateKnowledgeBase();
   }
-  if (jobName === 'cleanup-messages') {
+  if (jobName === "cleanup-messages") {
     return await cleanupMessages();
   }
-  
-  console.error('Invalid job name', jobName);
+  if (jobName === "weekly-update") {
+    return await weeklyUpdate();
+  }
+
+  console.error("Invalid job name", jobName);
   exit(1);
 }
 
