@@ -14,7 +14,22 @@ export default function LayoutWrapper(props: Props): ReactNode {
   return (
     <>
       <Layout {...props} />
-      <CrawlChatScript id="67dbfc7258ed87c571a04b83" sidePanel sidePanelOpen hideToc />
+      <CrawlChatScript
+        id="67dbfc7258ed87c571a04b83"
+        selectionButtons={{
+          explore: {
+            name: "Explore",
+            queryPrefix: "Explain what is:"
+          },
+          ticket: {
+            name: "Ask human",
+            queryPrefix: "Create a support ticket for:"
+          },
+        }}
+        sidePanel
+        sidePanelOpen
+        hideToc
+      />
     </>
   );
 }
