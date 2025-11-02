@@ -67,6 +67,7 @@ import { SiDocusaurus, SiN8N } from "react-icons/si";
 import { FaConfluence } from "react-icons/fa";
 import { Logo } from "~/dashboard/logo";
 import { MCPIcon } from "~/mcp-icon";
+import toast, { Toaster } from "react-hot-toast";
 
 export function meta() {
   return makeMeta({
@@ -1430,20 +1431,27 @@ function Hero() {
 }
 
 export function LandingPage({ children }: PropsWithChildren) {
+  const handleCopyCoupon = () => {
+    navigator.clipboard.writeText("WINTER30");
+    toast.success("Coupon code copied to clipboard");
+  };
+
   return (
     <div data-theme="brand" className="bg-base-200 font-aeonik">
-      <div
-        className={cn(
-          "hidden md:block aspect-[1440/960] w-full",
-          // "bg-[url('https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/clouds.png')]",
-          // "dark:bg-[url('https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/clouds-dark.png')]",
-          "bg-contain bg-no-repeat absolute top-0 left-0"
-        )}
-      >
-        <div className="w-full h-full bg-gradient-to-b from-[rgba(246,246,245,0)] to-base-200"></div>
+      <div className="text-center bg-primary text-primary-content py-2 px-6">
+        Get 30% 💰 discount for first 3 months. Use{" "}
+        <strong
+          onClick={handleCopyCoupon}
+          className="cursor-pointer inline-block hover:underline"
+        >
+          WINTER30
+        </strong>{" "}
+        coupon code at checkout.
       </div>
 
       <div className="relative">{children}</div>
+
+      <Toaster position="bottom-center" />
     </div>
   );
 }
