@@ -427,6 +427,7 @@ type UserPlan {
 
   expiresAt         DateTime?
   activatedAt       DateTime
+  creditsResetAt    DateTime?
 }
 
 type TopupPlan {

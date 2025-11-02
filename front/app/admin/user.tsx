@@ -92,6 +92,10 @@ export default function User({ loaderData }: Route.ComponentProps) {
             label: "Plan activated at",
             value: user.plan?.activatedAt.toLocaleString() ?? "-",
           },
+          {
+            label: "Plan credits reset at",
+            value: user.plan?.creditsResetAt?.toLocaleString() ?? "-",
+          },
           { label: "Pages limit", value: user.plan?.limits?.pages },
           {
             label: "Members limit",

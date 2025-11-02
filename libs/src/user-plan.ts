@@ -188,7 +188,7 @@ export const resetCredits = async (userId: string, planId?: string) => {
             status: "ACTIVE",
             activatedAt: new Date(),
           },
-          update: { credits: plan.credits },
+          update: { credits: plan.credits, creditsResetAt: new Date() },
         },
       },
     },
