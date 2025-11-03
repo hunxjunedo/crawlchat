@@ -20,9 +20,7 @@ export default function LandingLayout({ loaderData }: Route.ComponentProps) {
 
       <Outlet />
 
-      <Container>
-        <CTA />
-      </Container>
+      <CTA />
 
       <Footer />
     </LandingPage>

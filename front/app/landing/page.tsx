@@ -829,8 +829,7 @@ function PricingBox({
   return (
     <div
       className={cn(
-        "flex-1 bg-base-100 shadow-md border border-base-300 rounded-2xl relative",
-        popular && "bg-primary text-primary-content"
+        "flex-1 bg-base-100 shadow-md border border-base-300 rounded-2xl relative"
       )}
     >
       {popular && (
@@ -838,7 +837,7 @@ function PricingBox({
           className={cn(
             "bg-primary-subtle border border-base-300 absolute",
             "translate-y-[-40%] top-0 right-0 translate-x-[10%]",
-            "text-sm text-primary px-3 py-2 font-medium flex items-center gap-2 rounded-xl",
+            "text-lg text-primary px-3 py-2 font-medium flex items-center gap-2 rounded-xl",
             "bg-base-200 shadow-2xl"
           )}
         >
@@ -847,18 +846,13 @@ function PricingBox({
         </div>
       )}
 
-      <div
-        className={cn(
-          "p-6 border-b border-base-300",
-          popular && "border-base-100/20"
-        )}
-      >
-        <h4 className="text-2xl font-bold font-radio-grotesk">{title}</h4>
+      <div className={cn("p-6 border-b border-base-300")}>
+        <h4 className="text-4xl font-semibold font-radio-grotesk">{title}</h4>
         <p className="opacity-50 font-medium">{description}</p>
       </div>
       <div className="p-6 gap-6 flex flex-col">
         <div className="flex gap-1 items-end">
-          <p className="text-4xl font-bold font-radio-grotesk">{price}</p>
+          <p className="text-6xl font-bold font-radio-grotesk">{price}</p>
           <p className="opacity-50 font-medium mb-1">/month</p>
         </div>
         <ul className="flex flex-col gap-2">
@@ -869,30 +863,21 @@ function PricingBox({
                   <span className="w-0 h-0 block overflow-hidden">
                     Excluded
                   </span>
-                  <TbCircleXFilled size={20} />
+                  <TbCircleXFilled size={26} />
                 </span>
               )}
               {!item.excluded && (
-                <span
-                  className={cn(
-                    "text-success",
-                    popular && "text-primary-content"
-                  )}
-                >
-                  <TbCircleCheckFilled size={20} />
+                <span className={cn("text-success")}>
+                  <TbCircleCheckFilled size={26} />
                 </span>
               )}
-              <span className="font-medium">{item.text}</span>
+              <span className="text-xl">{item.text}</span>
             </li>
           ))}
         </ul>
         <div className="w-full">
           <Button
-            className={cn(
-              "w-full text-xl p-2",
-              popular &&
-                "border-base-100 text-base-100 hover:bg-base-100 hover:text-primary"
-            )}
+            className={cn("w-full text-xl p-2")}
             variant={"outline"}
             href={!onClick ? href : undefined}
             onClick={() => onClick?.()}
@@ -1041,15 +1026,23 @@ export function Pricing() {
 
 export function CTA({ text }: { text?: string }) {
   return (
-    <div className="mt-32" id="cta">
-      <div className="w-full bg-gradient-to-b from-base-100 to-base-200 shadow-md rounded-2xl py-16 px-10 relative">
-        <h2 className="font-radio-grotesk text-[42px] md:text-[54px] leading-[1.2] font-medium text-center max-w-[900px] mx-auto">
+    <div className="mt-32 -mb-4" id="cta">
+      <div className="w-full py-16 px-10 relative bg-accent">
+        <h2
+          className={cn(
+            "font-radio-grotesk text-[42px] md:text-[54px] leading-[1.2]",
+            "font-medium text-center max-w-[900px] mx-auto text-accent-content"
+          )}
+        >
           {text ||
             "Deliver your tech doc with AI to your community and internal teams now!"}
         </h2>
 
         <div className="flex justify-center mt-8">
-          <a href="/login" className={ctaClassNames(true)}>
+          <a
+            href="/login"
+            className={cn(ctaClassNames(true), "bg-base-100 border-0 text-accent")}
+          >
             Get started
             <TbArrowRight />
           </a>
@@ -1077,7 +1070,7 @@ function FooterLink({
 
 export function Footer() {
   return (
-    <footer className="bg-base-100 mt-32 border-t border-base-300">
+    <footer className="bg-base-100 border-t border-base-300">
       <Container>
         <div className="py-8 flex flex-col md:flex-row gap-10">
           <div className="flex-[2] flex flex-col gap-4">
@@ -1418,7 +1411,7 @@ function Hero() {
         </div>
       </div>
       <div className="flex-1 flex-col">
-        <div className="border-2 border-primary rounded-box overflow-hidden shadow">
+        <div className="border-2 border-accent rounded-box overflow-hidden shadow">
           <iframe src="/w/crawlchat" className="w-full h-[560px]" />
         </div>
         <div className="text-sm text-base-content/50 text-center mt-4">
@@ -1438,7 +1431,7 @@ export function LandingPage({ children }: PropsWithChildren) {
 
   return (
     <div data-theme="brand" className="bg-base-200 font-aeonik">
-      <div className="text-center bg-primary text-primary-content py-2 px-6">
+      <div className="text-center bg-accent text-accent-content py-2 px-6">
         Get 30% 💰 discount for first 3 months. Use{" "}
         <strong
           onClick={handleCopyCoupon}
@@ -1586,7 +1579,7 @@ export function CustomTestimonial({
 
 function CTH({ children }: PropsWithChildren) {
   return (
-    <span className="bg-primary text-primary-content px-3 mx-1 whitespace-nowrap rounded-box">
+    <span className="bg-accent/10 text-accent px-3 mx-1 whitespace-nowrap rounded-box">
       {children}
     </span>
   );
@@ -1676,17 +1669,11 @@ export function MauritsTestimonial() {
 export function CustomTestimonials() {
   return (
     <div className="mt-32 flex flex-col gap-10">
-      <div className="grid grid-cols-1 md:grid-cols-3 border border-base-300 rounded-2xl bg-base-100">
+      <div className="grid grid-cols-1 md:grid-cols-4 border border-base-300 bg-base-100/50">
         <JonnyTestimonial />
         <AntonTestimonial />
         <MauritsTestimonial />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3">
-        <div />
-        <div className="border border-base-300 rounded-2xl bg-base-100">
-          <EgelhausTestimonial />
-        </div>
-        <div />
+        <EgelhausTestimonial />
       </div>
     </div>
   );
@@ -1868,7 +1855,7 @@ function FAQ() {
             <div
               className={cn(
                 "flex justify-between gap-4 text-2xl cursor-pointer py-8",
-                "hover:text-primary",
+                "hover:text-primary items-center",
                 active === index && "text-primary"
               )}
               onClick={() => handleClick(index)}
@@ -2098,44 +2085,6 @@ function Gallery() {
     <div className="mb-16">
       <div
         className={cn(
-          "flex justify-center items-center",
-          "bg-base-100 aspect-video rounded-xl shadow-xl",
-          "overflow-hidden mb-4 relative",
-          "border border-base-300"
-        )}
-      >
-        {steps[activeStep].img && isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-50 z-10">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              <p className="text-lg font-medium opacity-70">Loading...</p>
-            </div>
-          </div>
-        )}
-        {steps[activeStep].img && (
-          <img
-            src={steps[activeStep].img}
-            alt={steps[activeStep].title}
-            className={cn(
-              "w-full h-full object-cover",
-              isLoading && "opacity-50"
-            )}
-          />
-        )}
-
-        {steps[activeStep].video && (
-          <GalleryVideo
-            key={steps[activeStep].title.replace(" ", "-").toLowerCase()}
-            id={steps[activeStep].title.replace(" ", "-").toLowerCase()}
-            autoPlay={steps[activeStep].autoPlay ?? true}
-            video={steps[activeStep].video}
-            poster={steps[activeStep].poster}
-          />
-        )}
-      </div>
-
-      <div
-        className={cn(
           "border border-base-300 rounded-xl p-2",
           "flex gap-2 bg-base-100 justify-center lg:justify-between",
           "flex-wrap"
@@ -2169,6 +2118,44 @@ function Gallery() {
             )}
           </button>
         ))}
+      </div>
+
+      <div
+        className={cn(
+          "flex justify-center items-center",
+          "bg-base-100 aspect-video rounded-xl shadow-xl",
+          "overflow-hidden mt-4 relative",
+          "border border-base-300"
+        )}
+      >
+        {steps[activeStep].img && isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-50 z-10">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <p className="text-lg font-medium opacity-70">Loading...</p>
+            </div>
+          </div>
+        )}
+        {steps[activeStep].img && (
+          <img
+            src={steps[activeStep].img}
+            alt={steps[activeStep].title}
+            className={cn(
+              "w-full h-full object-cover",
+              isLoading && "opacity-50"
+            )}
+          />
+        )}
+
+        {steps[activeStep].video && (
+          <GalleryVideo
+            key={steps[activeStep].title.replace(" ", "-").toLowerCase()}
+            id={steps[activeStep].title.replace(" ", "-").toLowerCase()}
+            autoPlay={steps[activeStep].autoPlay ?? true}
+            video={steps[activeStep].video}
+            poster={steps[activeStep].poster}
+          />
+        )}
       </div>
     </div>
   );
@@ -2505,9 +2492,7 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
         <UsedBy />
       </Container>
 
-      <Container>
-        <CustomTestimonials />
-      </Container>
+      <CustomTestimonials />
 
       {/* <Container>
         <Stats
