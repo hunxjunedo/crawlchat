@@ -339,6 +339,10 @@ client.on(Events.MessageCreate, async (message) => {
 
     messages.push(await makeMessage(message, scrape));
 
+    const publicThreadId =
+      message.channel.type === ChannelType.PublicThread
+        ? message.channel.id
+        : undefined;
     let response = "Something went wrong";
     let discordThread = null;
 
@@ -363,7 +367,7 @@ client.on(Events.MessageCreate, async (message) => {
       message: answerMessage,
     } = await query(scrape.id, messages, createToken(scrape.userId), {
       prompt: defaultPrompt,
-      clientThreadId: discordThread?.id,
+      clientThreadId: discordThread?.id ?? publicThreadId,
     });
 
     if (error) {
