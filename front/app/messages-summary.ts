@@ -98,6 +98,8 @@ export function getMessagesSummary(messages: Message[]) {
     (m) => (m.llmMessage as any)?.role === "user"
   ).length;
 
+  const resolvedCount = messages.filter((m) => m.analysis?.resolved).length;
+
   return {
     messagesCount: Object.values(dailyMessages).reduce(
       (acc, curr) => acc + curr,
@@ -113,6 +115,7 @@ export function getMessagesSummary(messages: Message[]) {
     lowRatingQueries,
     avgScore,
     questions,
+    resolvedCount,
   };
 }
 

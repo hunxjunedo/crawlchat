@@ -1,6 +1,7 @@
 import type { CategorySuggestion, Message, Prisma, Scrape } from "libs/prisma";
 import type { Route } from "./+types/messages";
 import {
+  TbConfetti,
   TbFolder,
   TbMessage,
   TbMessages,
@@ -179,7 +180,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                     {loaderData.messagePairs.map((pair, index) => (
                       <tr key={index}>
                         <td>
-                          <div className="w-md line-clamp-1">
+                          <div className="w-[400px] line-clamp-1">
                             <RouterLink
                               className="link link-hover"
                               to={`/messages/${pair.queryMessage?.id}`}
@@ -203,6 +204,15 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                                 </RouterLink>
                               </div>
                             )}
+
+                            {pair.responseMessage?.analysis?.resolved && (
+                              <div className="tooltip" data-tip="Resolved">
+                                <div className="badge badge-primary badge-soft gap-1 px-2">
+                                  <TbConfetti />
+                                </div>
+                              </div>
+                            )}
+
                             {pair.queryMessage?.thread.location && (
                               <CountryFlag
                                 location={pair.queryMessage.thread.location}

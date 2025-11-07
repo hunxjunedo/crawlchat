@@ -226,6 +226,13 @@ export async function analyseMessage(
         It should not be one of the following: ${categories.join(", ")}
       `
       ),
+    resolved: z.boolean().describe(
+      `
+        This should be true if the user mentioned that their question is resolved.
+        It should be true when user says, for example, "that works, ...", "it worked, ...", "that helped, ...".
+        It should be true even if the user says it workd and asks follow up questions.
+      `
+    ),
   };
 
   if (categories.length > 0) {
@@ -290,6 +297,7 @@ export async function analyseMessage(
     followUpQuestions: string[];
     category: { title: string; score: number } | null;
     categorySuggestions: { title: string; description: string }[];
+    resolved: boolean;
   };
 }
 
@@ -401,6 +409,7 @@ export async function fillMessageAnalysis(
       category,
       dataGapDone: false,
       categorySuggestions: [],
+      resolved: partialAnalysis?.resolved ?? false,
     };
 
     const checkForDataGap = shouldCheckForDataGap(sources);

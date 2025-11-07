@@ -4,6 +4,7 @@ import {
   TbChartBar,
   TbCheck,
   TbCircleXFilled,
+  TbConfetti,
   TbDatabase,
   TbFolder,
   TbFolderPlus,
@@ -513,9 +514,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               icon={<TbMessage />}
             />
             <StatCard
-              label="Helpful"
-              value={loaderData.messagesSummary.ratingUpCount}
-              icon={<TbThumbUp />}
+              label="Resolved"
+              value={loaderData.messagesSummary.resolvedCount}
+              icon={<TbConfetti />}
             />
             <StatCard
               label="Not helpful"
