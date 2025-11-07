@@ -898,6 +898,7 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
         ticketNumber,
         ticketStatus: "open",
         ticketUserEmail: userEmail,
+        lastMessageAt: new Date(),
       },
     });
   } else {
@@ -910,6 +911,7 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
         ticketNumber,
         ticketStatus: "open",
         ticketUserEmail: userEmail,
+        lastMessageAt: new Date(),
       },
     });
   }
