@@ -23,6 +23,7 @@ import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 import { ScoreBadge } from "~/components/score-badge";
 import { ChannelBadge } from "~/components/channel-badge";
+import { getMessageContent } from "./messages";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -232,7 +233,7 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                     className="link link-primary link-hover line-clamp-1"
                   >
                     {thread.messages[0]?.llmMessage
-                      ? (thread.messages[0]?.llmMessage as any).content
+                      ? getMessageContent(thread.messages[0])
                       : thread.id.substring(thread.id.length - 4)}
                   </Link>
                 </div>

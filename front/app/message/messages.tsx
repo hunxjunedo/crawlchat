@@ -77,7 +77,7 @@ export function meta() {
   });
 }
 
-function getMessageContent(message?: Message) {
+export function getMessageContent(message?: Message) {
   const content = (message?.llmMessage as any)?.content;
   return getQueryString(content) ?? "-";
 }
