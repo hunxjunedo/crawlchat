@@ -127,13 +127,12 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
   }, [category]);
 
   return (
-    <Page title="Messages" icon={<TbMessage />} right={<ViewSwitch />}>
-      <div className="flex flex-col gap-2 flex-1">
-        <div className="flex items-center gap-2 justify-between">
-          <div className="text-base-content/50">
-            Showing messages in last 7 days
-          </div>
-
+    <Page
+      title="Messages"
+      description="Showing for the last 7 days"
+      icon={<TbMessage />}
+      right={
+        <div className="flex gap-2 items-center">
           <select
             value={category ?? ""}
             className="select w-fit"
@@ -146,8 +145,11 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
               </option>
             ))}
           </select>
+          <ViewSwitch />
         </div>
-
+      }
+    >
+      <div className="flex flex-col gap-2 flex-1">
         {loaderData.messagePairs.length === 0 && (
           <div className="flex flex-1 justify-center items-center">
             <EmptyState

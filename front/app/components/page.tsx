@@ -1,12 +1,7 @@
 import cn from "@meltdownjs/cn";
 import type { LlmModel } from "libs/prisma";
 import { useContext, useEffect, useRef } from "react";
-import {
-  TbAlertTriangle,
-  TbArrowRight,
-  TbMenu2,
-  TbX,
-} from "react-icons/tb";
+import { TbAlertTriangle, TbArrowRight, TbMenu2, TbX } from "react-icons/tb";
 import { Link } from "react-router";
 import { AppContext } from "~/dashboard/context";
 
@@ -49,12 +44,14 @@ export function Page({
   children,
   right,
   noPadding,
+  description,
 }: {
   title: string;
   icon?: React.ReactNode;
   children?: React.ReactNode;
   right?: React.ReactNode;
   noPadding?: boolean;
+  description?: string;
 }) {
   const { setContainerWidth, scrape, setClosedReleaseKey, closedReleaseKey } =
     useContext(AppContext);
@@ -90,9 +87,16 @@ export function Page({
             >
               <TbMenu2 />
             </label>
-            <div className="flex items-center gap-2 text-xl font-medium">
-              {icon}
-              <div className="line-clamp-1">{title}</div>
+            <div>
+              <div className="flex items-center gap-2 text-xl font-medium">
+                {icon}
+                <div className="line-clamp-1">{title}</div>
+              </div>
+              {description && (
+                <div className="text-xs text-base-content/50">
+                  {description}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex gap-2 items-center">{right}</div>

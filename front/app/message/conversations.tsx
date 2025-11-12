@@ -109,23 +109,18 @@ function Pagination() {
   return (
     <div className="flex gap-2 items-center justify-end">
       <Link
-        className="btn btn-square"
+        className={cn("btn btn-square", page <= 1 && "btn-disabled")}
         to={page > 1 ? `/messages/conversations?page=${page - 1}` : "#"}
       >
         <TbChevronLeft />
       </Link>
 
       <div className="flex items-center justify-center gap-4 text-sm">
-        <span>
-          {from} - {to}
-        </span>
-        <span>
-          [{page} / {totalPages}]
-        </span>
+        {page} / {totalPages}
       </div>
 
       <Link
-        className="btn btn-square"
+        className={cn("btn btn-square", page === totalPages && "btn-disabled")}
         to={
           page < totalPages ? `/messages/conversations?page=${page + 1}` : "#"
         }
@@ -189,6 +184,7 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
   return (
     <Page
       title="Conversations"
+      description="Showing for the last 7 days"
       icon={<TbMessages />}
       right={
         <div className="flex gap-2 items-center">
@@ -208,12 +204,7 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
       )}
 
       {loaderData.threads.length > 0 && (
-        <div
-          className={cn(
-            "bg-base-200 rounded-box border border-base-300",
-            "overflow-hidden"
-          )}
-        >
+        <div className={cn("bg-base-200 rounded-box border border-base-300")}>
           {loaderData.threads.map((thread) => (
             <div
               key={thread.id}
