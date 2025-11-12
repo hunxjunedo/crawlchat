@@ -342,18 +342,18 @@ function CategoryCard({
           <TbFolder />
           <span className="font-bold">{title}</span>
         </Link>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           {lowRatingQuery && (
             <div
               className="tooltip tooltip-bottom"
               data-tip={"Latest low rating query"}
             >
-              <div className="text-xs text-base-content/50 line-clamp-1 truncate max-w-[200px]">
+              <div className="text-xs text-base-content/50 line-clamp-1 truncate flex-1">
                 [{lowRatingQuery.score.toFixed(2)}] {lowRatingQuery.content}
               </div>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="flex gap-4 flex-wrap">
