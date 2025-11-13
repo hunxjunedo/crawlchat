@@ -1337,6 +1337,29 @@ function Hero() {
     },
   ];
 
+  const channels = [
+    {
+      icon: <TbWorld />,
+      tooltip: "Embed on your website",
+    },
+    {
+      icon: <TbBrandDiscord />,
+      tooltip: "Add as Discord bot on your server",
+    },
+    {
+      icon: <TbBrandSlack />,
+      tooltip: "Add as Slack bot on your workspace",
+    },
+    {
+      icon: <MCPIcon />,
+      tooltip: "Distribute your docs as an MCP server",
+    },
+    {
+      icon: <TbCode />,
+      tooltip: "Integrate with your workflows using API",
+    },
+  ];
+
   return (
     <div
       className={cn("flex gap-10 md:gap-14 mb-10 flex-col md:flex-row py-2")}
@@ -1414,9 +1437,58 @@ function Hero() {
         </div>
       </div>
       <div className="flex-1 flex-col">
-        <div className="border-2 border-accent rounded-box overflow-hidden shadow">
-          <iframe src="/w/crawlchat" className="w-full h-[560px]" />
+        <div className="relative">
+          <div className="border-2 border-accent rounded-box overflow-hidden shadow">
+            <iframe src="/w/crawlchat" className="w-full h-[560px]" />
+          </div>
+
+          <img
+            src="/arrow.png"
+            className={cn(
+              "absolute bottom-[40px] left-0 -translate-x-full",
+              "w-16 h-16",
+              "rotate-70 opacity-70",
+              "hidden md:block"
+            )}
+          />
+
+          <div
+            className={cn(
+              "absolute bottom-[100px]",
+              "-left-6 -translate-x-full",
+              "-rotate-20",
+              "flex flex-col items-center gap-1",
+              "hidden md:block"
+            )}
+          >
+            <span
+              style={{
+                fontFamily: "'Mynerve', cursive",
+              }}
+            >
+              Add <span className="text-primary">Ask AI</span> on
+            </span>
+            <div className="flex items-center gap-1 text-lg group">
+              {channels.map((channel, index) => (
+                <div
+                  key={index}
+                  className="tooltip tooltip-bottom"
+                  data-tip={channel.tooltip}
+                >
+                  <span
+                    className={cn(
+                      "hover:text-primary transition-all",
+                      "group-hover:opacity-20 hover:opacity-100"
+                    )}
+                  >
+                    {channel.icon}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
         <div className="text-sm text-base-content/50 text-center mt-4">
           You can integrate AI trained on your documentation to your website,
           Discord server, Slack workspace, or as an MCP server.
