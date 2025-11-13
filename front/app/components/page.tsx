@@ -93,7 +93,7 @@ export function Page({
                 <div className="line-clamp-1">{title}</div>
               </div>
               {description && (
-                <div className="text-xs text-base-content/50">
+                <div className="text-xs text-base-content/50 line-clamp-1">
                   {description}
                 </div>
               )}

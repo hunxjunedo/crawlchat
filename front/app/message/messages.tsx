@@ -122,20 +122,20 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     if (category !== undefined) {
-      navigate(category ? `/messages?category=${category}` : `/messages`);
+      navigate(category ? `/questions?category=${category}` : `/questions`);
     }
   }, [category]);
 
   return (
     <Page
-      title="Messages"
+      title="Questions"
       description="Showing for the last 7 days"
       icon={<TbMessage />}
       right={
         <div className="flex gap-2 items-center">
           <select
             value={category ?? ""}
-            className="select w-fit"
+            className="select w-fit hidden md:block"
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">All categories</option>
@@ -145,6 +145,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
               </option>
             ))}
           </select>
+
           <ViewSwitch />
         </div>
       }
@@ -185,7 +186,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                           <div className="w-[400px] line-clamp-1">
                             <RouterLink
                               className="link link-hover"
-                              to={`/messages/${pair.queryMessage?.id}`}
+                              to={`/questions/${pair.queryMessage?.id}`}
                             >
                               {getMessageContent(pair.queryMessage)}
                             </RouterLink>
@@ -200,7 +201,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                               >
                                 <RouterLink
                                   className="btn btn-xs btn-square"
-                                  to={`/messages/conversations/${pair.queryMessage?.threadId}#message-${pair.queryMessage?.id}`}
+                                  to={`/questions/conversations/${pair.queryMessage?.threadId}#message-${pair.queryMessage?.id}`}
                                 >
                                   <TbMessages />
                                 </RouterLink>

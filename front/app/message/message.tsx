@@ -355,14 +355,14 @@ export default function Message({ loaderData }: Route.ComponentProps) {
 
   return (
     <Page
-      title="Message"
+      title="Question"
       icon={<TbMessage />}
       right={
         <>
           {!messagePair?.queryMessage?.thread.isDefault && (
             <Link
               className="btn btn-primary btn-soft"
-              to={`/messages/conversations?id=${messagePair?.queryMessage?.threadId}`}
+              to={`/questions/conversations?id=${messagePair?.queryMessage?.threadId}`}
               target="_blank"
             >
               <TbMessages />
@@ -371,7 +371,7 @@ export default function Message({ loaderData }: Route.ComponentProps) {
           )}
           <Link
             className="btn btn-primary"
-            to={`/messages/${messagePair?.queryMessage?.id}/fix`}
+            to={`/questions/${messagePair?.queryMessage?.id}/fix`}
           >
             <TbSettingsBolt />
             Correct it

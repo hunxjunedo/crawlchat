@@ -126,7 +126,7 @@ export function DataGapCard({
           <div className="join">
             <Link
               className="btn btn-sm btn-square join-item"
-              to={`/messages/${message.questionId}`}
+              to={`/questions/${message.questionId}`}
             >
               <TbMessage />
             </Link>

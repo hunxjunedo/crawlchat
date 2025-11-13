@@ -63,7 +63,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       where: { id: params.conversationId },
     });
 
-    return redirect(`/messages/conversations`);
+    return redirect(`/questions/conversations`);
   }
 
   return null;
@@ -175,7 +175,7 @@ export default function Conversation({ loaderData }: Route.ComponentProps) {
                       data-tip="View details"
                     >
                       <Link
-                        to={`/messages/${message.questionId}`}
+                        to={`/questions/${message.questionId}`}
                         className="btn btn-xs btn-square"
                       >
                         <TbMessage />

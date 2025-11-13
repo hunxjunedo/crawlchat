@@ -110,7 +110,7 @@ function Pagination() {
     <div className="flex gap-2 items-center justify-end">
       <Link
         className={cn("btn btn-square", page <= 1 && "btn-disabled")}
-        to={page > 1 ? `/messages/conversations?page=${page - 1}` : "#"}
+        to={page > 1 ? `/questions/conversations?page=${page - 1}` : "#"}
       >
         <TbChevronLeft />
       </Link>
@@ -122,7 +122,7 @@ function Pagination() {
       <Link
         className={cn("btn btn-square", page === totalPages && "btn-disabled")}
         to={
-          page < totalPages ? `/messages/conversations?page=${page + 1}` : "#"
+          page < totalPages ? `/questions/conversations?page=${page + 1}` : "#"
         }
       >
         <TbChevronRight />
@@ -188,7 +188,9 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
       icon={<TbMessages />}
       right={
         <div className="flex gap-2 items-center">
-          <Pagination />
+          <div className="hidden md:block">
+            <Pagination />
+          </div>
           <ViewSwitch />
         </div>
       }
@@ -204,81 +206,87 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
       )}
 
       {loaderData.threads.length > 0 && (
-        <div className={cn("bg-base-200 rounded-box border border-base-300")}>
-          {loaderData.threads.map((thread) => (
-            <div
-              key={thread.id}
-              className={cn(
-                "flex flex-col gap-1 px-4 py-2",
-                "border-b border-base-300",
-                "last:border-0"
-              )}
-            >
-              <div className="flex flex-col md:flex-row gap-2 md:items-center justify-between">
-                <div className="flex gap-2 items-center">
-                  {thread.location?.country && (
-                    <CountryFlag location={thread.location} />
-                  )}
-                  <Link
-                    to={`/messages/conversations/${thread.id}`}
-                    className="link link-primary link-hover line-clamp-1"
-                  >
-                    {thread.messages[0]?.llmMessage
-                      ? getMessageContent(thread.messages[0])
-                      : thread.id.substring(thread.id.length - 4)}
-                  </Link>
-                </div>
-                <div className="flex gap-2 items-center">
-                  {thread.ticketStatus && (
+        <div className="flex flex-col gap-2">
+          <div className={cn("bg-base-200 rounded-box border border-base-300")}>
+            {loaderData.threads.map((thread) => (
+              <div
+                key={thread.id}
+                className={cn(
+                  "flex flex-col px-4 py-2",
+                  "border-b border-base-300",
+                  "last:border-0"
+                )}
+              >
+                <div className="flex flex-col md:flex-row gap-2 md:items-center justify-between">
+                  <div className="flex gap-2 items-center">
+                    {thread.location?.country && (
+                      <CountryFlag location={thread.location} />
+                    )}
+                    <Link
+                      to={`/questions/conversations/${thread.id}`}
+                      className="link link-primary link-hover line-clamp-1"
+                    >
+                      {thread.messages[0]?.llmMessage
+                        ? getMessageContent(thread.messages[0])
+                        : thread.id.substring(thread.id.length - 4)}
+                    </Link>
+                  </div>
+                  <div className="flex gap-2 items-center flex-wrap">
+                    {thread.ticketStatus && (
+                      <div
+                        className="tooltip tooltip-left"
+                        data-tip="Ticket created"
+                      >
+                        <span className="badge badge-primary badge-soft px-1">
+                          <TbTicket />
+                        </span>
+                      </div>
+                    )}
+                    <ChannelBadge channel={thread.messages[0]?.channel} />
+                    {isResolved(thread.messages) && (
+                      <div className="tooltip tooltip-left" data-tip="Resolved">
+                        <span className="badge badge-primary badge-soft">
+                          <TbConfetti />
+                        </span>
+                      </div>
+                    )}
+                    <CategoriesBadge
+                      categories={getThreadCategories(thread.messages)}
+                    />
+                    <div className="tooltip tooltip-left" data-tip="Avg score">
+                      <ScoreBadge score={getMessagesScore(thread.messages)} />
+                    </div>
                     <div
                       className="tooltip tooltip-left"
-                      data-tip="Ticket created"
+                      data-tip="Number of messages"
                     >
-                      <span className="badge badge-primary badge-soft px-1">
-                        <TbTicket />
-                      </span>
-                    </div>
-                  )}
-                  <ChannelBadge channel={thread.messages[0]?.channel} />
-                  {isResolved(thread.messages) && (
-                    <div className="tooltip tooltip-left" data-tip="Resolved">
                       <span className="badge badge-primary badge-soft">
-                        <TbConfetti />
+                        <TbMessage />
+                        {thread.messages.length}
                       </span>
                     </div>
-                  )}
-                  <CategoriesBadge
-                    categories={getThreadCategories(thread.messages)}
-                  />
-                  <div className="tooltip tooltip-left" data-tip="Avg score">
-                    <ScoreBadge score={getMessagesScore(thread.messages)} />
-                  </div>
-                  <div
-                    className="tooltip tooltip-left"
-                    data-tip="Number of messages"
-                  >
-                    <span className="badge badge-primary badge-soft">
-                      <TbMessage />
-                      {thread.messages.length}
-                    </span>
                   </div>
                 </div>
+                <span className="text-base-content/50 text-sm">
+                  {moment(thread.createdAt).fromNow()}
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {thread.customTags &&
+                    Object.keys(thread.customTags).map((key) => (
+                      <div key={key} className="tooltip" data-tip={key}>
+                        <span className="badge badge-soft">
+                          {(thread.customTags as Record<string, any>)[key]}
+                        </span>
+                      </div>
+                    ))}
+                </div>
               </div>
-              <span className="text-base-content/50 text-sm">
-                {moment(thread.createdAt).fromNow()}
-              </span>
-              <div className="flex flex-wrap gap-1">
-                {thread.customTags &&
-                  Object.keys(thread.customTags).map((key) => (
-                    <div key={key} className="tooltip" data-tip={key}>
-                      <span className="badge badge-soft">
-                        {(thread.customTags as Record<string, any>)[key]}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <div className="block md:hidden">
+            <Pagination />
+          </div>
         </div>
       )}
     </Page>

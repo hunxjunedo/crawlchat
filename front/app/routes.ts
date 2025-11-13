@@ -29,15 +29,17 @@ export default [
   layout("dashboard/layout.tsx", [
     route("app", "dashboard/page.tsx"),
     route("profile", "dashboard/profile.tsx"),
-    route("messages/:messageId/fix", "message/fix.tsx"),
-    route("messages/conversations", "message/conversations.tsx"),
-    route("messages/conversations/:conversationId", "message/conversation.tsx"),
+    
     route("settings", "scrapes/settings.tsx"),
     route("tickets", "tickets/list.tsx"),
     route("tickets/settings", "tickets/settings.tsx"),
 
-    route("messages", "message/messages.tsx"),
-    route("messages/:queryMessageId", "message/message.tsx"),
+    route("questions", "message/messages.tsx"),
+    route("questions/:queryMessageId", "message/message.tsx"),
+    route("questions/:messageId/fix", "message/fix.tsx"),
+
+    route("questions/conversations", "message/conversations.tsx"),
+    route("questions/conversations/:conversationId", "message/conversation.tsx"),
 
     route("connect", "integrations/page.tsx", [
       index("integrations/customise.tsx"),

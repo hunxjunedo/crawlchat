@@ -1,42 +1,30 @@
 import { useMemo } from "react";
 import { TbMessage, TbMessages } from "react-icons/tb";
 import { Link, useMatches } from "react-router";
-import cn from "@meltdownjs/cn";
 
 export function ViewSwitch() {
   const matches = useMatches();
   const view = useMemo(() => {
     const match = matches.pop();
-    if (match?.pathname === "/messages") {
+    if (match?.pathname === "/questions") {
       return "messages";
     }
     return "conversations";
   }, [matches]);
 
+  if (view === "messages") {
+    return (
+      <Link to={"/questions/conversations"} className="btn btn-primary btn-soft">
+        <TbMessages />
+        <span className="hidden md:block">Conversations</span>
+      </Link>
+    );
+  }
+
   return (
-    <div className="join hidden md:flex">
-      <div className="tooltip tooltip-left" data-tip="Messages">
-        <Link
-          to={"/messages"}
-          className={cn(
-            "btn btn-square join-item",
-            view === "messages" && "btn-disabled"
-          )}
-        >
-          <TbMessage />
-        </Link>
-      </div>
-      <div className="tooltip tooltip-left" data-tip="Conversations">
-        <Link
-          to={"/messages/conversations"}
-          className={cn(
-            "btn btn-square join-item",
-            view === "conversations" && "btn-disabled"
-          )}
-        >
-          <TbMessages />
-        </Link>
-      </div>
-    </div>
+    <Link to={"/questions"} className="btn btn-primary btn-soft">
+      <TbMessage />
+      <span className="hidden md:block">Questions</span>
+    </Link>
   );
 }

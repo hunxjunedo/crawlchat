@@ -228,8 +228,8 @@ export function SideMenu({
         forScrape: true,
       },
       {
-        label: "Messages",
-        to: "/messages",
+        label: "Questions",
+        to: "/questions",
         icon: <TbMessage />,
         forScrape: true,
       },

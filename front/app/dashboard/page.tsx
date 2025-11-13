@@ -2,6 +2,7 @@ import type { Route } from "./+types/page";
 import type { Message } from "libs/prisma";
 import {
   TbChartBar,
+  TbChartLine,
   TbCheck,
   TbCircleXFilled,
   TbConfetti,
@@ -336,7 +337,7 @@ function CategoryCard({
     >
       <div className="h-fit">
         <Link
-          to={`/messages?category=${title}`}
+          to={`/questions?category=${title}`}
           className="flex items-center gap-2 link link-primary link-hover"
         >
           <TbFolder />
@@ -449,8 +450,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <Page
-      title="Home"
-      icon={<TbHome />}
+      title="Summary"
+      icon={<TbChartLine />}
       right={
         <div className="flex gap-2">
           <button
