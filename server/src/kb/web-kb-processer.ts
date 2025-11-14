@@ -87,6 +87,7 @@ export class WebKbProcesser extends BaseKbProcesser {
         markdown = result.markdown;
       } catch (e: any) {
         error = e.message;
+        this.store.urlSet.delete(url);
       }
 
       const metaTags = this.store.urls[url]?.metaTags ?? [];
