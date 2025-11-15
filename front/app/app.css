@@ -73,6 +73,40 @@
   }
 }
 
+@keyframes infinite-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 30s linear infinite !important;
+}
+
+.infinite-scroll-container:hover .animate-infinite-scroll {
+  animation-play-state: paused !important;
+}
+
+@keyframes infinite-scroll-reverse {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-infinite-scroll-reverse {
+  animation: infinite-scroll-reverse 30s linear infinite !important;
+}
+
+.infinite-scroll-container:hover .animate-infinite-scroll-reverse {
+  animation-play-state: paused !important;
+}
+
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;

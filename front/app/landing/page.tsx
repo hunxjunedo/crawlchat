@@ -63,8 +63,8 @@ import { Link, useLoaderData } from "react-router";
 import { cache as changelogCache } from "~/changelog/fetch";
 import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
-import { SiDocusaurus, SiN8N } from "react-icons/si";
-import { FaConfluence } from "react-icons/fa";
+import { SiDocusaurus, SiLinear, SiN8N } from "react-icons/si";
+import { FaConfluence, FaMicrophone } from "react-icons/fa";
 import { Logo } from "~/dashboard/logo";
 import { MCPIcon } from "~/mcp-icon";
 import toast, { Toaster } from "react-hot-toast";
@@ -2244,7 +2244,7 @@ export function SourceCard({
 }) {
   return (
     <div
-      className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64 relative"
+      className="tooltip before:max-w-36 md:before:max-w-64 relative"
       data-tip={tooltip}
     >
       {isNew && <NewBadge />}
@@ -2267,7 +2267,7 @@ function NewBadge() {
   return (
     <span
       className={cn(
-        "absolute top-0 right-0 translate-x-1/3 -translate-y-1/2",
+        "absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2",
         "badge badge-error badge-sm"
       )}
     >
@@ -2341,6 +2341,18 @@ function SourcesChannels() {
       title: "Confluence",
       tooltip: "Import your Confluence pages securely",
     },
+    {
+      icon: <SiLinear />,
+      title: "Linear",
+      tooltip: "Import your Linear issues and projects securely",
+      isNew: true,
+    },
+    {
+      icon: <TbCode />,
+      title: "API",
+      tooltip: "Add pages to the knowledge base using API",
+      isNew: true,
+    },
   ];
 
   const channels = [
@@ -2376,23 +2388,10 @@ function SourcesChannels() {
       tooltip: "Integrate with n8n by using CrawlChat node into your workflows",
       isNew: true,
     },
-  ];
-
-  const tools = [
     {
-      icon: <TbChartLine />,
-      title: "Analytics",
-      tooltip: "View messages, scores, efficiency and more",
-    },
-    {
-      icon: <TbChartBarOff />,
-      title: "Data Gaps",
-      tooltip: "View data gaps and fix them",
-    },
-    {
-      icon: <TbFolder />,
-      title: "Categories",
-      tooltip: "Tag questions with categories and analyze them better",
+      icon: <FaMicrophone />,
+      title: "Voice agent",
+      tooltip: "Ask questions by voice using a voice agent",
       isNew: true,
     },
   ];
@@ -2409,69 +2408,42 @@ function SourcesChannels() {
         useful channels where you can deliver your documentation with AI.
       </HeadingDescription>
 
-      <div className="flex flex-col items-center gap-2">
-        <p className="text-base-content/20">Sources</p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          {sources.map((source, index) => (
-            <SourceCard
-              key={index}
-              icon={source.icon}
-              title={source.title}
-              tooltip={source.tooltip}
-            />
-          ))}
-        </div>
-      </div>
+      <p className="text-base-content/20 text-center">Sources</p>
 
-      <div className="flex justify-center text-2xl opacity-10">
-        <TbArrowDown />
-      </div>
-
-      <div className="flex flex-col items-center gap-2">
-        <p className="text-base-content/20">CrawlChat</p>
-        <div
-          className={cn(
-            "bg-primary rounded-box text-primary-content",
-            "flex p-4 px-6 gap-6 flex-wrap justify-center"
-          )}
-        >
-          {tools.map((tool) => (
-            <div
-              key={tool.title}
-              className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64 relative"
-              data-tip={tool.tooltip}
-            >
-              {tool.isNew && <NewBadge />}
-              <div className={cn("flex flex-col items-center")}>
-                <div className="text-2xl">{tool.icon}</div>
-                <div className="font-radio-grotesk text-md text-center shrink-0">
-                  {tool.title}
-                </div>
+      <div className="inline-flex gap-4 flex-nowrap py-8 infinite-scroll-container">
+        {Array.from(Array(4)).map((i) => (
+          <div key={i} className="flex gap-4 animate-infinite-scroll">
+            {sources.map((source, index) => (
+              <div key={`${source.title}-${index}`} className="flex-shrink-0">
+                <SourceCard
+                  icon={source.icon}
+                  title={source.title}
+                  tooltip={source.tooltip}
+                  isNew={source.isNew}
+                />
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ))}
       </div>
 
-      <div className="flex justify-center text-2xl opacity-10">
-        <TbArrowDown />
+      <div className="inline-flex gap-4 flex-nowrap py-8 infinite-scroll-container">
+        {Array.from(Array(4)).map((i) => (
+          <div key={i} className="flex gap-4 animate-infinite-scroll-reverse">
+            {channels.map((channel) => (
+              <ChannelCard
+                key={channel.title}
+                icon={channel.icon}
+                title={channel.title}
+                tooltip={channel.tooltip}
+                isNew={channel.isNew}
+              />
+            ))}
+          </div>
+        ))}
       </div>
 
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex gap-4 justify-center flex-wrap">
-          {channels.map((channel) => (
-            <ChannelCard
-              key={channel.title}
-              icon={channel.icon}
-              title={channel.title}
-              tooltip={channel.tooltip}
-              isNew={channel.isNew}
-            />
-          ))}
-        </div>
-
-        <p className="text-base-content/20">Channels</p>
-      </div>
+      <p className="text-base-content/20 text-center">Channels</p>
     </div>
   );
 }
@@ -2564,21 +2536,19 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
 
       <CustomTestimonials />
 
-      {/* <Container>
+      <Container>
         <Stats
           messagesThisWeek={loaderData.messagesThisWeek}
           messagesDay={loaderData.messagesDay}
           messagesMonth={loaderData.messagesMonth}
         />
-      </Container> */}
+      </Container>
 
       <Container>
         <Works />
       </Container>
 
-      <Container>
-        <SourcesChannels />
-      </Container>
+      <SourcesChannels />
 
       {/* <Container>
         <Flow />
