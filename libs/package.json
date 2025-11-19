@@ -108,7 +108,7 @@
   },
   "scripts": {
     "preinstall": "npm run build",
-    "build": "npx prisma generate && npx tsc"
+    "build": "npx prisma@6.4.1 generate && npx tsc"
   },
   "author": "",
   "license": "ISC",
