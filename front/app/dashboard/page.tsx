@@ -493,11 +493,15 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   }) {
     return (
       <div className="bg-base-200 border border-base-300 rounded-box">
-        <div className="p-2 px-3 border-b border-base-300 font-medium opacity-80">
+        <div className="p-2 px-3 border-b border-base-300 text-xs font-medium opacity-80">
           {props.label}
         </div>
         <ul className="flex flex-col gap-1 p-2">
           {props.payload?.map((item) => {
+            if (item.value === 0) {
+              return null;
+            }
+
             const index = Array.from(categories).indexOf(item.name ?? "");
             const color = BRIGHT_COLORS[index % BRIGHT_COLORS.length];
             return (
