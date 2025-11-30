@@ -713,7 +713,7 @@ function DashboardFeatures() {
 }
 
 type PricingItem = {
-  text: string;
+  text: string | ReactNode;
   excluded?: boolean;
 };
 
@@ -774,8 +774,8 @@ function PricingBox({
           <p className="opacity-50 font-medium mb-1">/month</p>
         </div>
         <ul className="flex flex-col gap-2">
-          {items.map((item) => (
-            <li key={item.text} className="flex gap-2 items-center">
+          {items.map((item, index) => (
+            <li key={index} className="flex gap-2 items-center">
               {item.excluded && (
                 <span className="text-error">
                   <span className="w-0 h-0 block overflow-hidden">
@@ -828,7 +828,16 @@ export function PricingBoxes({
           { text: `${starterPlan.credits.messages} message credits/month` },
           { text: `${starterPlan.limits.scrapes} collections` },
           { text: `${starterPlan.limits.teamMembers} team members` },
-          { text: "Smart AI models" },
+          {
+            text: (
+              <span>
+                <a href="/ai-models" className="link link-primary link-hover">
+                  Smart AI
+                </a>{" "}
+                models
+              </span>
+            ),
+          },
         ]}
         href={
           "https://checkout.dodopayments.com/buy/pdt_vgCVfRAaCT99LM1Dfk5qF?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
@@ -846,7 +855,16 @@ export function PricingBoxes({
           { text: `${proPlan.credits.messages} message credits/month` },
           { text: `${proPlan.limits.scrapes} collections` },
           { text: `${proPlan.limits.teamMembers} team members` },
-          { text: "Best AI models" },
+          {
+            text: (
+              <span>
+                <a href="/ai-models" className="link link-primary link-hover">
+                  Best AI
+                </a>{" "}
+                models
+              </span>
+            ),
+          },
         ]}
         href={
           "https://checkout.dodopayments.com/buy/pdt_P68hLo9a0At8cgn4WbzBe?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
@@ -1028,6 +1046,9 @@ export function Footer() {
               </li>
               <li>
                 <FooterLink href="/changelog">Changelog</FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/ai-models">AI Models</FooterLink>
               </li>
               <li>
                 <FooterLink href="https://docs.crawlchat.app" external>

@@ -87,6 +87,8 @@ export default [
     route("discord-bot", "landing/discord-bot.tsx"),
     route("support-tickets", "landing/support-tickets.tsx"),
 
+    route("ai-models", "landing/ai-models.tsx"),
+
     route("pricing", "landing/pricing.tsx"),
 
     ...prefix("tool", [route("draft", "tool/draft-page.tsx")]),
