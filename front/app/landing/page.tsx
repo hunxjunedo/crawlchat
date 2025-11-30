@@ -2,9 +2,7 @@ import type { Route } from "./+types/page";
 import type { PropsWithChildren, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import {
-  TbArrowDown,
   TbArrowRight,
-  TbArrowsShuffle,
   TbBook,
   TbBook2,
   TbBrandDiscord,
@@ -15,7 +13,6 @@ import {
   TbBrandX,
   TbChartBar,
   TbChartBarOff,
-  TbChartLine,
   TbCheck,
   TbChevronDown,
   TbChevronRight,
@@ -23,7 +20,6 @@ import {
   TbCircleCheckFilled,
   TbCircleFilled,
   TbCircleXFilled,
-  TbClock,
   TbCode,
   TbColorSwatch,
   TbCrown,
@@ -42,8 +38,6 @@ import {
   TbPlug,
   TbRobotFace,
   TbScoreboard,
-  TbSettings,
-  TbShare,
   TbThumbUp,
   TbUpload,
   TbUserHeart,
@@ -177,41 +171,13 @@ function NavLink({
         <div
           className={cn(
             "absolute top-0 right-0 text-[8px]",
-            "bg-secondary text-secondary-content px-2 py-[2px] rounded-full",
+            "bg-secondary text-secondary-content px-2 py-[2px] rounded-box",
             "translate-x-[20%] -translate-y-[80%]"
           )}
         >
           {tooltip}
         </div>
       )}
-    </a>
-  );
-}
-
-function Button({
-  children,
-  className,
-  variant = "outline",
-  href,
-  onClick,
-}: PropsWithChildren & {
-  className?: string;
-  variant?: "solid" | "outline";
-  href?: string;
-  onClick?: () => void;
-}) {
-  return (
-    <a
-      className={cn(
-        "font-medium border text-primary border-primary rounded-xl px-6 py-1 flex items-center justify-center gap-2",
-        "cursor-pointer hover:bg-primary hover:text-primary-content transition-all",
-        variant === "solid" && "bg-primary text-primary-content",
-        className
-      )}
-      href={href}
-      onClick={onClick}
-    >
-      {children}
     </a>
   );
 }
@@ -239,8 +205,8 @@ function Stats({
   return (
     <div className="flex flex-col md:flex-row gap-8 w-full mt-16 md:items-center">
       <div className="flex-1 flex flex-col gap-10">
-        <div className="text-md md:text-xl font-medium px-6 py-3 shadow-md rounded-2xl bg-base-100 w-fit flex items-center gap-4 -rotate-[4deg]">
-          <div className="w-3 h-3 bg-green-500 rounded-full outline-2 outline-green-300" />
+        <div className="text-md md:text-xl font-medium px-6 py-3 shadow-md rounded-box bg-base-100 w-fit flex items-center gap-4 -rotate-[4deg]">
+          <div className="w-3 h-3 bg-green-500 rounded-box outline-2 outline-green-300" />
           Serving the community
         </div>
         <h3 className="text-4xl md:text-5xl font-radio-grotesk font-bold leading-[1.2]">
@@ -250,7 +216,7 @@ function Stats({
         </h3>
       </div>
 
-      <div className="flex-1 shadow-md bg-base-100 rounded-2xl">
+      <div className="flex-1 shadow-md bg-base-100 rounded-box">
         <StatsItem label="Today" value={messagesDay} />
         <StatsItem label="In the last week" value={messagesThisWeek} />
         <StatsItem label="In the last month" value={messagesMonth} />
@@ -327,7 +293,7 @@ export function UsedBy() {
           <div className="font-medium text-xl">Polotno</div>
         </div> */}
 
-        <div className="bg-gray-900 rounded-full p-4 px-6 pb-3">
+        <div className="bg-gray-900 rounded-box p-4 px-6 pb-3">
           <img
             src="/used-by/postiz.svg"
             alt="Postiz"
@@ -349,7 +315,7 @@ export function Heading({ children }: PropsWithChildren) {
 
 export function HeadingHighlight({ children }: PropsWithChildren) {
   return (
-    <span className="text-primary bg-primary-content px-4 rounded-lg md:leading-[1.4]">
+    <span className="text-primary bg-primary-content px-4 rounded-box md:leading-[1.4]">
       {children}
     </span>
   );
@@ -375,7 +341,7 @@ function WorksStep({
     <div className="flex flex-col gap-4 flex-1 items-center max-w-[400px]">
       <div
         className={cn(
-          "max-w-[300px] mx-auto rounded-2xl overflow-hidden",
+          "max-w-[300px] mx-auto rounded-box overflow-hidden",
           "border border-primary mb-4"
         )}
       >
@@ -390,7 +356,7 @@ function WorksStep({
 
 function stepHighlightClassNames() {
   return cn(
-    "border px-2 py-0.5 inline-flex items-center gap-1 rounded-full leading-none mx-1"
+    "border px-2 py-0.5 inline-flex items-center gap-1 rounded-box leading-none mx-1"
   );
 }
 
@@ -402,7 +368,9 @@ function Works() {
       </Heading>
 
       <HeadingDescription>
-        CrawlChat features a streamlined workflow. Transform your documentation into an AI-ready knowledge base for your community in three simple steps.
+        CrawlChat features a streamlined workflow. Transform your documentation
+        into an AI-ready knowledge base for your community in three simple
+        steps.
       </HeadingDescription>
 
       <div className="flex flex-col md:flex-row gap-16 items-center md:items-start">
@@ -410,7 +378,8 @@ function Works() {
           img="/new-landing/knowledge-base.png"
           title="Make knowledge base"
         >
-          Add your existing documents or web pages to create your knowledge base. Import documentation from multiple{" "}
+          Add your existing documents or web pages to create your knowledge
+          base. Import documentation from multiple{" "}
           <span
             className={cn(
               stepHighlightClassNames(),
@@ -433,7 +402,8 @@ function Works() {
           sources in minutes.
         </WorksStep>
         <WorksStep img="/new-landing/integrate-chatbot.png" title="Integrate">
-          Embed the Ask AI widget on your website, Discord server, or Slack workspace. Customize the bot's UI and{" "}
+          Embed the Ask AI widget on your website, Discord server, or Slack
+          workspace. Customize the bot's UI and{" "}
           <span
             className={cn(
               stepHighlightClassNames(),
@@ -505,7 +475,7 @@ function ClickableFeature({
   return (
     <div
       className={cn(
-        "rounded-2xl p-4 border border-transparent hover:border-base-300 gap-2 flex flex-col",
+        "rounded-box p-4 border border-transparent hover:border-base-300 gap-2 flex flex-col",
         "cursor-pointer",
         active && "bg-base-100 shadow-md hover:border-transparent"
       )}
@@ -569,7 +539,7 @@ function FeaturesWithImage({
       </div>
       <div
         className={cn(
-          "flex-1 bg-ash-strong rounded-2xl shadow-md border",
+          "flex-1 bg-ash-strong rounded-box shadow-md border",
           "border-base-300 aspect-square overflow-hidden",
           "w-full aspect-square h-fit"
         )}
@@ -592,7 +562,9 @@ function ChannelWidget() {
       </Heading>
 
       <HeadingDescription>
-        Stop making users search through hundreds of pages. Add CrawlChat to your documentation and let users find instant answers right where they need them.
+        Stop making users search through hundreds of pages. Add CrawlChat to
+        your documentation and let users find instant answers right where they
+        need them.
       </HeadingDescription>
 
       <FeaturesWithImage
@@ -637,7 +609,10 @@ function ChannelDiscord() {
       </Heading>
 
       <HeadingDescription>
-        Tech companies often have extensive internal documentation across multiple teams. Delivering these docs efficiently is challenging. Import from Notion, Confluence, or upload files, then connect them to your Discord or Slack workspaces.
+        Tech companies often have extensive internal documentation across
+        multiple teams. Delivering these docs efficiently is challenging. Import
+        from Notion, Confluence, or upload files, then connect them to your
+        Discord or Slack workspaces.
       </HeadingDescription>
 
       <FeaturesWithImage
@@ -681,43 +656,6 @@ function ChannelDiscord() {
   );
 }
 
-function ChannelMCP() {
-  return (
-    <div className="mt-32">
-      <Heading>
-        Your docs on AI apps as an <HeadingHighlight>MCP</HeadingHighlight>{" "}
-        server
-      </Heading>
-
-      <HeadingDescription>
-        The chat widget includes all necessary tools. Your community finds precise answers from your documentation with a single click.
-      </HeadingDescription>
-
-      <FeaturesWithImage
-        trackName="channel-mcp"
-        features={[
-          {
-            title: "Distribute",
-            description:
-              "AI models have knowledge cutoffs and won't know about your documentation. Provide your docs as context for AI apps like Cursor, Claude Code, and Windsurf. Share the MCP server with your community to enable AI powered search through your docs, significantly improving accuracy.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/8-min.png",
-            key: "sources",
-            icon: <TbShare />,
-          },
-          {
-            title: "Happy developers",
-            description:
-              "Developers spend more time asking AI than browsing documentation. MCP servers let them get help from their preferred AI app without leaving their workspace. CrawlChat significantly improves developer efficiency.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/7-min.png",
-            key: "code",
-            icon: <TbCode />,
-          },
-        ]}
-      />
-    </div>
-  );
-}
-
 function DashboardFeatures() {
   return (
     <div className="mt-32">
@@ -727,7 +665,9 @@ function DashboardFeatures() {
       </Heading>
 
       <HeadingDescription>
-        While users turn to ChatGPT for answers, you're missing valuable insights from your docs and community. CrawlChat provides comprehensive insights on questions asked, categories, data gaps, scores, and more.
+        While users turn to ChatGPT for answers, you're missing valuable
+        insights from your docs and community. CrawlChat provides comprehensive
+        insights on questions asked, categories, data gaps, scores, and more.
       </HeadingDescription>
 
       <FeaturesWithImage
@@ -764,98 +704,6 @@ function DashboardFeatures() {
   );
 }
 
-function ToolsRow({ children }: PropsWithChildren) {
-  return <div className="grid grid-cols-1 md:grid-cols-3">{children}</div>;
-}
-
-function ToolItem({
-  title,
-  description,
-  icon,
-}: {
-  title: string;
-  description: string;
-  icon: string | ReactNode;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex-1 flex flex-col gap-2 p-6 border-opacity-60 border-base-300",
-        "md:border-r border-b no-border-last-3 no-border-every-3 last:border-b-0"
-      )}
-    >
-      <div className="flex flex-col gap-2">
-        {typeof icon === "string" ? (
-          <img src={icon} alt={title} className="w-6 h-6" />
-        ) : (
-          <div>
-            <div
-              className={cn(
-                "text-3xl bg-primary-content p-4 rounded-full",
-                "text-primary w-fit border border-primary/20"
-              )}
-            >
-              {icon}
-            </div>
-          </div>
-        )}
-        <h3 className="text-xl font-radio-grotesk">{title}</h3>
-      </div>
-      <p className="opacity-50 font-medium leading-tight">{description}</p>
-    </div>
-  );
-}
-
-function Tools() {
-  return (
-    <div className="mt-32" id="features">
-      <Heading>
-        All the <HeadingHighlight>AI tools</HeadingHighlight> to power up your
-        technical docs
-      </Heading>
-
-      <HeadingDescription>
-        CrawlChat reduces technical support load by enabling instant AI powered conversations with your documentation directly from your website, Discord, or Slack.
-      </HeadingDescription>
-
-      <div className="bg-base-100 rounded-2xl border border-base-300">
-        <ToolsRow>
-          <ToolItem
-            title="Instant answers"
-            description="Users get immediate answers from your docs, guides, and FAQs—no searching or waiting. Reduces support requests and improves self-service."
-            icon={<TbMessage />}
-          />
-          <ToolItem
-            title="Less Repetitive Questions"
-            description="Answers frequent questions directly from your documentation, reducing repetitive support requests and freeing your team to focus on complex issues."
-            icon={<TbArrowsShuffle />}
-          />
-          <ToolItem
-            title="24/7 Availability"
-            description="Always available, helping users 24/7 day or night without waiting for support teams, reducing off hour ticket volume."
-            icon={<TbClock />}
-          />
-          <ToolItem
-            title="Analytics"
-            description="Comprehensive analytics for your docs and community. Track daily messages, score distribution, and more to gain deeper visibility into documentation performance and community engagement."
-            icon={<TbChartBar />}
-          />
-          <ToolItem
-            title="Discord & Slack bots"
-            description="Works seamlessly in Discord and Slack. Users tag the bot to get instant answers from your docs—support delivered directly in chat."
-            icon={<TbBrandDiscord />}
-          />
-          <ToolItem
-            title="Customisation"
-            description="Customize the chat widget's appearance and tone. Use custom prompts to guide AI responses, tailoring answers to match your brand and support style."
-            icon={<TbSettings />}
-          />
-        </ToolsRow>
-      </div>
-    </div>
-  );
-}
-
 type PricingItem = {
   text: string;
   excluded?: boolean;
@@ -885,7 +733,7 @@ function PricingBox({
   return (
     <div
       className={cn(
-        "flex-1 bg-base-100 shadow-md border border-base-300 rounded-2xl relative"
+        "flex-1 bg-base-100 shadow-md border border-base-300 rounded-box relative"
       )}
     >
       {popular && (
@@ -893,7 +741,7 @@ function PricingBox({
           className={cn(
             "bg-primary-subtle border border-base-300 absolute",
             "translate-y-[-40%] top-0 right-0 translate-x-[10%]",
-            "text-lg text-primary px-3 py-2 font-medium flex items-center gap-2 rounded-xl",
+            "text-lg text-primary px-3 py-2 font-medium flex items-center gap-2 rounded-box",
             "bg-base-200 shadow-2xl"
           )}
         >
@@ -932,15 +780,14 @@ function PricingBox({
           ))}
         </ul>
         <div className="w-full">
-          <Button
-            className={cn("w-full text-xl p-2")}
-            variant={popular ? "solid" : "outline"}
+          <a
+            className={cn("w-full text-xl p-2 btn btn-primary btn-lg")}
             href={!onClick ? href : undefined}
             onClick={() => onClick?.()}
           >
             {payLabel ?? (free ? "Try it out" : "Purchase")}
             <TbArrowRight />
-          </Button>
+          </a>
         </div>
       </div>
     </div>
@@ -1071,7 +918,8 @@ export function Pricing() {
       </Heading>
 
       <HeadingDescription>
-        Choose the plan that best fits your needs. Start with a 7-day free trial and cancel anytime.
+        Choose the plan that best fits your needs. Start with a 7-day free trial
+        and cancel anytime.
       </HeadingDescription>
 
       <div className="flex flex-col md:flex-row md:gap-6 gap-10 mt-20">
@@ -1088,12 +936,12 @@ export function Pricing() {
 
 export function CTA({ text }: { text?: string }) {
   return (
-    <div className="mt-32 -mb-4" id="cta">
-      <div className="w-full py-16 px-10 relative bg-accent">
+    <div className="mt-32" id="cta">
+      <div className="w-full py-16 px-10 relative border-t-4 border-b-4 border-dashed border-primary">
         <h2
           className={cn(
             "font-radio-grotesk text-[42px] md:text-[54px] leading-[1.2]",
-            "font-medium text-center max-w-[900px] mx-auto text-accent-content"
+            "font-medium text-center max-w-[900px] mx-auto"
           )}
         >
           {text ||
@@ -1101,13 +949,7 @@ export function CTA({ text }: { text?: string }) {
         </h2>
 
         <div className="flex justify-center mt-8">
-          <a
-            href="/login"
-            className={cn(
-              ctaClassNames(true),
-              "bg-base-100 border-0 text-accent"
-            )}
-          >
+          <a href="/login" className="btn btn-primary btn-xl">
             Get started
             <TbArrowRight />
           </a>
@@ -1135,7 +977,7 @@ function FooterLink({
 
 export function Footer() {
   return (
-    <footer className="bg-base-100 border-t border-base-300">
+    <footer className="bg-base-100">
       <Container>
         <div className="py-8 flex flex-col md:flex-row gap-10">
           <div className="flex-[2] flex flex-col gap-4">
@@ -1329,8 +1171,8 @@ export function Nav({ user }: { user?: User | null }) {
               <ul
                 tabIndex={0}
                 className={cn(
-                  "dropdown-content menu bg-base-100 rounded-box z-1 w-72 p-2",
-                  "shadow-sm mt-2"
+                  "dropdown-content menu bg-base-200 rounded-box z-1 w-72 p-2",
+                  "shadow-lg mt-4"
                 )}
               >
                 <li>
@@ -1374,19 +1216,19 @@ export function Nav({ user }: { user?: User | null }) {
 
           <div>
             <div className="items-center gap-2 hidden md:flex">
-              {!user && <Button href="/login">Login</Button>}
+              {!user && <Link to="/login">Login</Link>}
               {!user && (
                 <div className="hidden md:block">
-                  <Button href="/pricing" variant="solid">
+                  <Link to="/pricing" className="btn btn-primary">
                     Start free trial
-                  </Button>
+                  </Link>
                 </div>
               )}
               {user && (
-                <Button href="/app">
+                <Link to="/app" className="btn btn-primary">
                   Dashboard
                   <TbArrowRight />
-                </Button>
+                </Link>
               )}
             </div>
             <div className="dropdown dropdown-end md:hidden">
@@ -1443,7 +1285,7 @@ export function Nav({ user }: { user?: User | null }) {
 
 export function ctaClassNames(primary: boolean) {
   return cn(
-    "text-2xl border-2 border-primary px-8 py-4 rounded-xl font-medium",
+    "text-2xl border-2 border-primary px-8 py-4 rounded-box font-medium",
     "flex items-center gap-2 transition-all hover:translate-y-[-2px]",
     "text-center justify-center",
     !primary && "text-primary hover:bg-primary-subtle",
@@ -1502,8 +1344,8 @@ function Hero() {
             className="mb-4 cursor-pointer hover:scale-[1.02] transition-all w-fit"
             href={`/changelog/${focusChangelog.slug}`}
           >
-            <div className="bg-red-50 text-sm px-1.5 py-1 rounded-full flex items-center gap-2 pr-2 border border-red-300 text-red-700">
-              <span className="px-2 bg-red-200 rounded-full font-medium border border-red-300">
+            <div className="bg-red-50 text-sm px-1.5 py-1 rounded-box flex items-center gap-2 pr-2 border border-red-300 text-red-700">
+              <span className="px-2 bg-red-200 rounded-box font-medium border border-red-300">
                 NEW
               </span>
               <span className="leading-none">{focusChangelog.title}</span>
@@ -1520,11 +1362,12 @@ function Hero() {
         </h1>
 
         <p className="text-xl mt-6 text-base-content/60">
-          Add CrawlChat to your documentation and let users find instant answers right where they need them.
+          Add CrawlChat to your documentation and let users find instant answers
+          right where they need them.
           <ul className="mt-4 flex flex-col gap-2">
             {features.map((feature, index) => (
               <li key={index} className="flex gap-2">
-                <div className="text-primary rounded-full p-1 text">
+                <div className="text-primary rounded-box p-1 text">
                   <TbCheck />
                 </div>
                 <span>{feature.text}</span>
@@ -1539,26 +1382,22 @@ function Hero() {
             "flex-col sm:flex-row"
           )}
         >
-          {/* <button className={ctaClassNames(false)} onClick={handleAskCrawlChat}>
-            <TbMessage />
-            Ask AI
-          </button> */}
-
-          <a className={ctaClassNames(true)} href="/login">
+          <Link to="/login" className="btn btn-primary btn-xl">
             Integrate now
             <TbArrowRight />
-          </a>
+          </Link>
         </div>
 
         <div className="flex flex-col gap-4">
           <div className="text-sm text-base-content/50 italic max-w-md">
-            CrawlChat powers the "Ask AI" widget on sites, MCP servers for docs, and Discord bots for communities. Smarter docs. Better support.
+            CrawlChat powers the "Ask AI" widget on sites, MCP servers for docs,
+            and Discord bots for communities. Smarter docs. Better support.
           </div>
 
           <div className="flex items-center gap-2">
             <img
               src="https://pbs.twimg.com/profile_images/1561788279313383424/RcRFiKnE_400x400.png"
-              className="w-6 h-6 rounded-full"
+              className="w-6 h-6 rounded-box"
             />
             <span className="text-sm text-base-content/50">
               Anton Lavrenov, Konvajs
@@ -1665,7 +1504,7 @@ function FlowCard({
   return (
     <div
       className={cn(
-        "rounded-2xl bg-base-100 border border-base-300 p-6 flex flex-col justify-between gap-4",
+        "rounded-box bg-base-100 border border-base-300 p-6 flex flex-col justify-between gap-4",
         cols === 1 && "md:col-span-1",
         cols === 2 && "md:col-span-2",
         cols === 3 && "md:col-span-3",
@@ -1682,7 +1521,7 @@ function FlowCard({
         <img
           src={img}
           alt={title}
-          className="border border-base-300 rounded-lg"
+          className="border border-base-300 rounded-box"
         />
       </div>
     </div>
@@ -1697,7 +1536,9 @@ export function Flow() {
       </Heading>
 
       <HeadingDescription>
-        CrawlChat is a simple yet powerful AI tool for technical documentation. Configure it in minutes and gain actionable analytics to improve your docs.
+        CrawlChat is a simple yet powerful AI tool for technical documentation.
+        Configure it in minutes and gain actionable analytics to improve your
+        docs.
       </HeadingDescription>
 
       <div
@@ -1762,7 +1603,7 @@ export function CustomTestimonial({
           <img
             src={authorImage}
             alt={author}
-            className="w-16 h-16 rounded-full border border-base-300"
+            className="w-16 h-16 rounded-box border border-base-300"
           />
           <span className="font-medium">{author}</span>
           <span className="text-sm text-gray-500">{authorCompany}</span>
@@ -1903,7 +1744,8 @@ export function FAQ() {
               for your customer queries.
             </li>
             <li>
-              It comes with a support ticket system that ensures queries reach you when documentation isn't sufficient.
+              It comes with a support ticket system that ensures queries reach
+              you when documentation isn't sufficient.
             </li>
             <li>
               It provides all the necessary analytics required to monitor the
@@ -1960,7 +1802,7 @@ export function FAQ() {
       ),
     },
     {
-          question: "How can I integrate it with Slack or Discord?",
+      question: "How can I integrate it with Slack or Discord?",
       answer: (
         <p>
           Yes! CrawlChat provides a Discord bot and a Slack app that can be
@@ -1994,8 +1836,8 @@ export function FAQ() {
             improve your documentation.
           </p>
           <p>
-            Apart from that, you can also see what knowledge groups are being used
-            the most to answer the questions.
+            Apart from that, you can also see what knowledge groups are being
+            used the most to answer the questions.
           </p>
         </div>
       ),
@@ -2072,10 +1914,10 @@ export function FAQ() {
       </div>
 
       <div className="flex justify-center mt-16">
-        <Button onClick={handleAsk}>
+        <button onClick={handleAsk} className="btn btn-primary btn-soft btn-lg">
           Question not listed? Ask here
           <TbArrowRight />
-        </Button>
+        </button>
       </div>
     </div>
   );
@@ -2143,7 +1985,7 @@ function GalleryVideo({
         >
           <button
             className={cn(
-              "p-4 md:p-10 bg-primary text-primary-content rounded-full",
+              "p-4 md:p-10 bg-primary text-primary-content rounded-box",
               "cursor-pointer hover:scale-105 transition-all duration-200 z-10",
               "text-4xl md:text-8xl"
             )}
@@ -2159,7 +2001,7 @@ function GalleryVideo({
         <div className="absolute p-4 flex items-center gap-2 bottom-0">
           <button
             className={cn(
-              "p-2 bg-base-100 text-primary rounded-full",
+              "p-2 bg-base-100 text-primary rounded-box",
               "cursor-pointer hover:scale-105 transition-all duration-200 z-10",
               "shadow"
             )}
@@ -2169,7 +2011,7 @@ function GalleryVideo({
           </button>
           <button
             className={cn(
-              "p-2 bg-base-100 text-primary rounded-full",
+              "p-2 bg-base-100 text-primary rounded-box",
               "cursor-pointer hover:scale-105 transition-all duration-200 z-10",
               "shadow"
             )}
@@ -2282,7 +2124,7 @@ function Gallery() {
     <div className="mb-16">
       <div
         className={cn(
-          "border border-base-300 rounded-xl p-2",
+          "border border-base-300 rounded-box p-2",
           "flex gap-2 bg-base-100 justify-center lg:justify-between",
           "flex-wrap"
         )}
@@ -2291,7 +2133,7 @@ function Gallery() {
           <button
             key={index}
             className={cn(
-              "flex items-center p-1 rounded-md w-fit px-3 text-sm gap-1",
+              "flex items-center p-1 rounded-box w-fit px-3 text-sm gap-1",
               "transition-all duration-200 cursor-pointer relative",
               activeStep === index && "bg-primary text-primary-content",
               activeStep !== index && "hover:bg-base-300",
@@ -2320,7 +2162,7 @@ function Gallery() {
       <div
         className={cn(
           "flex justify-center items-center",
-          "bg-base-100 aspect-video rounded-xl shadow-xl",
+          "bg-base-100 aspect-video rounded-box shadow-xl",
           "overflow-hidden mt-4 relative",
           "border border-base-300"
         )}
@@ -2328,7 +2170,7 @@ function Gallery() {
         {steps[activeStep].img && isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-50 z-10">
             <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-box h-12 w-12 border-b-2 border-primary"></div>
               <p className="text-lg font-medium opacity-70">Loading...</p>
             </div>
           </div>
@@ -2531,7 +2373,9 @@ function SourcesChannels() {
       </Heading>
 
       <HeadingDescription>
-        CrawlChat supports a wide range of documentation sources and delivery channels, enabling AI powered documentation across your entire ecosystem.
+        CrawlChat supports a wide range of documentation sources and delivery
+        channels, enabling AI powered documentation across your entire
+        ecosystem.
       </HeadingDescription>
 
       <p className="text-base-content/20 text-center">Sources</p>
@@ -2622,7 +2466,9 @@ function SecondaryCTA({
         >
           {icon}
         </div>
-        <Button href={href}>{ctaLabel}</Button>
+        <Link to={href} className="btn btn-primary">
+          {ctaLabel}
+        </Link>
       </div>
     </div>
   );
