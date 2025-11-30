@@ -9,7 +9,9 @@ import {
   PLAN_FREE,
   PLAN_HOBBY,
   PLAN_PRO,
+  PLAN_PRO_YEARLY,
   PLAN_STARTER,
+  PLAN_STARTER_YEARLY,
 } from "libs/user-plan";
 import { planMap } from "libs/user-plan";
 import { prisma } from "libs/prisma";
@@ -88,6 +90,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     starterPlan: PLAN_STARTER,
     proPlan: PLAN_PRO,
     hobbyPlan: PLAN_HOBBY,
+    starterYearlyPlan: PLAN_STARTER_YEARLY,
+    proYearlyPlan: PLAN_PRO_YEARLY,
     usedPages,
     scrapeUsers,
   };
@@ -167,7 +171,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       <UpgradeModal
         starterPlan={loaderData.starterPlan}
         proPlan={loaderData.proPlan}
-        hobbyPlan={loaderData.hobbyPlan}
+        starterYearlyPlan={loaderData.starterYearlyPlan}
+        proYearlyPlan={loaderData.proYearlyPlan}
       />
     </AppContext.Provider>
   );

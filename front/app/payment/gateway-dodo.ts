@@ -1,4 +1,11 @@
-import { PLAN_HOBBY, PLAN_PRO, PLAN_STARTER, type Plan } from "libs/user-plan";
+import {
+  PLAN_HOBBY,
+  PLAN_PRO,
+  PLAN_PRO_YEARLY,
+  PLAN_STARTER,
+  PLAN_STARTER_YEARLY,
+  type Plan,
+} from "libs/user-plan";
 import type { PaymentGateway, PaymentGatewayWebhookType } from "./gateway";
 import { Webhook } from "standardwebhooks";
 import { DodoPayments } from "dodopayments";
@@ -21,6 +28,8 @@ export const productIdPlanMap: Record<string, Plan> = {
   pdt_IcrpqSx48qoCenz4lnLi1: PLAN_HOBBY,
   pdt_vgCVfRAaCT99LM1Dfk5qF: PLAN_STARTER,
   pdt_P68hLo9a0At8cgn4WbzBe: PLAN_PRO,
+  pdt_uAHyWAsgys9afUnn9NjAM: PLAN_STARTER_YEARLY,
+  pdt_5dCrGhvBslGdT2fIxQjuy: PLAN_PRO_YEARLY,
 
   // dev
   pdt_CDgenxMUiAKjzBDVROTDr: PLAN_STARTER,

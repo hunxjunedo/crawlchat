@@ -1,5 +1,18 @@
-import { PLAN_FREE, PLAN_HOBBY, PLAN_PRO, PLAN_STARTER } from "libs/user-plan";
-import { Container, CustomTestimonials, FAQ, Pricing, PricingFeatures } from "./page";
+import {
+  PLAN_FREE,
+  PLAN_HOBBY,
+  PLAN_PRO,
+  PLAN_PRO_YEARLY,
+  PLAN_STARTER,
+  PLAN_STARTER_YEARLY,
+} from "libs/user-plan";
+import {
+  Container,
+  CustomTestimonials,
+  FAQ,
+  Pricing,
+  PricingFeatures,
+} from "./page";
 import { makeMeta } from "~/meta";
 
 export function meta() {
@@ -16,6 +29,8 @@ export async function loader() {
     starterPlan: PLAN_STARTER,
     proPlan: PLAN_PRO,
     hobbyPlan: PLAN_HOBBY,
+    starterYearlyPlan: PLAN_STARTER_YEARLY,
+    proYearlyPlan: PLAN_PRO_YEARLY,
   };
 }
 

@@ -62,6 +62,8 @@ import {
   PLAN_STARTER,
   PLAN_HOBBY,
   type Plan,
+  PLAN_STARTER_YEARLY,
+  PLAN_PRO_YEARLY,
 } from "libs/user-plan";
 import { Link, useLoaderData } from "react-router";
 import { cache as changelogCache } from "~/changelog/fetch";
@@ -154,6 +156,8 @@ export async function loader() {
     proPlan: PLAN_PRO,
     hobbyPlan: PLAN_HOBBY,
     focusChangelog,
+    starterYearlyPlan: PLAN_STARTER_YEARLY,
+    proYearlyPlan: PLAN_PRO_YEARLY,
   };
 }
 
@@ -727,6 +731,7 @@ function PricingBox({
   href,
   payLabel,
   onClick,
+  period = "month",
 }: {
   popular?: boolean;
   title: string;
@@ -737,6 +742,7 @@ function PricingBox({
   href?: string;
   payLabel?: string;
   onClick?: () => void;
+  period?: "month" | "year";
 }) {
   return (
     <div
@@ -771,7 +777,7 @@ function PricingBox({
       <div className="p-6 gap-6 flex flex-col">
         <div className="flex gap-1 items-end">
           <p className="text-4xl font-semibold font-radio-grotesk">{price}</p>
-          <p className="opacity-50 font-medium mb-1">/month</p>
+          <p className="opacity-50 font-medium mb-1">/{period}</p>
         </div>
         <ul className="flex flex-col gap-2">
           {items.map((item, index) => (
@@ -811,12 +817,87 @@ function PricingBox({
 export function PricingBoxes({
   starterPlan,
   proPlan,
+  starterYearlyPlan,
+  proYearlyPlan,
+  yearly,
   onClick,
 }: {
   starterPlan: Plan;
   proPlan: Plan;
+  starterYearlyPlan: Plan;
+  proYearlyPlan: Plan;
+  yearly?: boolean;
   onClick?: (planId: string) => void;
 }) {
+  if (yearly) {
+    return (
+      <>
+        <PricingBox
+          period="year"
+          title="Starter"
+          description="Start your journey with CrawlChat"
+          price={`$${starterYearlyPlan.price}`}
+          items={[
+            { text: `${starterYearlyPlan.limits.pages} pages` },
+            {
+              text: `${
+                starterYearlyPlan.credits.messages / 12
+              } message credits/month`,
+            },
+            { text: `${starterYearlyPlan.limits.scrapes} collections` },
+            { text: `${starterYearlyPlan.limits.teamMembers} team members` },
+            {
+              text: (
+                <span>
+                  <a href="/ai-models" className="link link-primary link-hover">
+                    Smart AI
+                  </a>{" "}
+                  models
+                </span>
+              ),
+            },
+          ]}
+          href={
+            "https://checkout.dodopayments.com/buy/pdt_uAHyWAsgys9afUnn9NjAM?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+          }
+          onClick={onClick ? () => onClick?.(starterYearlyPlan.id) : undefined}
+          payLabel="Start free trial"
+        />
+        <PricingBox
+          period="year"
+          title="Pro"
+          description="For power users and teams"
+          popular
+          price={`$${proYearlyPlan.price}`}
+          items={[
+            { text: `${proYearlyPlan.limits.pages} pages` },
+            {
+              text: `${
+                proYearlyPlan.credits.messages / 12
+              } message credits/month`,
+            },
+            { text: `${proYearlyPlan.limits.scrapes} collections` },
+            { text: `${proYearlyPlan.limits.teamMembers} team members` },
+            {
+              text: (
+                <span>
+                  <a href="/ai-models" className="link link-primary link-hover">
+                    Best AI
+                  </a>{" "}
+                  models
+                </span>
+              ),
+            },
+          ]}
+          href={
+            "https://checkout.dodopayments.com/buy/pdt_5dCrGhvBslGdT2fIxQjuy?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+          }
+          onClick={onClick ? () => onClick?.(proYearlyPlan.id) : undefined}
+          payLabel="Start free trial"
+        />
+      </>
+    );
+  }
   return (
     <>
       <PricingBox
@@ -824,7 +905,7 @@ export function PricingBoxes({
         description="Start your journey with CrawlChat"
         price={`$${starterPlan.price}`}
         items={[
-          { text: `${starterPlan.credits.scrapes} pages` },
+          { text: `${starterPlan.limits.pages} pages` },
           { text: `${starterPlan.credits.messages} message credits/month` },
           { text: `${starterPlan.limits.scrapes} collections` },
           { text: `${starterPlan.limits.teamMembers} team members` },
@@ -851,7 +932,7 @@ export function PricingBoxes({
         popular
         price={`$${proPlan.price}`}
         items={[
-          { text: `${proPlan.credits.scrapes} pages` },
+          { text: `${proPlan.limits.pages} pages` },
           { text: `${proPlan.credits.messages} message credits/month` },
           { text: `${proPlan.limits.scrapes} collections` },
           { text: `${proPlan.limits.teamMembers} team members` },
@@ -876,8 +957,54 @@ export function PricingBoxes({
   );
 }
 
+export function PricingSwitch({
+  yearly,
+  setYearly,
+}: {
+  yearly: boolean;
+  setYearly: (yearly: boolean) => void;
+}) {
+  function handleYearlyChange(yearly: boolean) {
+    setYearly(yearly);
+    track("pricing_" + (yearly ? "yearly" : "monthly"), {});
+  }
+
+  return (
+    <div className="flex justify-center items-center gap-4">
+      <span
+        className="text-lg cursor-pointer"
+        onClick={() => handleYearlyChange(false)}
+      >
+        Monthly
+      </span>
+      <input
+        type="checkbox"
+        checked={yearly}
+        onChange={() => handleYearlyChange(!yearly)}
+        className="toggle toggle-lg"
+      />
+      <span
+        className="text-lg relative cursor-pointer"
+        onClick={() => handleYearlyChange(true)}
+      >
+        <span
+          className={cn(
+            "absolute top-0 right-0 text-sm bg-primary/30 px-2 rounded-box",
+            "whitespace-nowrap translate-x-full -translate-y-1/2"
+          )}
+        >
+          2 months free
+        </span>
+        Yearly
+      </span>
+    </div>
+  );
+}
+
 export function Pricing({ noMarginTop }: { noMarginTop?: boolean }) {
-  const { starterPlan, proPlan } = useLoaderData<typeof loader>();
+  const { starterPlan, proPlan, starterYearlyPlan, proYearlyPlan } =
+    useLoaderData<typeof loader>();
+  const [isYearly, setIsYearly] = useState(false);
 
   return (
     <div className={cn("mt-32", noMarginTop && "mt-10")} id="pricing">
@@ -890,8 +1017,16 @@ export function Pricing({ noMarginTop }: { noMarginTop?: boolean }) {
         and cancel anytime.
       </HeadingDescription>
 
+      <PricingSwitch yearly={isYearly} setYearly={setIsYearly} />
+
       <div className="flex flex-col md:flex-row md:gap-6 gap-10 mt-20">
-        <PricingBoxes starterPlan={starterPlan} proPlan={proPlan} />
+        <PricingBoxes
+          starterPlan={starterPlan}
+          proPlan={proPlan}
+          starterYearlyPlan={starterYearlyPlan}
+          proYearlyPlan={proYearlyPlan}
+          yearly={isYearly}
+        />
       </div>
     </div>
   );
@@ -1061,14 +1196,14 @@ export function Footer() {
               <li>
                 <FooterLink href="/discord-bot">Discord bot</FooterLink>
               </li>
-              <li>
+              {/* <li>
                 <FooterLink href="https://crawlchat.affonso.io" external>
                   Affiliate program{" "}
                   <span className="whitespace-nowrap text-primary text-sm">
                     30% commission!
                   </span>
                 </FooterLink>
-              </li>
+              </li> */}
             </ul>
           </div>
           <div className="flex-[1]">

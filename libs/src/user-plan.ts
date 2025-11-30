@@ -94,11 +94,49 @@ export const PLAN_PRO: Plan = {
   category: "BASE",
 };
 
+export const PLAN_STARTER_YEARLY: Plan = {
+  id: "starter-yearly",
+  name: "Starter",
+  price: 450,
+  type: "SUBSCRIPTION",
+  credits: {
+    scrapes: 5000 * 12,
+    messages: 2000 * 12,
+  },
+  limits: {
+    scrapes: 2,
+    teamMembers: 2,
+    pages: 5000,
+  },
+  resetType: "yearly",
+  category: "BASE",
+};
+
+export const PLAN_PRO_YEARLY: Plan = {
+  id: "pro-yearly",
+  name: "Pro",
+  price: 990,
+  type: "SUBSCRIPTION",
+  credits: {
+    scrapes: 14000 * 12,
+    messages: 7000 * 12,
+  },
+  limits: {
+    scrapes: 3,
+    teamMembers: 5,
+    pages: 14000,
+  },
+  resetType: "yearly",
+  category: "BASE",
+};
+
 export const planMap: Record<string, Plan> = {
   [PLAN_FREE.id]: PLAN_FREE,
   [PLAN_STARTER.id]: PLAN_STARTER,
   [PLAN_PRO.id]: PLAN_PRO,
   [PLAN_HOBBY.id]: PLAN_HOBBY,
+  [PLAN_STARTER_YEARLY.id]: PLAN_STARTER_YEARLY,
+  [PLAN_PRO_YEARLY.id]: PLAN_PRO_YEARLY,
 };
 
 export const activatePlan = async (
