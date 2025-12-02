@@ -45,58 +45,42 @@ const RichCreateTicket = ({
   }
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-2 border border-base-300",
-        "p-4 rounded-box w-full my-8 shadow"
-      )}
-    >
-      {!loading && (
-        <>
-          <input
-            className="input w-full"
-            placeholder="Title"
-            defaultValue={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={disabled}
-          />
-          <textarea
-            className="textarea textarea-bordered w-full"
-            placeholder="Message"
-            defaultValue={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={4}
-            disabled={disabled}
-          />
-          <input
-            className="input w-full"
-            placeholder="Email"
-            defaultValue={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={disabled || !!customerEmail}
-          />
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-base-content/50">
-              Create a support ticket
-            </div>
-            <button
-              className="btn"
-              onClick={handleSubmit}
-              disabled={disabled || !onTicketCreate}
-            >
-              {loading && (
-                <span className="loading loading-spinner loading-xs" />
-              )}
-              Create <TbArrowRight />
-            </button>
-          </div>
-        </>
-      )}
-      {loading && (
-        <div className="flex items-center justify-center">
-          <span className="loading loading-spinner" />
+    <div className={cn("flex flex-col gap-2 w-full my-8")}>
+      <input
+        className="input w-full"
+        placeholder="Title"
+        defaultValue={title}
+        onChange={(e) => setTitle(e.target.value)}
+        disabled={disabled}
+      />
+      <textarea
+        className="textarea textarea-bordered w-full"
+        placeholder="Message"
+        defaultValue={message}
+        onChange={(e) => setMessage(e.target.value)}
+        rows={4}
+        disabled={disabled}
+      />
+      <input
+        className="input w-full"
+        placeholder="Email"
+        defaultValue={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={disabled || !!customerEmail}
+      />
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-base-content/50">
+          Create a support ticket
         </div>
-      )}
+        <button
+          className="btn"
+          onClick={handleSubmit}
+          disabled={disabled || !onTicketCreate || loading}
+        >
+          {loading && <span className="loading loading-spinner loading-xs" />}
+          Create <TbArrowRight />
+        </button>
+      </div>
     </div>
   );
 };
