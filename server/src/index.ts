@@ -853,6 +853,8 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     return;
   }
 
+  console.log("Sending answer to client");
+
   const citation = extractCitations(answer.content, answer.sources, {
     cleanCitations: true,
     addSourcesToMessage: channel === "api" ? false : true,
