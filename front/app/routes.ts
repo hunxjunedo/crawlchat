@@ -31,6 +31,7 @@ export default [
     route("profile", "dashboard/profile.tsx"),
     
     route("settings", "scrapes/settings.tsx"),
+    route("settings/helpdesk", "dashboard/settings/helpdesk.tsx"),
     route("tickets", "tickets/list.tsx"),
     route("tickets/settings", "tickets/settings.tsx"),
 
@@ -109,6 +110,8 @@ export default [
   ]),
 
   route("email-alert", "email-alert.ts"),
+
+  route("helpdesk/:slug", "helpdesk/page.tsx"),
 
   route("w/:id", "widget/page.tsx"),
   route("s/:id", "widget/share.tsx"),
