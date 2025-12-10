@@ -1304,6 +1304,11 @@ export function Footer() {
                 </FooterLink>
               </li>
               <li>
+                <FooterLink href="/blog/crawlchat-vs-sitegpt">
+                  CrawlChat vs SiteGPT
+                </FooterLink>
+              </li>
+              <li>
                 <FooterLink href="/blog/how-postiz-uses-crawlchat">
                   How Postiz Uses CrawlChat
                 </FooterLink>
