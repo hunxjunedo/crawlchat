@@ -1008,23 +1008,27 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
   const oldMessages = JSON.parse((req.body.messages as string) || "[]");
   const formatText = req.body.formatText as string;
   const llmModel = req.body.llmModel as LlmModel | undefined;
+  const slate = req.body.slate as string;
+  const content = req.body.content as string;
+  const title = req.body.title as string;
 
   const message = {
     role: "user",
-    content: prompt,
+    content,
   };
 
-  const messages = [...oldMessages, message];
+  const messages = [message];
 
   const queryContext: QueryContext = {
     ragQueries: [],
   };
 
-  const llmConfig = getConfig(llmModel ?? "haiku_4_5");
+  const llmConfig = getConfig("gemini_2_5_flash");
   const agent = new SimpleAgent({
     id: "compose-agent",
     prompt: `
-    Update the answer given above following the prompt and the question.
+    Update the <slate> given below following the prompt and the question.
+
     Use the search_data tool to get the relevant information.
     Only update the asked items from <answer>.
     Use the search_data tool only if new information is required.
@@ -1041,40 +1045,64 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
     You need to find indirect questions. For example: 'What is the cheapest pricing plan?' should be converted into 'pricing plans' and then find cheapest
     Don't use the search_data tool if the latest message is answer for a follow up question. Ex: yes, no.,
 
-    Don't overwrite the answer with delta. Always apply the delta.
+    Don't add top level heading to the slate. It is included outside.
+    Start the slate with a regular paragraph or text.
+    Update the title only if it is asked or the title is empty or not set.
 
-    Just give the answer. Don't give any other text other than the answer.
-    Don't include <answer> or any kind of tags in the answer.
-    Don't mention about you searching the context etc., it should be pure answer.
 
-    If you don't have answer, just give back the text.
-    Don't make huge changes, do minimal and concise changes.
+    <title>${title}</title>
+    <slate>${slate}</slate>
+
+    Output should be in the following format:
 
     <format-text>${formatText}</format-text>
+
+    You need to give back the updated slate.
+    You should apply changes asked to the current slate.
+    You should only apply changes and not do anything else.
+    Don't inspire from previous slates. Continue from the current slate.
+
+    ${prompt}
     `,
     tools: [makeRagTool(scrape.id, scrape.indexer, { queryContext }).make()],
+    schema: z.object({
+      slate: z.string({
+        description: "The answer in slate format",
+      }),
+      details: z.string({
+        description: "Any additional details while updating the slate",
+      }),
+      title: z.string({
+        description: "The title of the page. Should be under 8 words.",
+      }),
+    }),
     user: scrape.id,
+    maxTokens: 8000,
     ...llmConfig,
   });
 
   const flow = new Flow([agent], {
     messages: messages.map((m) => ({
       llmMessage: {
-        role: m.role as any,
+        role: m.role,
         content: m.content,
-      },
+      } as any,
     })),
   });
   flow.addNextAgents(["compose-agent"]);
 
   while (await flow.stream()) {}
 
-  const content = flow.getLastMessage().llmMessage.content as string;
+  const response = flow.getLastMessage().llmMessage.content as string;
+  const { slate: newSlate, details, title: newTitle } = JSON.parse(response);
 
   await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
 
   res.json({
     content,
+    details,
+    title: newTitle,
+    slate: newSlate,
     messages: [
       ...messages,
       {
