@@ -67,6 +67,9 @@ export default [
     route("actions/new", "actions/new.tsx"),
     route("actions/:actionId", "actions/edit.tsx"),
 
+    route("articles", "articles/list.tsx"),
+    route("article/:id", "articles/page.tsx"),
+
     route("data-gaps", "data-gaps/page.tsx"),
 
     route("assistance", "assistance.tsx"),
@@ -112,7 +115,10 @@ export default [
 
   route("email-alert", "email-alert.ts"),
 
-  route("helpdesk/:slug", "helpdesk/page.tsx"),
+  layout("helpdesk/layout.tsx", [
+    route("helpdesk/:slug", "helpdesk/page.tsx"),
+    route("helpdesk/:slug/article/:id", "helpdesk/article.tsx"),
+  ]),
 
   route("w/:id", "widget/page.tsx"),
   route("s/:id", "widget/share.tsx"),

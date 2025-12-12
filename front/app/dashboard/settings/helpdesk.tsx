@@ -8,7 +8,7 @@ import { TbSettings } from "react-icons/tb";
 import { useState, useMemo } from "react";
 import { SettingsSection } from "~/settings-section";
 import { useFetcher } from "react-router";
-import { Helpdesk } from "~/helpdesk/page";
+import { Helpdesk } from "~/helpdesk/layout";
 import type { HelpdeskConfig } from "libs/prisma";
 import { createToken } from "libs/jwt";
 import cn from "@meltdownjs/cn";
@@ -49,7 +49,18 @@ export async function loader({ request }: Route.LoaderArgs) {
     expiresInSeconds: 60 * 60 * 24,
   });
 
-  return { scrape, helpdeskConfig, userToken };
+  const guides = await prisma.article.findMany({
+    where: {
+      scrapeId: scrape.id,
+      purpose: "guide",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 20,
+  });
+
+  return { scrape, helpdeskConfig, userToken, guides };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -303,7 +314,11 @@ export default function HelpdeskSettings({ loaderData }: Route.ComponentProps) {
               messages={[]}
               userToken={loaderData.userToken}
               config={previewConfig}
-            />
+            >
+              <div className="text-center">
+                Your guides and other content will appear here.
+              </div>
+            </Helpdesk>
           </div>
         </div>
       </div>

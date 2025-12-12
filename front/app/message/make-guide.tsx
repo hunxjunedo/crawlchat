@@ -7,6 +7,8 @@ import type { Route } from "./+types/make-guide";
 import { ComposerSection, useComposer } from "~/compose";
 import { getMessageContent } from "./messages";
 import { useEffect } from "react";
+import { useFetcher } from "react-router";
+import { redirect } from "react-router";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -25,6 +27,32 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   });
 
   return { thread, scrape };
+}
+
+export async function action({ request, params }: Route.ActionArgs) {
+  const user = await getAuthUser(request);
+  const scrapeId = await getSessionScrapeId(request);
+  authoriseScrapeUser(user!.scrapeUsers, scrapeId);
+
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "publish") {
+    const content = formData.get("content") as string;
+    const title = formData.get("title") as string;
+
+    await prisma.article.create({
+      data: {
+        userId: user!.id,
+        scrapeId: scrapeId,
+        purpose: "guide",
+        title: title || undefined,
+        content: content,
+      },
+    });
+
+    throw redirect(`/questions/conversations`);
+  }
 }
 
 export default function MakeGuide({ loaderData }: Route.ComponentProps) {
@@ -57,6 +85,8 @@ export default function MakeGuide({ loaderData }: Route.ComponentProps) {
     stateLess: true,
   });
 
+  const publishFetcher = useFetcher();
+
   useEffect(() => {
     setTimeout(() => {
       composer.askEdit("Make a guide");
@@ -68,10 +98,26 @@ export default function MakeGuide({ loaderData }: Route.ComponentProps) {
       title="Make a guide"
       icon={<TbBook2 />}
       right={
-        <button className="btn btn-primary">
-          Publish
-          <TbCheck />
-        </button>
+        <publishFetcher.Form method="post">
+          <input type="hidden" name="intent" value="publish" />
+          <input type="hidden" name="content" value={composer.state.slate} />
+          <input
+            type="hidden"
+            name="title"
+            value={composer.state.title ?? ""}
+          />
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={publishFetcher.state !== "idle"}
+          >
+            {publishFetcher.state !== "idle" && (
+              <span className="loading loading-spinner loading-xs" />
+            )}
+            Publish
+            <TbCheck />
+          </button>
+        </publishFetcher.Form>
       }
     >
       <ComposerSection composer={composer} />
