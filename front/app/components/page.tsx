@@ -21,18 +21,17 @@ const LlmNameMap: Record<LlmModel, string> = {
 };
 
 const release = {
-  key: "categories-for-questions",
-  title: "Categories for questions",
+  key: "avatars",
+  title: "Avatars",
   description: (
     <p>
-      Now you can create <strong>Categories</strong> for the questions being
-      asked and group them for better analytics!
+      Have added <strong>avatars</strong> to the Conversations and Threads tables to help you identify and track questions asked by users across time. This feature makes it easier to see who asked what questions and follow user interactions throughout your conversations.
     </p>
   ),
-  date: "2025-10-17T17:14:04.947Z",
+  date: "2025-12-13T17:14:04.947Z",
   cta: {
     label: "Read more",
-    href: "/changelog/24-categories-for-questions",
+    href: "/changelog/28-avatars",
     icon: <TbArrowRight />,
     target: "_blank",
   },
