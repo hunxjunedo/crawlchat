@@ -222,7 +222,7 @@ Only following blocks are allowed:
 
 You should use only the above formatting in the answer.
 `,
-    fingerprint: message.user,
+    fingerprint: (message as any).user,
   });
 
   if (error) {
