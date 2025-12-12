@@ -519,7 +519,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
   const query = req.query.query as string;
   const creditsUsed = 1;
 
-  await prisma.message.create({
+  const questionMessage = await prisma.message.create({
     data: {
       threadId: thread.id,
       scrapeId: scrape.id,
@@ -556,6 +556,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
       ownerUserId: scrape.userId,
       channel: "mcp",
       creditsUsed,
+      questionId: questionMessage.id,
     },
   });
   await updateLastMessageAt(thread.id);
@@ -853,6 +854,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
       llmModel: scrape.llmModel as any,
       creditsUsed: answer!.creditsUsed,
       fingerprint,
+      questionId: questionMessage.id,
     },
   });
   await updateLastMessageAt(thread.id);
