@@ -14,8 +14,8 @@ import { getConfig } from "./config";
 import { createToken } from "libs/jwt";
 import { consumeCredits } from "libs/user-plan";
 
-const MAX_ANSWER_SCORE = 0.2;
-const MIN_QUESTION_SCORE = 0.8;
+const MAX_ANSWER_SCORE = 0.5;
+const MIN_RELEVANT_SCORE = 0.5;
 
 export async function decomposeQuestion(question: string, scrapeId: string) {
   const agent = new SimpleAgent({
@@ -73,7 +73,7 @@ export async function getRelevantScore(
     })
   );
 
-  const hit = scores.some((s) => s >= MIN_QUESTION_SCORE);
+  const hit = scores.some((s) => s >= MIN_RELEVANT_SCORE);
 
   const avg = scores.reduce((acc, s) => acc + s, 0) / scores.length;
   const result = {
@@ -86,33 +86,52 @@ export async function getRelevantScore(
 
 async function getDataGap(
   question: string,
+  answer: string,
   context: string[],
-  scrapeId: string
+  scrapeId: string,
+  knowledgeBaseContext?: {
+    title?: string | null;
+    chatPrompt?: string | null;
+  }
 ) {
   const llmConfig = getConfig("gpt_5");
 
   const agent = new SimpleAgent({
     id: "data-gap-detector",
     prompt: `
-    You are a helpful assistant that detects data gaps in the answer provided for the question.
-    You may leave title and description empty if there is no data gap.
-    The data gap should be very specific and should not be generic.
-    The description should be not more than 5 points.
-    The data gap can be absance of data or partial data.
-    You need to find the data gap from the context provided for the question. Don't find gaps in question.
+    You are a helpful assistant that detects data gaps in the knowledge base for the question asked.
+    
+    A data gap occurs when:
+    1. The question is relevant to the knowledge base topic
+    2. The knowledge base does not contain sufficient information to properly answer the question
+    3. The information may be completely missing or only partially available
+    
+    Your task is to identify what specific information is MISSING from the knowledge base that would be needed to properly answer this question.
+    
+    The context provided shows what information WAS found in the knowledge base. Compare this against what the question requires to identify the gaps.
+    
+    IMPORTANT: The data gap description must be relevant to the knowledge base's domain and topic. It should describe what information is missing in terms that are specific to this knowledge base's context and purpose.
+    
+    The data gap should be very specific and actionable, not generic.
+    You may leave title and description empty if there is no meaningful data gap.
     `,
     schema: z.object({
       title: z.string({
         description: `
-          Make a title for the data gap (if any). It should be under 10 words and respresent the gap clearly.
-          It is used to represent the data gap from the sources for the given question.
+          Make a title for the data gap (if any). It should be under 10 words and clearly represent what information is missing.
+          It should describe the gap in the knowledge base, not the question itself.
+          The title should be relevant to the knowledge base's domain.
+          Leave empty string if there is no meaningful data gap.
         `,
       }),
       description: z.string({
         description: `
           Make a description for the data gap (if any). It should be in markdown format.
-          It should explain the details to be filled for the data gap.
-          Make it descriptive, mention topics to fill as bullet points.
+          It should explain what specific information is missing from the knowledge base that would be needed to answer this question.
+          The description MUST be relevant to the knowledge base's domain, topic, and context. Use terminology and concepts that align with the knowledge base's purpose.
+          List the specific topics, details, or information that should be added to the knowledge base, framed in the context of the knowledge base's domain.
+          Make it descriptive and actionable, mention topics to fill as bullet points (max 5 points).
+          Leave empty string if there is no meaningful data gap.
         `,
       }),
     }),
@@ -120,6 +139,14 @@ async function getDataGap(
     maxTokens: 4096,
     ...llmConfig,
   });
+
+  const knowledgeBaseInfo = knowledgeBaseContext?.title
+    ? `\n\n<knowledge-base-context>\nTitle: ${knowledgeBaseContext.title}${
+        knowledgeBaseContext.chatPrompt
+          ? `\nPurpose: ${knowledgeBaseContext.chatPrompt}`
+          : ""
+      }\n</knowledge-base-context>`
+    : "";
 
   const flow = new Flow([agent], {
     messages: [
@@ -131,9 +158,22 @@ async function getDataGap(
             ${question}
             </question>
             
-            <context>
-            ${context.join("\n\n")}
-            </context>
+            <answer-provided>
+            ${answer}
+            </answer-provided>
+            
+            <context-from-knowledge-base>
+            ${
+              context.length > 0
+                ? context.join("\n\n")
+                : "No relevant context found in the knowledge base."
+            }
+            </context-from-knowledge-base>${knowledgeBaseInfo}
+            
+            Analyze what information is MISSING from the knowledge base that would be needed to properly answer this question.
+            Consider what the question asks for versus what information is actually available in the knowledge base.
+            
+            When describing the data gap, ensure it is relevant to the knowledge base's domain and context. The description should use terminology and concepts that align with the knowledge base's purpose and topic.
           `,
         },
       },
@@ -235,6 +275,13 @@ export async function analyseMessage(
         It should be true even if the user says it workd and asks follow up questions.
       `
     ),
+    noInformation: z.boolean().describe(
+      `
+        This should be true if the user mentioned that they don't have any information, or if the answer contains phrases indicating lack of information.
+        It should be true when user says, for example, "I don't have any information", "I don't know", "I don't have any information about that", etc.
+        It should also be true if the answer contains phrases like "I don't have specific information", "I don't have specific information about that", etc.
+      `
+    ),
   };
 
   if (categories.length > 0) {
@@ -290,10 +337,6 @@ export async function analyseMessage(
     return null;
   }
 
-  console.log("=== content ===");
-  console.log(content);
-  console.log("===");
-
   return JSON.parse(content as string) as {
     questionSentiment: QuestionSentiment;
     shortQuestion: string;
@@ -301,10 +344,14 @@ export async function analyseMessage(
     category: { title: string; score: number } | null;
     categorySuggestions: { title: string; description: string }[];
     resolved: boolean;
+    noInformation: boolean;
   };
 }
 
 function shouldCheckForDataGap(sources: MessageSourceLink[]) {
+  if (sources.length === 0) {
+    return true;
+  }
   const avgScore =
     sources.reduce((acc, s) => acc + (s.score ?? 0), 0) / sources.length;
   return avgScore <= MAX_ANSWER_SCORE;
@@ -415,20 +462,46 @@ export async function fillMessageAnalysis(
       resolved: partialAnalysis?.resolved ?? false,
     };
 
-    const checkForDataGap = shouldCheckForDataGap(sources);
+    // const checkForDataGap = shouldCheckForDataGap(sources);
+    console.log({
+      noInformation: partialAnalysis?.noInformation,
+    });
 
-    if (checkForDataGap) {
-      const questionRelevance = await getRelevantScore(
-        await decomposeQuestion(question, message.scrapeId),
-        message.scrape
+    if (partialAnalysis?.noInformation) {
+      const decomposedQuestions = await decomposeQuestion(
+        question,
+        message.scrapeId
       );
-      analysis.questionRelevanceScore = questionRelevance.avg;
 
-      if (questionRelevance.hit) {
-        const dataGap = await getDataGap(question, context, message.scrapeId);
-        if (dataGap.title && dataGap.description) {
-          analysis.dataGapTitle = dataGap.title;
-          analysis.dataGapDescription = dataGap.description;
+      if (decomposedQuestions && decomposedQuestions.length > 0) {
+        const questionRelevance = await getRelevantScore(
+          decomposedQuestions,
+          message.scrape
+        );
+        analysis.questionRelevanceScore = questionRelevance.avg;
+
+        if (questionRelevance.hit) {
+          const dataGap = await getDataGap(
+            question,
+            answer,
+            context,
+            message.scrapeId,
+            {
+              title: message.scrape.title,
+              chatPrompt: message.scrape.chatPrompt,
+            }
+          );
+          if (
+            dataGap.title &&
+            dataGap.description &&
+            dataGap.title.trim() &&
+            dataGap.description.trim()
+          ) {
+            analysis.dataGapTitle = dataGap.title;
+            analysis.dataGapDescription = dataGap.description;
+
+            console.log("Added data gap");
+          }
         }
       }
     }
