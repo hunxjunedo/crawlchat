@@ -8,7 +8,7 @@ import {
 import { githubApiRateLimiter } from "../rate-limiter";
 
 const ISSUES_TO_FETCH: Record<string, number> = {
-  "692bb91325e4f55feefdfe82": 6000,
+  "692bb91325e4f55feefdfe82": 10000,
 };
 
 export class GithubIssuesKbProcesser extends BaseKbProcesser {
