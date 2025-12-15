@@ -7,6 +7,10 @@ import {
 } from "../github-api";
 import { githubApiRateLimiter } from "../rate-limiter";
 
+const ISSUES_TO_FETCH: Record<string, number> = {
+  "692bb91325e4f55feefdfe82": 6000,
+};
+
 export class GithubIssuesKbProcesser extends BaseKbProcesser {
   constructor(
     protected listener: KbProcesserListener,
@@ -32,7 +36,7 @@ export class GithubIssuesKbProcesser extends BaseKbProcesser {
     const issues = await getJustIssues({
       repo,
       username,
-      n: 100,
+      n: ISSUES_TO_FETCH[this.knowledgeGroup.id] ?? 100,
     });
 
     for (let i = 0; i < issues.length; i++) {
