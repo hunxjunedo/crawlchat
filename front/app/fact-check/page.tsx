@@ -261,7 +261,7 @@ export default function FactCheckPage() {
     formData.append("intent", "check-fact");
     formData.append("fact", fact);
 
-    const response = await fetch("/fact-check/api", {
+    const response = await fetch("/tool/fact-check/api", {
       method: "POST",
       body: formData,
       headers: {
@@ -278,7 +278,11 @@ export default function FactCheckPage() {
   }
 
   return (
-    <Page title="Fact Check" icon={<TbCheck />}>
+    <Page
+      title="Fact Check"
+      icon={<TbCheck />}
+      description="Check the facts in your text against your knowledge base"
+    >
       {!extractFetcher.data?.facts && (
         <SettingsSection
           fetcher={extractFetcher}
@@ -289,7 +293,7 @@ export default function FactCheckPage() {
           <textarea
             name="text"
             className="textarea w-full"
-            rows={10}
+            rows={6}
             placeholder="Enter the text you want to fact-check..."
             value={text}
             onChange={(e) => setText(e.target.value)}

@@ -80,9 +80,12 @@ export default [
 
     route("assistance", "assistance.tsx"),
     route("draft", "draft.tsx"),
-    route("compose", "compose.tsx"),
-    route("fact-check", "fact-check/page.tsx"),
-    route("fact-check/api", "fact-check/api.ts"),
+
+    ...prefix("tool", [
+      route("compose", "compose.tsx"),
+      route("fact-check", "fact-check/page.tsx"),
+      route("fact-check/api", "fact-check/api.ts"),
+    ]),
 
     route("welcome", "welcome/page.tsx"),
 
