@@ -7,7 +7,7 @@ import ws from "express-ws";
 import cors from "cors";
 import { prisma } from "./prisma";
 import { deleteByIds, deleteScrape, makeRecordId } from "./scrape/pinecone";
-import { authenticate, AuthMode, authoriseScrapeUser } from "./auth";
+import { authenticate, AuthMode, authoriseScrapeUser } from "libs/express-auth";
 import { splitMarkdown } from "./scrape/markdown-splitter";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -15,6 +15,7 @@ import {
   Message,
   MessageAttachment,
   MessageChannel,
+  Prisma,
   Thread,
 } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
@@ -50,6 +51,19 @@ import { extractSiteUseCase } from "./site-use-case";
 import { handleWs } from "./routes/socket";
 import apiRouter from "./routes/api";
 import adminRouter from "./routes/admin";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: Prisma.UserGetPayload<{
+        include: {
+          scrapeUsers: true;
+        };
+      }>;
+      authMode?: AuthMode;
+    }
+  }
+}
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -473,7 +487,9 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
   }
 
   const clientUserId = req.body.clientUserId as string | undefined;
-  const fingerprint = (clientUserId ?? req.body.fingerprint) as string | undefined;
+  const fingerprint = (clientUserId ?? req.body.fingerprint) as
+    | string
+    | undefined;
 
   let thread = await prisma.thread.findFirst({
     where: { scrapeId: scrape.id, isDefault: true },
