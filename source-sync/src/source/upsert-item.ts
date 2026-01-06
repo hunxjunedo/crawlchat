@@ -59,6 +59,10 @@ export async function upsertItem(
     );
   }
 
+  const embeddings = documents.map((doc) => ({
+    id: doc.id,
+  }));
+
   await prisma.scrapeItem.upsert({
     where: {
       knowledgeGroupId_url: { knowledgeGroupId: knowledgeGroup.id, url },
@@ -67,9 +71,7 @@ export async function upsertItem(
       markdown: text,
       title,
       metaTags: [],
-      embeddings: documents.map((doc) => ({
-        id: doc.id,
-      })),
+      embeddings,
       status: "completed",
       sourcePageId,
     },
@@ -83,6 +85,7 @@ export async function upsertItem(
       title,
       markdown: text,
       metaTags: [],
+      embeddings,
     },
   });
 }
