@@ -1,14 +1,14 @@
 import { KnowledgeGroupType } from "libs/dist/prisma";
-import { WebSource } from "./web";
-import { NotionSource } from "./notion";
-import { GithubIssuesSource } from "./github-issues";
-import { GithubDiscussionsSource } from "./github-discussions";
-import { TextSource } from "./text";
+import { WebSource } from "./source-web";
+import { NotionSource } from "./source-notion";
+import { GithubIssuesSource } from "./source-github-issues";
+import { GithubDiscussionsSource } from "./source-github-discussions";
+import { TextSource } from "./source-text";
 import { ConfluenceSource } from "./confluence";
-import { LinearIssuesSource } from "./linear";
-import { LinearProjectSource } from "./linear-project";
-import { YoutubeChannelSource } from "./youtube-channel";
-import { YoutubeVideosSource } from "./youtube-videos";
+import { LinearIssuesSource } from "./source-linear";
+import { LinearProjectsSource } from "./source-linear-projects";
+import { YoutubeChannelSource } from "./source-youtube-channel";
+import { YoutubeVideosSource } from "./source-youtube-videos";
 
 export function makeSource(type: KnowledgeGroupType) {
   switch (type) {
@@ -27,7 +27,7 @@ export function makeSource(type: KnowledgeGroupType) {
     case "linear":
       return new LinearIssuesSource();
     case "linear_projects":
-      return new LinearProjectSource();
+      return new LinearProjectsSource();
     case "youtube_channel":
       return new YoutubeChannelSource();
     case "youtube":

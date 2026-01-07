@@ -3,7 +3,7 @@ import { GroupData, ItemData } from "./queue";
 import { LinearClient, PaginationOrderBy } from "libs/linear";
 import { scheduleUrls } from "./schedule";
 
-export class LinearProjectSource implements Source {
+export class LinearProjectsSource implements Source {
   private getClient(group: GroupForSource) {
     return new LinearClient({
       apiKey: group.linearApiKey!,
