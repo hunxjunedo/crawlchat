@@ -8,11 +8,13 @@ import {
   itemQueue,
   ItemData,
   redis,
+  groupQueue,
 } from "./source/queue";
 import { upsertFailedItem, upsertItem } from "./source/upsert-item";
 import {
   decrementPendingUrls,
   getPendingUrls,
+  incrementPendingUrls,
   scheduleGroup,
 } from "./source/schedule";
 
@@ -26,10 +28,21 @@ const groupEvents = new QueueEvents(GROUP_QUEUE_NAME, {
 
 groupEvents.on("added", async ({ jobId }) => {
   console.log(`Group job added: ${jobId}`);
+  const job = await groupQueue.getJob(jobId);
+  if (job) {
+    await incrementPendingUrls(job.data.processId);
+  }
 });
 
 groupEvents.on("failed", async ({ jobId, failedReason }) => {
   console.log(`Group job failed: ${jobId}, failed reason: ${failedReason}`);
+});
+
+groupEvents.on("completed", async ({ jobId }) => {
+  const job = await groupQueue.getJob(jobId);
+  if (job) {
+    await decrementPendingUrls(job.data.processId);
+  }
 });
 
 async function checkGroupCompletion(job: Job<ItemData>) {
@@ -47,6 +60,10 @@ async function checkGroupCompletion(job: Job<ItemData>) {
 
 itemEvents.on("added", async ({ jobId }) => {
   console.log(`Item job added: ${jobId}`);
+  const job = await itemQueue.getJob(jobId);
+  if (job) {
+    await incrementPendingUrls(job.data.processId);
+  }
 });
 
 itemEvents.on("failed", async ({ jobId, failedReason }) => {

@@ -63,7 +63,6 @@ export async function scheduleUrl(
   if (!(await markScheduledIfNotExists(url, processId))) {
     return null;
   }
-  await incrementPendingUrls(processId);
 
   await itemQueue.add(
     "item",
