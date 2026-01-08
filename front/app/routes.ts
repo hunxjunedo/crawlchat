@@ -80,8 +80,6 @@ export default [
 
     route("data-gaps", "data-gaps/page.tsx"),
 
-    route("assistance", "assistance.tsx"),
-
     ...prefix("tool", [
       route("compose", "compose.tsx"),
       route("fact-check", "fact-check/page.tsx"),

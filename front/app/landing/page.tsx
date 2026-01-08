@@ -1266,11 +1266,10 @@ export function Nav({ user }: { user?: User | null }) {
             <NavLink href="/pricing">Pricing</NavLink>
             <NavLink href="/changelog">Changelog</NavLink>
             <NavLink href="/blog">Blog</NavLink>
-            {/* <NavLink href="/public-bots">Public bots</NavLink> */}
           </div>
 
           <div>
-            <div className="items-center gap-2 hidden md:flex">
+            <div className="items-center gap-8 hidden md:flex">
               {!user && <Link to="/login">Login</Link>}
               {!user && (
                 <div className="hidden md:block">
