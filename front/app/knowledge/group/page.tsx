@@ -107,7 +107,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     await prisma.knowledgeGroup.update({
       where: { id: knowledgeGroupId, scrapeId },
-      data: { status: "done" },
+      data: { status: "done", updateProcessId: null },
     });
 
     return { success: true };

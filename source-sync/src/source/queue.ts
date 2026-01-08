@@ -60,7 +60,5 @@ export const itemQueue = new Queue<ItemData>(ITEM_QUEUE_NAME, {
       type: "exponential",
       delay: 2000,
     },
-    removeOnComplete: 100,
-    removeOnFail: 100,
   },
 });

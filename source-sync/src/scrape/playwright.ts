@@ -1,16 +1,80 @@
-import { chromium } from "playwright";
+import { chromium, Browser, BrowserContext, Page } from "playwright";
 
-async function getPage() {
-  const browser = await chromium.launch();
-  return await browser.newPage();
+let browser: Browser | null = null;
+let browserPromise: Promise<Browser> | null = null;
+let cleanupTimeout: NodeJS.Timeout | null = null;
+
+const IDLE_TIMEOUT_MS = 30000;
+
+async function getBrowser(): Promise<Browser> {
+  if (browser) {
+    return browser;
+  }
+
+  if (!browserPromise) {
+    browserPromise = chromium.launch({
+      headless: true,
+    }).then((b) => {
+      browser = b;
+      browser.on("disconnected", () => {
+        browser = null;
+        browserPromise = null;
+        cancelCleanup();
+      });
+      return b;
+    });
+  }
+
+  return browserPromise;
+}
+
+function scheduleCleanup() {
+  cancelCleanup();
+  
+  cleanupTimeout = setTimeout(async () => {
+    if (!browser) {
+      return;
+    }
+
+    if (browser.contexts().length === 0) {
+      console.log("No active contexts, closing browser to save CPU");
+      await browser.close();
+      browser = null;
+      browserPromise = null;
+      cleanupTimeout = null;
+    }
+  }, IDLE_TIMEOUT_MS);
+}
+
+function cancelCleanup() {
+  if (cleanupTimeout) {
+    clearTimeout(cleanupTimeout);
+    cleanupTimeout = null;
+  }
+}
+
+async function getPage(): Promise<{ page: Page; context: BrowserContext }> {
+  const browserInstance = await getBrowser();
+  const context = await browserInstance.newContext({
+    viewport: { width: 1920, height: 1080 },
+  });
+  
+  context.on("close", () => {
+    scheduleCleanup();
+  });
+  
+  cancelCleanup();
+  const page = await context.newPage();
+  return { page, context };
 }
 
 export async function scrapePw(
   url: string,
   options?: { scrollSelector?: string; maxWait?: number }
 ) {
-  const page = await getPage();
+  const { page, context } = await getPage();
   console.log("Playwright scraping", url);
+  
   const response = await page.goto(url);
 
   if (options?.maxWait) {
@@ -55,5 +119,30 @@ export async function scrapePw(
   }
 
   const html = await page.content();
+  await page.close();
+  await context.close();
+  
+  if (browser && browser.contexts().length === 0) {
+    scheduleCleanup();
+  }
+  
   return { text: html, statusCode: response?.status() ?? -1 };
 }
+
+process.on("SIGTERM", async () => {
+  cancelCleanup();
+  if (browser) {
+    await browser.close();
+    browser = null;
+    browserPromise = null;
+  }
+});
+
+process.on("SIGINT", async () => {
+  cancelCleanup();
+  if (browser) {
+    await browser.close();
+    browser = null;
+    browserPromise = null;
+  }
+});
