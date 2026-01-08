@@ -1,11 +1,17 @@
 import { Queue } from "bullmq";
 import Redis from "ioredis";
 
-export const redis = new Redis(process.env.REDIS_URL!, {
+const redisUrl = process.env.REDIS_URL!;
+const isTls = redisUrl.startsWith("rediss://");
+
+export const redis = new Redis(redisUrl, {
   maxRetriesPerRequest: null,
-  tls: {
-    rejectUnauthorized: false,
-  },
+  family: 0,
+  ...(isTls && {
+    tls: {
+      rejectUnauthorized: false,
+    },
+  }),
 });
 
 export const GROUP_QUEUE_NAME = process.env.GROUP_QUEUE_NAME!;
