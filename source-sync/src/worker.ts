@@ -111,6 +111,8 @@ const groupWorker = new Worker<GroupData>(
   {
     connection: redis,
     concurrency: 1,
+    lockDuration: 30000,
+    maxStalledCount: 1,
   }
 );
 
@@ -158,6 +160,8 @@ const itemWorker = new Worker<ItemData>(
   {
     connection: redis,
     concurrency: 1,
+    lockDuration: 30000,
+    maxStalledCount: 1,
   }
 );
 

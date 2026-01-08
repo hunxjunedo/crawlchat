@@ -47,6 +47,8 @@ export const groupQueue = new Queue<GroupData>(GROUP_QUEUE_NAME, {
       type: "exponential",
       delay: 2000,
     },
+    removeOnComplete: 100,
+    removeOnFail: 100,
   },
 });
 
@@ -58,5 +60,7 @@ export const itemQueue = new Queue<ItemData>(ITEM_QUEUE_NAME, {
       type: "exponential",
       delay: 2000,
     },
+    removeOnComplete: 100,
+    removeOnFail: 100,
   },
 });
