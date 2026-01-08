@@ -14,7 +14,7 @@ async function createBrowser() {
 }
 
 async function getPage(): Promise<Page> {
-  const browserInstance = browser || await createBrowser();
+  const browserInstance = browser || (await createBrowser());
   const context = await browserInstance.newContext({
     viewport: { width: 1920, height: 1080 },
   });
@@ -42,7 +42,7 @@ export async function scrapePw(
     if (options?.maxWait) {
       await page.waitForTimeout(options.maxWait);
     } else {
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("networkidle", { timeout: 10000 });
     }
 
     await page.waitForTimeout(5000);
@@ -76,7 +76,7 @@ export async function scrapePw(
         scrollElement.scrollTo(0, scrollElement.scrollHeight);
       }, scrollSelector);
 
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("networkidle", { timeout: 10000 });
       await page.waitForTimeout(1000);
     }
 
