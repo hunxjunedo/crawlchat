@@ -10,7 +10,6 @@ import {
 import { makeIndexer } from "../indexer/factory";
 import {
   FlowMessage,
-  LlmTool,
   multiLinePrompt,
   SimpleAgent,
   SimpleTool,

@@ -31,7 +31,7 @@ import { chunk } from "libs/chunk";
 import { Flow } from "./llm/flow";
 import { z } from "zod";
 import { baseAnswerer, collectSourceLinks } from "./answer";
-import { fillMessageAnalysis } from "./llm/analyse-message";
+import { fillMessageAnalysis } from "./analyse-message";
 import { createToken } from "libs/jwt";
 import { MultimodalContent, getQueryString } from "libs/llm-message";
 import {
@@ -76,6 +76,7 @@ app.use(cors());
 
 app.use("/api", apiRouter);
 app.use("/admin", adminRouter);
+expressWs.app.ws("/", handleWs);
 
 async function updateLastMessageAt(threadId: string) {
   await prisma.thread.update({
@@ -185,8 +186,6 @@ app.delete(
     res.json({ message: "ok" });
   }
 );
-
-expressWs.app.ws("/", handleWs);
 
 app.get("/mcp/:scrapeId", async (req, res) => {
   console.log(`MCP request for ${req.params.scrapeId} and ${req.query.query}`);

@@ -3,7 +3,7 @@ import {
   ChatCompletionMessageToolCall,
   ChatCompletionToolMessageParam,
 } from "openai/resources/chat/completions";
-import { FlowMessage, LlmMessage, State } from "./agentic";
+import { FlowMessage, State } from "./agentic";
 import { Agent } from "./agentic";
 import { handleStream, HandleStreamOptions } from "./stream";
 
