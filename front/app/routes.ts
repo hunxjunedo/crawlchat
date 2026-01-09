@@ -18,11 +18,6 @@ export default [
   route("terms", "landing/terms/page.tsx"),
   route("policy", "landing/policy/page.tsx"),
   route("data-privacy", "landing/data-privacy/page.tsx"),
-  layout("landing/embed-demo/layout.tsx", [
-    route("embed-demo", "landing/embed-demo/page.tsx"),
-    route("embed-demo/pricing", "landing/embed-demo/pricing.tsx"),
-    route("embed-demo/docs", "landing/embed-demo/docs.tsx"),
-  ]),
 
   route("payment/lemonsqueezy-webhook", "payment/lemonsqueezy-webhook.ts"),
   route("payment/dodo-webhook", "payment/dodo-webhook.ts"),

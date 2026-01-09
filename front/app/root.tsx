@@ -49,31 +49,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const matches = useMatches();
   const shouldTrack = useMemo(() => {
-    const trackingExcludedScrapeIds = [
-      "67d221efb4b9de65095a2579",
-      "67c0a28c5b075f0bb35e5366",
-      "67bca5b7b57f15a3a6f8eac6",
-      "67dbfc7258ed87c571a04b83",
-      "67e312247a822a2303f2b8a7",
-      "683dbed123465b65fecc4fbe",
-      "683e89a77d51a04cd9711bf7",
-      "680e1be3148c99bff1f7711b", // 270degrees
-      "6875d6818d356651a9d4a41e", // guideroll
-      "68ac269d2961657c4b7924a9", // Postiz
-      "686d843711915abf46700f2b", // Nobl9
-      "crawlchat",
-    ];
-
-    const shouldTrack = trackingExcludedScrapeIds.every(
-      (id) => !location.pathname.includes(`/w/${id}`)
-    );
-
-    return shouldTrack;
+    return !/\/w\/[0-9a-fA-F]{24}/.test(location.pathname);
   }, [location]);
-
-  const isEmbedDemo = matches.some(
-    (match) => match.id.startsWith("embed-demo")
-  );
   const isLandingPage = matches.some((match) => match.id === "landing/page");
 
   return (
@@ -115,21 +92,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
-        {isEmbedDemo && (
-          <script
-            src="/embed.js"
-            id="crawlchat-script"
-            data-id="crawlchat"
-            data-ask-ai-text="💬 Ask AI"
-            data-ask-ai-background-color="#000000"
-            data-ask-ai-color="white"
-            data-ask-ai-position="br"
-            data-ask-ai-margin-x="30px"
-            data-ask-ai-margin-y="20px"
-            data-ask-ai-radius="30px"
-            data-ask-ai="true"
-          />
-        )}
         {isLandingPage && (
           <script
             src="https://crawlchat.app/embed.js"
