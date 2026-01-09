@@ -8,13 +8,13 @@ You can self host it yourself or let [CrawlChat](https://crawlchat.app/pricing) 
 
 Here are the services it consists of. They are mostly simple **Node** + **TypeScript** apps.
 
-| Name                                 | Purpose                                                         | Run           |
-| ------------------------------------ | --------------------------------------------------------------- | ------------- |
-| [front](tree/main/front)             | The front facing [React Router 7](https://reactrouter.com) app  | `npm run dev` |
-| [server](tree/main/server)           | LLM interacting [Express](https://expressjs.com) app            | `npm run dev` |
-| [source-sync](tree/main/source-sync) | A [BullMQ](http://bullmq.io) app for syncing the sources and KB | `npm run dev` |
-| [discord-bot](tree/main/discord-bot) | [Discord](https://discord.com) bot to answer questions          | `npm run dev` |
-| [slack-app](tree/main/slack-app)     | [Slack](https://slack.com) app to answer questions              | `npm run dev` |
+| Name        | Purpose                                                         | Run           |
+| ----------- | --------------------------------------------------------------- | ------------- |
+| front       | The front facing [React Router 7](https://reactrouter.com) app  | `npm run dev` |
+| server      | LLM interacting [Express](https://expressjs.com) app            | `npm run dev` |
+| source-sync | A [BullMQ](http://bullmq.io) app for syncing the sources and KB | `npm run dev` |
+| discord-bot | [Discord](https://discord.com) bot to answer questions          | `npm run dev` |
+| slack-app   | [Slack](https://slack.com) app to answer questions              | `npm run dev` |
 
 ## Self-host
 
