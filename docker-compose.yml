@@ -1,0 +1,158 @@
+services:
+  front:
+    image: ghcr.io/crawlchat/crawlchat-front:latest
+    networks:
+      - crawlchat-net
+    depends_on:
+      - database
+    ports:
+      - "3001:3000"
+    environment:
+      # Remember to change these variables in production!
+      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
+      RESEND_FROM_EMAIL: ""
+      RESEND_KEY: ""
+      VITE_APP_URL: ""
+      VITE_SERVER_WS_URL: ""
+      VITE_SERVER_URL: ""
+      # Put random characters here (at least 32 characters); Has to be the in all services
+      JWT_SECRET: ""
+      LEMONSQUEEZY_WEBHOOK_SECRET: ""
+      GOOGLE_CLIENT_ID: ""
+      GOOGLE_CLIENT_SECRET: ""
+      GOOGLE_REDIRECT_URI: ""
+      DODO_WEBHOOK_SECRET: ""
+      DODO_API_KEY: ""
+      DATAFAST_API_KEY: ""
+      VITE_SOURCE_SYNC_URL: "http://source_sync:3000"
+      ADMIN_EMAILS: ""
+      DEFAULT_SIGNUP_PLAN_ID: "accelerate-yearly"
+
+  server:
+    image: ghcr.io/crawlchat/crawlchat-server:latest
+    networks:
+      - crawlchat-net
+    depends_on:
+      - database
+    ports:
+      - "3002:3000"
+    environment:
+      OPENAI_API_KEY: ""
+      # Remember to change these variables in production!
+      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
+      PINECONE_API_KEY: ""
+      # Put random characters here (at least 32 characters); Has to be the in all services
+      JWT_SECRET: ""
+      SOURCE_SYNC_URL: "http://source_sync:3000"
+      ADMIN_EMAILS: ""
+
+  source_sync:
+    image: ghcr.io/crawlchat/crawlchat-source-sync:latest
+    depends_on:
+      - redis
+      - database
+    networks:
+      - crawlchat-net
+    environment:
+      # Remember to change these variables in production!
+      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
+      PINECONE_API_KEY: ""
+      # Put random characters here (at least 32 characters)
+      JWT_SECRET: ""
+      SCRAPECREATORS_API_KEY: ""
+      REDIS_URL: "redis://redis:6379"
+      GROUP_QUEUE_NAME: "crawlchat_source_sync_groups"
+      ITEM_QUEUE_NAME: "crawlchat_source_sync_items"
+
+  discord_bot:
+    image: ghcr.io/crawlchat/crawlchat-discord:latest
+    depends_on:
+      - database
+    networks:
+      - crawlchat-net
+    environment:
+      # Discord App ID
+      APP_ID: ""
+      # Discord App / Bot Token
+      DISCORD_TOKEN: ""
+      PUBLIC_KEY: ""
+      BOT_USER_ID: ""
+      ALL_BOT_USER_IDS: ""
+      SERVER_HOST: ""
+      # Put random characters here (at least 32 characters)
+      JWT_SECRET: ""
+      # Remember to change these variables in production!
+      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
+
+  slack_app:
+    image: ghcr.io/crawlchat/crawlchat-slack:latest
+    depends_on:
+      - database
+    networks:
+      - crawlchat-net
+    environment:
+      SERVER_HOST: ""
+      SLACK_SIGNING_SECRET: ""
+      SLACK_CLIENT_ID: ""
+      SLACK_CLIENT_SECRET: ""
+      SLACK_STATE_SECRET: ""
+      HOST: ""
+      # Put random characters here (at least 32 characters)
+      JWT_SECRET: ""
+      # Remember to change these variables in production!
+      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
+
+
+# Redis & MongoDB
+  database:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--noauth"]
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - crawlchat-net
+    healthcheck:
+      test: mongosh --eval "db.adminCommand('ping')" --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  mongo-init:
+    image: mongo:7
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["sh", "-c", "
+      until mongosh --host database:27017 --eval 'db.runCommand({ ping: 1 })'; do
+      echo 'Waiting for Mongo...'; sleep 2;
+      done;
+      mongosh --host database:27017 --eval 'rs.initiate({_id:\"rs0\",members:[{_id:0,host:\"database:27017\"}]})'
+      "]
+    networks:
+      - crawlchat-net
+
+  redis:
+    image: redis:7
+    container_name: crawlchat-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 12
+    volumes:
+      - redis_data:/data
+    networks:
+      - crawlchat-net
+
+networks:
+  crawlchat-net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  redis_data:

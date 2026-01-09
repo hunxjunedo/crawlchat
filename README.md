@@ -20,12 +20,14 @@ Here are the services it consists of. They are mostly simple **Node** + **TypeSc
 
 There are **Dockerfile**s for all the above mentioned services. You can instantly host on platforms like [Coolify](https://coolify.io), [Railway](https://railway.com), etc. by just setting up the **environment variables**
 
+See the [docker-compose.yml](https://github.com/pskd73/crawlchat/blob/main/docker-compose.yml) on how to set up all basic services automatically.
+
 ## Contribution
 
 It should be pretty straight forward process. Clone the repository locally and start the **front**, **server**, **source-sync** to get started. Make sure you add the `.env` files in the services with appropriate values as mentioned in `env.example` files respectively.
 
-Feel free to rais a **Pull request** if you find any improvement, interesting feature addition, fixes for bugs!
+Feel free to raise a **Pull request** if you find any improvement, interesting feature addition, fixes for bugs!
 
 ## License
 
-It is available on a O'Saasy license. Go to [LICENSE](https://github.com/pskd73/crawlchat/blob/main/LICENSE)
+It is available on a O'Saasy license. Go to [LICENSE](https://github.com/pskd73/crawlchat/blob/main/LICENSE.md)
