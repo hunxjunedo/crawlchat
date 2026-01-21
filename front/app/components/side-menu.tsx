@@ -80,8 +80,8 @@ function SideMenuItem({
         <div
           className={cn(
             "flex pl-3 pr-2 py-1 w-full justify-between rounded-box items-center",
-            "transition-all hover:bg-accent hover:text-accent-content group",
-            isActive && !link.items && "bg-accent text-accent-content",
+            "hover:bg-accent/10 hover:text-accent group",
+            isActive && !link.items && "bg-accent/10 text-accent",
             isActive && link.items && "bg-base-300"
           )}
         >
@@ -386,7 +386,6 @@ export function SideMenu({
         icon: <TbTools />,
         forScrape: true,
         to: "/tool",
-        isNew: true,
         items: [
           {
             label: "Compose",
@@ -487,11 +486,7 @@ export function SideMenu({
         {scrape && (
           <div className="px-3 w-full">
             <div className="dropdown w-full">
-              <button
-                tabIndex={0}
-                className="btn w-full flex justify-between"
-                style={{ background: "white" }}
-              >
+              <button tabIndex={0} className="btn w-full flex justify-between">
                 {scrapeId ? scrape?.title : "Select collection"}
                 <TbChevronDown />
               </button>
@@ -576,11 +571,7 @@ export function SideMenu({
           </div>
 
           <div className="dropdown dropdown-top dropdown-end">
-            <button
-              tabIndex={0}
-              className="btn btn-sm mt-1 btn-square"
-              style={{ background: "white" }}
-            >
+            <button tabIndex={0} className="btn btn-sm mt-1 btn-square">
               <TbChevronUp />
             </button>
             <ul
