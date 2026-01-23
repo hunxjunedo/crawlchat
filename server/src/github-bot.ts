@@ -1,62 +1,31 @@
 import crypto from "crypto";
 import { Router } from "express";
-import type { Express, Request, Response } from "express";
-import { Octokit } from "@octokit/core";
-import { createAppAuth } from "@octokit/auth-app";
+import type { Request, Response } from "express";
 import { baseAnswerer } from "./answer";
 import { fillMessageAnalysis } from "./analyse-message";
 import { extractCitations } from "libs/citation";
 import { createToken } from "libs/jwt";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
 import { getQueryString } from "libs/llm-message";
-import {
-  MessageChannel,
-  MessageRating,
-  Thread,
-  prisma,
-} from "libs/prisma";
-
-const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
-const githubAppId = Number(process.env.GITHUB_APP_ID ?? 0);
-const githubPrivateKey = (process.env.GITHUB_APP_PRIVATE_KEY ?? "").replace(
-  /\\n/g,
-  "\n"
-);
-const hasAppCredentials = githubAppId > 0 && githubPrivateKey.length > 0;
-
-const appAuth = hasAppCredentials
-  ? createAppAuth({
-      appId: githubAppId,
-      privateKey: githubPrivateKey,
-    })
-  : null;
-
-type GitHubQuestionType = "discussion" | "issue";
-
-type GitHubQuestionRequest = {
-  type: GitHubQuestionType;
-  number: number;
-  repoFullName: string;
-  owner: string;
-  repo: string;
-  question: string;
-  mention: boolean;
-  threadKey: string;
-  title?: string;
-  installationId: number;
-};
+import { MessageRating, Thread, prisma } from "libs/prisma";
+import jwt from "jsonwebtoken";
 
 type GitHubPostResponse = {
   id: number;
   html_url: string;
 };
 
-function containsMention(text?: string | null) {
+function containsMention(text: string) {
   return Boolean(text && text.trim().startsWith("@crawlchat"));
 }
 
+function cleanupMention(text: string) {
+  return text.replace(/^@crawlchat/g, "").trim();
+}
 
 function verifySignature(req: Request) {
+  const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
+
   if (!webhookSecret) {
     throw new Error("GitHub webhook secret not configured");
   }
@@ -83,22 +52,58 @@ function verifySignature(req: Request) {
 
   const expectedSignature = `sha256=${digest}`;
 
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+  if (
+    !crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    )
+  ) {
     throw new Error("Invalid GitHub signature");
   }
 }
 
-async function getInstallationOctokit(
-  installationId: number
-): Promise<Octokit> {
-  if (!appAuth) {
-    throw new Error("GitHub bot: No app authentication available. Make sure GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY are set.");
+async function getToken(installationId: number): Promise<string> {
+  const githubAppId = process.env.GITHUB_APP_ID;
+  const githubPrivateKey = process.env.GITHUB_APP_PRIVATE_KEY?.replace(
+    /\\n/g,
+    "\n"
+  );
+
+  if (!githubAppId || !githubPrivateKey) {
+    throw new Error("GitHub app authentication not configured");
   }
-  const auth = await appAuth({
-    type: "installation",
-    installationId,
-  });
-  return new Octokit({ auth: auth.token });
+
+  const now = Math.floor(Date.now() / 1000);
+  const iat = now - 30;
+  const jwtToken = jwt.sign(
+    {
+      iat,
+      exp: iat + 60 * 9,
+      iss: githubAppId,
+    },
+    githubPrivateKey,
+    { algorithm: "RS256" }
+  );
+
+  const response = await fetch(
+    `https://api.github.com/app/installations/${installationId}/access_tokens`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to get installation token: ${error}`);
+  }
+
+  const data = await response.json();
+  return data.token;
 }
 
 async function getThread(
@@ -122,68 +127,97 @@ async function getThread(
 }
 
 async function postDiscussionComment(
-  octokit: Octokit,
+  token: string,
   owner: string,
   repo: string,
   discussionNumber: number,
   body: string
 ): Promise<GitHubPostResponse> {
-  const response = await octokit.request(
-    "POST /repos/{owner}/{repo}/discussions/{discussion_number}/comments",
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/discussions/${discussionNumber}/comments`,
     {
-      owner,
-      repo,
-      discussion_number: discussionNumber,
-      body,
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ body }),
     }
   );
-  return response.data as GitHubPostResponse;
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to post discussion comment: ${error}`);
+  }
+
+  return (await response.json()) as GitHubPostResponse;
 }
 
 async function postIssueComment(
-  octokit: Octokit,
+  token: string,
   owner: string,
   repo: string,
   issueNumber: number,
   body: string
 ): Promise<GitHubPostResponse> {
-  const response = await octokit.request(
-    "POST /repos/{owner}/{repo}/issues/{issue_number}/comments",
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
     {
-      owner,
-      repo,
-      issue_number: issueNumber,
-      body,
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ body }),
     }
   );
-  return response.data as GitHubPostResponse;
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to post issue comment: ${error}`);
+  }
+
+  return (await response.json()) as GitHubPostResponse;
 }
 
-async function answerGitHubQuestion(data: GitHubQuestionRequest) {
+async function answer(data: {
+  type: "discussion" | "issue";
+  number: number;
+  repoFullName: string;
+  owner: string;
+  repo: string;
+  question: string;
+  threadKey: string;
+  installationId: number;
+  title?: string;
+  userId?: string;
+}) {
   const scrape = await prisma.scrape.findFirst({
     where: { githubRepoName: data.repoFullName },
   });
   if (!scrape) {
-    console.warn(`GitHub bot: No scrape found for repository "${data.repoFullName}". Make sure you've configured this repository in your CrawlChat GitHub bot settings.`);
-    return;
-  }
-
-  if (
-    !(
-      await hasEnoughCredits(scrape.userId, "messages", {
-        alert: {
-          scrapeId: scrape.id,
-          token: createToken(scrape.userId),
-        },
-      })
-    )
-  ) {
-    console.warn("Insufficient credits for GitHub reply");
-    return;
+    return console.error(
+      `GitHub repo ${data.repoFullName} not found in CrawlChat`
+    );
   }
 
   if (!data.question.trim()) {
     return;
+  }
+
+  if (
+    !(await hasEnoughCredits(scrape.userId, "messages", {
+      alert: {
+        scrapeId: scrape.id,
+        token: createToken(scrape.userId),
+      },
+    }))
+  ) {
+    return console.warn("Insufficient credits for GitHub reply");
   }
 
   const thread = await getThread(scrape.id, data.threadKey, data.title);
@@ -193,12 +227,12 @@ async function answerGitHubQuestion(data: GitHubQuestionRequest) {
       threadId: thread.id,
       scrapeId: scrape.id,
       ownerUserId: scrape.userId,
-      channel: "github_discussion" as MessageChannel,
+      channel: "github_discussion",
       llmMessage: {
         role: "user",
         content: data.question,
       },
-      fingerprint: data.mention ? "mention" : undefined,
+      fingerprint: data.userId?.toString(),
     },
   });
 
@@ -216,18 +250,12 @@ async function answerGitHubQuestion(data: GitHubQuestionRequest) {
     actions,
   });
 
-  const shouldReply = data.mention || (answer.context?.length ?? 0) > 0;
-  if (!shouldReply) {
-    console.info("Skipping GitHub reply: no relevant context and no mention.");
-    return;
-  }
-
   const answerMessage = await prisma.message.create({
     data: {
       threadId: thread.id,
       scrapeId: scrape.id,
       ownerUserId: scrape.userId,
-      channel: "github_discussion" as MessageChannel,
+      channel: "github_discussion",
       llmMessage: {
         role: "assistant",
         content: answer.content,
@@ -236,6 +264,7 @@ async function answerGitHubQuestion(data: GitHubQuestionRequest) {
       creditsUsed: answer.creditsUsed,
       questionId: questionMessage.id,
       llmModel: scrape.llmModel,
+      fingerprint: data.userId?.toString(),
     },
   });
 
@@ -267,12 +296,10 @@ async function answerGitHubQuestion(data: GitHubQuestionRequest) {
     addSourcesToMessage: false,
   });
 
-  const installationOctokit = await getInstallationOctokit(data.installationId);
-
   let postResponse: GitHubPostResponse;
   if (data.type === "discussion") {
     postResponse = await postDiscussionComment(
-      installationOctokit,
+      await getToken(data.installationId),
       data.owner,
       data.repo,
       data.number,
@@ -280,7 +307,7 @@ async function answerGitHubQuestion(data: GitHubQuestionRequest) {
     );
   } else {
     postResponse = await postIssueComment(
-      installationOctokit,
+      await getToken(data.installationId),
       data.owner,
       data.repo,
       data.number,
@@ -288,247 +315,238 @@ async function answerGitHubQuestion(data: GitHubQuestionRequest) {
     );
   }
 
-
   await prisma.message.update({
     where: { id: answerMessage.id },
     data: {
       githubCommentId: String(postResponse.id),
       url: postResponse.html_url,
-      rating: "none" as MessageRating,
     },
   });
 
   await consumeCredits(scrape.userId, "messages", answer.creditsUsed);
 }
 
-export function setupGithubBot(app: Express) {
-  const router = Router();
+const router = Router();
 
-  router.post("/webhook", async (req: Request, res: Response) => {
-    try {
-      verifySignature(req);
-    } catch (error) {
-      console.warn("GitHub webhook signature failed:", error);
-      res.status(401).json({ message: "Invalid signature" });
-      return;
-    }
-
-    const event = req.headers["x-github-event"] as string | undefined;
-    const payload = req.body;
-
-    if (!event || !payload) {
-      res.status(400).json({ message: "Invalid payload" });
-      return;
-    }
-
-    res.json({ ok: true });
-    processWebhookAsync(event, payload).catch((error) => {
-      console.error("Failed to process GitHub webhook asynchronously", error);
-    });
-  });
-
-  if (appAuth) {
-    app.use("/github", router);
+router.post("/webhook", async (req: Request, res: Response) => {
+  try {
+    verifySignature(req);
+  } catch (error) {
+    console.warn("GitHub webhook signature failed:", error);
+    res.status(401).json({ message: "Invalid signature" });
+    return;
   }
-}
 
-async function processWebhookAsync(event: string, payload: any) {
+  const event = req.headers["x-github-event"] as string | undefined;
+  const payload = req.body;
+
+  if (!event || !payload) {
+    res.status(400).json({ message: "Invalid payload" });
+    return;
+  }
+
+  res.json({ ok: true });
+  processWebhook(event, payload);
+});
+
+async function processWebhook(event: string, payload: any) {
   if (event === "discussion_comment" && payload.action === "created") {
-      const comment = payload.comment;
-      const discussion = payload.discussion;
-      const repository = payload.repository;
-      const installationId = payload.installation?.id;
+    const comment = payload.comment;
+    const discussion = payload.discussion;
+    const repository = payload.repository;
+    const installationId = payload.installation?.id;
 
-      if (
-        comment &&
-        discussion &&
-        repository &&
-        installationId &&
-        comment.user &&
-        discussion.number
-      ) {
-        const repoFullName = repository.full_name;
-        const owner = repository.owner?.login;
-        const repoName = repository.name;
-
-        if (
-          repoFullName &&
-          owner &&
-          repoName &&
-          comment.user.type?.toLowerCase?.() !== "bot" &&
-          !comment.user.login?.endsWith?.("[bot]")
-        ) {
-          const threadKey = `${repoFullName}-discussion-${discussion.number}`;
-          await answerGitHubQuestion({
-            type: "discussion",
-            number: discussion.number,
-            repoFullName,
-            owner,
-            repo: repoName,
-            question: comment.body ?? "",
-            mention: containsMention(comment.body),
-            threadKey,
-            title: discussion.title,
-            installationId,
-          }).catch((error) => {
-            console.error("Failed to handle discussion comment", error);
-          });
-        }
-      }
-    }
-
-    if (event === "issue_comment" && payload.action === "created") {
-      const comment = payload.comment;
-      const issue = payload.issue;
-      const repository = payload.repository;
-      const installationId = payload.installation?.id;
-
-      if (
-        comment &&
-        issue &&
-        repository &&
-        installationId &&
-        issue.number &&
-        comment.user
-      ) {
-        const repoFullName = repository.full_name;
-        const owner = repository.owner?.login;
-        const repoName = repository.name;
-
-        if (
-          repoFullName &&
-          owner &&
-          repoName &&
-          comment.user.type?.toLowerCase?.() !== "bot" &&
-          !comment.user.login?.endsWith?.("[bot]")
-        ) {
-          const threadKey = `${repoFullName}#issue-${issue.number}`;
-          await answerGitHubQuestion({
-            type: "issue",
-            number: issue.number,
-            repoFullName,
-            owner,
-            repo: repoName,
-            question: comment.body ?? "",
-            mention: containsMention(comment.body),
-            threadKey,
-            title: issue.title,
-            installationId,
-          }).catch((error) => {
-            console.error("Failed to handle issue comment", error);
-          });
-        }
-      }
-    }
-
-    if (event === "issues" && payload.action === "opened") {
-      const issue = payload.issue;
-      const repository = payload.repository;
-      const installationId = payload.installation?.id;
-
-      if (
-        issue &&
-        repository &&
-        installationId &&
-        issue.number &&
-        repository.full_name &&
-        issue.user &&
-        issue.user.type?.toLowerCase?.() !== "bot" &&
-        !issue.user.login?.endsWith?.("[bot]")
-      ) {
-        const repoFullName = repository.full_name;
-        const owner = repository.owner?.login;
-        const repoName = repository.name;
-        const questionText =
-          issue.body?.trim() || issue.title?.trim() || "";
-
-        if (repoFullName && owner && repoName && questionText) {
-          const threadKey = `${repoFullName}#issue-${issue.number}`;
-          await answerGitHubQuestion({
-            type: "issue",
-            number: issue.number,
-            repoFullName,
-            owner,
-            repo: repoName,
-            question: questionText,
-            mention: containsMention(issue.body),
-            threadKey,
-            title: issue.title,
-            installationId,
-          }).catch((error) => {
-            console.error("Failed to handle issue", error);
-          });
-        }
-      }
+    if (!containsMention(comment.body)) {
+      return;
     }
 
     if (
-      event === "reaction" &&
-      payload.action &&
-      ["created", "deleted"].includes(payload.action)
+      comment &&
+      discussion &&
+      repository &&
+      installationId &&
+      comment.user &&
+      discussion.number
     ) {
-      const comment = payload.comment;
-      const repository = payload.repository;
-      const installationId = payload.installation?.id;
+      const repoFullName = repository.full_name;
+      const owner = repository.owner?.login;
+      const repoName = repository.name;
 
-      if (comment && repository && installationId) {
-        const repoFullName = repository.full_name;
-        const owner = repository.owner?.login;
-        const repoName = repository.name;
+      if (
+        repoFullName &&
+        owner &&
+        repoName &&
+        comment.user.type?.toLowerCase?.() !== "bot" &&
+        !comment.user.login?.endsWith?.("[bot]")
+      ) {
+        const threadKey = `${repoFullName}-discussion-${discussion.number}`;
+        await answer({
+          type: "discussion",
+          number: discussion.number,
+          repoFullName,
+          owner,
+          repo: repoName,
+          question: cleanupMention(comment.body),
+          userId: comment.user.id,
+          threadKey,
+          title: discussion.title,
+          installationId,
+        });
+      }
+    }
+  }
 
-        if (repoFullName && owner && repoName) {
-          const message = await prisma.message.findFirst({
-            where: {
-              githubCommentId: String(comment.id),
-              channel: "github_discussion",
+  if (event === "issue_comment" && payload.action === "created") {
+    const comment = payload.comment;
+    const issue = payload.issue;
+    const repository = payload.repository;
+    const installationId = payload.installation?.id;
+
+    if (!containsMention(comment.body)) {
+      return;
+    }
+
+    if (
+      comment &&
+      issue &&
+      repository &&
+      installationId &&
+      issue.number &&
+      comment.user
+    ) {
+      const repoFullName = repository.full_name;
+      const owner = repository.owner?.login;
+      const repoName = repository.name;
+
+      if (
+        repoFullName &&
+        owner &&
+        repoName &&
+        comment.user.type?.toLowerCase?.() !== "bot" &&
+        !comment.user.login?.endsWith?.("[bot]")
+      ) {
+        const threadKey = `${repoFullName}#issue-${issue.number}`;
+        await answer({
+          type: "issue",
+          number: issue.number,
+          repoFullName,
+          owner,
+          repo: repoName,
+          question: cleanupMention(comment.body),
+          userId: comment.user.id,
+          threadKey,
+          title: issue.title,
+          installationId,
+        });
+      }
+    }
+  }
+
+  if (event === "issues" && payload.action === "opened") {
+    const issue = payload.issue;
+    const repository = payload.repository;
+    const installationId = payload.installation?.id;
+
+    if (
+      issue &&
+      repository &&
+      installationId &&
+      issue.number &&
+      repository.full_name &&
+      issue.user &&
+      issue.user.type?.toLowerCase?.() !== "bot" &&
+      !issue.user.login?.endsWith?.("[bot]")
+    ) {
+      const repoFullName = repository.full_name;
+      const owner = repository.owner?.login;
+      const repoName = repository.name;
+      const questionText = issue.body?.trim() || issue.title?.trim() || "";
+
+      if (repoFullName && owner && repoName && questionText) {
+        const threadKey = `${repoFullName}#issue-${issue.number}`;
+        await answer({
+          type: "issue",
+          number: issue.number,
+          repoFullName,
+          owner,
+          repo: repoName,
+          question: questionText,
+          userId: issue.user.id,
+          threadKey,
+          title: issue.title,
+          installationId,
+        });
+      }
+    }
+  }
+
+  if (
+    event === "reaction" &&
+    payload.action &&
+    ["created", "deleted"].includes(payload.action)
+  ) {
+    const comment = payload.comment;
+    const repository = payload.repository;
+    const installationId = payload.installation?.id;
+
+    if (comment && repository && installationId) {
+      const repoFullName = repository.full_name;
+      const owner = repository.owner?.login;
+      const repoName = repository.name;
+
+      if (repoFullName && owner && repoName) {
+        const message = await prisma.message.findFirst({
+          where: {
+            githubCommentId: String(comment.id),
+            channel: "github_discussion",
+          },
+        });
+
+        if (message) {
+          const isIssueComment = !!payload.issue;
+          const endpoint = isIssueComment
+            ? `https://api.github.com/repos/${owner}/${repoName}/issues/comments/${comment.id}/reactions?per_page=100`
+            : `https://api.github.com/repos/${owner}/${repoName}/discussions/comments/${comment.id}/reactions?per_page=100`;
+
+          const reactionsResponse = await fetch(endpoint, {
+            headers: {
+              Authorization: `Bearer ${await getToken(installationId)}`,
+              Accept: "application/vnd.github.squirrel-girl-preview+json",
+              "X-GitHub-Api-Version": "2022-11-28",
             },
           });
 
-          if (message) {
-            const installationOctokit = await getInstallationOctokit(
-              installationId
+          if (!reactionsResponse.ok) {
+            throw new Error(
+              `Failed to get reactions: ${await reactionsResponse.text()}`
             );
-            const isIssueComment = !!payload.issue;
-            const endpoint = isIssueComment
-              ? "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
-              : "GET /repos/{owner}/{repo}/discussions/comments/{comment_id}/reactions";
-
-            const reactionsResponse = await installationOctokit.request(
-              endpoint,
-              {
-                owner,
-                repo: repoName,
-                comment_id: comment.id,
-                per_page: 100,
-                headers: {
-                  accept:
-                    "application/vnd.github.squirrel-girl-preview+json",
-                },
-              }
-            );
-
-            const thumbsUp = (reactionsResponse.data as any[]).filter(
-              (reaction) => reaction.content === "+1"
-            ).length;
-            const thumbsDown = (reactionsResponse.data as any[]).filter(
-              (reaction) => reaction.content === "-1"
-            ).length;
-
-            let rating: MessageRating = "none";
-            if (thumbsDown >= thumbsUp && thumbsDown > 0) {
-              rating = "down";
-            } else if (thumbsUp > 0) {
-              rating = "up";
-            }
-
-            await prisma.message.update({
-              where: { id: message.id },
-              data: {
-                rating,
-              },
-            });
           }
+
+          const reactions = (await reactionsResponse.json()) as any[];
+          const thumbsUp = reactions.filter(
+            (reaction) => reaction.content === "+1"
+          ).length;
+          const thumbsDown = reactions.filter(
+            (reaction) => reaction.content === "-1"
+          ).length;
+
+          let rating: MessageRating = "none";
+          if (thumbsDown >= thumbsUp && thumbsDown > 0) {
+            rating = "down";
+          } else if (thumbsUp > 0) {
+            rating = "up";
+          }
+
+          await prisma.message.update({
+            where: { id: message.id },
+            data: {
+              rating,
+            },
+          });
         }
       }
     }
+  }
 }
+
+export default router;
