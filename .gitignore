@@ -1,9 +1,13 @@
 .DS_Store
 .venv
 .env
+.env.old
 
 /bin/
 # Docker
 docker-compose.override.yml
 
 node_modules/
+
+.turbo
+out/

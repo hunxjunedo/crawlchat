@@ -1,5 +1,5 @@
 {
-  "name": "libs",
+  "name": "@packages/common",
   "version": "1.0.0",
   "description": "",
   "type": "commonjs",
@@ -114,8 +114,10 @@
     }
   },
   "scripts": {
-    "preinstall": "npm run build",
-    "build": "npx prisma@6.4.1 generate && npx tsc"
+    "generate": "prisma generate",
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "prettier": "prettier --no-error-on-unmatched-pattern --check ./**/*.{ts,tsx,js,jsx,json,css,md}"
   },
   "author": "",
   "license": "ISC",

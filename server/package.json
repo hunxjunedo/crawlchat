@@ -8,7 +8,8 @@
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "cli": "npx tsc && node dist/cli.js",
-    "cron": "npx tsc && node dist/cron.js \"$@\""
+    "cron": "npx tsc && node dist/cron.js \"$@\"",
+    "prettier": "prettier --no-error-on-unmatched-pattern --check ./**/*.{ts,tsx,js,jsx,json,css,md}"
   },
   "author": "",
   "license": "ISC",
@@ -21,9 +22,10 @@
     "concurrently": "^9.1.2",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@packages/common": "*",
     "@pinecone-database/pinecone": "^4.1.0",
     "@prisma/client": "^6.2.1",
     "cors": "^2.8.5",
@@ -31,7 +33,6 @@
     "express": "^4.21.2",
     "express-ws": "^5.0.2",
     "jsonwebtoken": "^9.0.2",
-    "libs": "file:../libs",
     "openai": "^4.83.0",
     "prisma": "^6.2.1",
     "uuid": "^11.0.5",

@@ -1,10 +1,18 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../.env" });
+
+if (!process.env.SLACK_SIGNING_SECRET) {
+  if (!process.env.SELF_HOSTED) {
+    throw new Error("SLACK_SIGNING_SECRET is not set");
+  }
+  console.log("SLACK_SIGNING_SECRET is not set, skipping Slack app");
+  process.exit(0);
+}
 
 import { App } from "@slack/bolt";
 import { InstallationStore } from "@slack/oauth";
-import { prisma } from "libs/prisma";
-import { createToken } from "libs/jwt";
+import { prisma } from "@packages/common/prisma";
+import { createToken } from "@packages/common/jwt";
 import { learn, query } from "./api";
 
 const LOADING_REACTION = "hourglass";

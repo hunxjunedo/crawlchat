@@ -1,4 +1,4 @@
-import type { Scrape } from "libs/prisma";
+import type { Scrape } from "@packages/common/prisma";
 
 export function makeMcpName(scrape: Scrape) {
   const name =
@@ -61,8 +61,7 @@ export function makeClaudeDeepLink(scrapeId: string, name: string) {
 
   let url = `mcp-install://install-server?name=${encodedName}&command=${encodeURIComponent(command)}`;
 
-  // Add args
-  args.forEach(arg => {
+  args.forEach((arg) => {
     url += `&args=${encodeURIComponent(arg)}`;
   });
 
