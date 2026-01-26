@@ -393,7 +393,11 @@ function CategoryCard({
   );
 }
 
-function CategoryTiles({ categories }: { categories: Array<{ title: string; count: number }> }) {
+function CategoryTiles({
+  categories,
+}: {
+  categories: Array<{ title: string; count: number }>;
+}) {
   const paddingBoxes = 3 - (categories.length % 3);
 
   return (
@@ -410,7 +414,9 @@ function CategoryTiles({ categories }: { categories: Array<{ title: string; coun
           className={cn("p-2 px-3 bg-base-100", "flex justify-between")}
         >
           {category.title}
-          <span className="badge badge-primary badge-soft">{category.count}</span>
+          <span className="badge badge-primary badge-soft">
+            {category.count}
+          </span>
         </div>
       ))}
       {Array.from({ length: paddingBoxes }).map((_, index) => (
@@ -494,12 +500,12 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       .slice(0, 20)
       .map(([title, d]) => ({ title, count: d.count }));
   }, [loaderData.messagesSummary.tags, tagsOrder]);
-    const languages = useMemo(() => {
-    const sortedLanguages = Object.entries(loaderData.messagesSummary.languagesDistribution).sort(
-      (a, b) => {
-        return b[1].count - a[1].count;
-      }
-    );
+  const languages = useMemo(() => {
+    const sortedLanguages = Object.entries(
+      loaderData.messagesSummary.languagesDistribution
+    ).sort((a, b) => {
+      return b[1].count - a[1].count;
+    });
 
     if (languagesOrder === "latest") {
       sortedLanguages.sort((a, b) => {
