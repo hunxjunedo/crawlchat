@@ -467,9 +467,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                           )}
                         </div>
                       </td>
-                      <td>
-                        {pair.responseMessage.analysis?.language}
-                      </td>
+                      <td>{pair.responseMessage.analysis?.language}</td>
                       <td className="w-10">
                         <ChannelBadge
                           channel={pair.queryMessage?.channel}
