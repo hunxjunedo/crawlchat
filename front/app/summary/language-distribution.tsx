@@ -7,6 +7,9 @@ export default function LanguageDistribution({
 }: {
   languages: Record<string, number>;
 }) {
+  if (Object.keys(languages).length == 0) {
+    return null;
+  }
   return (
     <div style={{ width: "100%" }}>
       <Heading className="mb-0">Languages</Heading>

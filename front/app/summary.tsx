@@ -394,12 +394,8 @@ function CategoryCard({
   );
 }
 
-function CategoryTiles({
-  categories,
-}: {
-  categories: Array<{ title: string; count: number }>;
-}) {
-  const paddingBoxes = 3 - (categories.length % 3);
+function Tags({ tags }: { tags: Array<{ title: string; count: number }> }) {
+  const paddingBoxes = 3 - (tags.length % 3);
 
   return (
     <div
@@ -409,15 +405,13 @@ function CategoryTiles({
         "bg-base-300 border border-base-300"
       )}
     >
-      {categories.map((category) => (
+      {tags.map((tag) => (
         <div
-          key={category.title}
+          key={tag.title}
           className={cn("p-2 px-3 bg-base-100", "flex justify-between")}
         >
-          {category.title}
-          <span className="badge badge-primary badge-soft">
-            {category.count}
-          </span>
+          {tag.title}
+          <span className="badge badge-primary badge-soft">{tag.count}</span>
         </div>
       ))}
       {Array.from({ length: paddingBoxes }).map((_, index) => (
@@ -781,7 +775,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   <option value="latest">Latest</option>
                 </select>
               </div>
-              <CategoryTiles categories={tags} />
+              <Tags tags={tags} />
             </div>
           )}
           <LanguageDistribution
