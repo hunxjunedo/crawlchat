@@ -5,27 +5,17 @@ export default function Tags({
 }: {
   tags: Array<{ title: string; count: number }>;
 }) {
-  const paddingBoxes = (3 - (tags.length % 3)) % 3;
-
   return (
-    <div
-      className={cn(
-        "grid grid-cols-1 md:grid-cols-3",
-        "rounded-box gap-px",
-        "bg-base-300 border border-base-300"
-      )}
-    >
+    <div className={cn("flex flex-row flex-wrap gap-3")}>
       {tags.map((tag) => (
         <div
-          key={tag.title}
-          className={cn("p-2 px-3 bg-base-100", "flex justify-between")}
+          className={cn("border border-base-300 p-3 bg-base-100 flex gap-2")}
         >
           {tag.title}
-          <span className="badge badge-primary badge-soft">{tag.count}</span>
+          <span className="badge badge-primary rounded-4xl badge-soft">
+            {tag.count}
+          </span>
         </div>
-      ))}
-      {Array.from({ length: paddingBoxes }).map((_, index) => (
-        <div key={index} className="p-2 px-3 bg-base-100 hidden md:block" />
       ))}
     </div>
   );
