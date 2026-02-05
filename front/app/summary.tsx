@@ -207,7 +207,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (intent === "remove-tag") {
-    const tagName = formData.get("tagName");
+    const tagName = formData.get("tagName") as string;
     await prisma.$runCommandRaw({
       update: "Message",
       updates: [
@@ -658,7 +658,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   <option value="latest">Latest</option>
                 </select>
               </div>
-              <Tags fetcher={newCollectionFetcher} tags={tags} />
+              <Tags tags={tags} />
             </div>
           )}
 

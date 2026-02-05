@@ -1,39 +1,53 @@
 import cn from "@meltdownjs/cn";
-import { FaXmark } from "react-icons/fa6";
-import type { FetcherWithComponents } from "react-router";
+import { TbX } from "react-icons/tb";
+import { useFetcher } from "react-router";
+
+function Tag({ title, count }: { title: string; count: number }) {
+  const fetcher = useFetcher();
+
+  return (
+    <div
+      className={cn(
+        "border border-base-300 relative p-2 px-3 bg-base-100 flex gap-4",
+        "group"
+      )}
+    >
+      {title}
+      <span className="badge badge-primary rounded-box badge-soft">
+        {count}
+      </span>
+
+      <fetcher.Form
+        method="post"
+        className={cn(
+          "absolute top-0 right-0 translate-x-1/2 -translate-y-1/2",
+          "z-10 hidden group-hover:flex",
+          fetcher.state !== "idle" && "flex"
+        )}
+      >
+        <input type="hidden" name="intent" value="remove-tag" />
+        <input type="hidden" name="tagName" value={title} />
+        <button className="btn btn-xs btn-soft btn-square btn-error">
+          {fetcher.state !== "idle" ? (
+            <span className="loading loading-spinner" />
+          ) : (
+            <TbX />
+          )}
+        </button>
+      </fetcher.Form>
+    </div>
+  );
+}
 
 export default function Tags({
   tags,
-  fetcher,
 }: {
-  fetcher: FetcherWithComponents<any>;
   tags: Array<{ title: string; count: number }>;
 }) {
   return (
-    <div className={cn("flex flex-row flex-wrap gap-3")}>
+    <div className={cn("flex flex-row flex-wrap gap-2")}>
       {tags.map((tag) => (
-        <div
-          className={cn(
-            "border border-base-300 relative p-4 pr-7 bg-base-100 flex gap-4"
-          )}
-        >
-          {tag.title}
-          <span className="badge badge-primary rounded-4xl badge-soft">
-            {tag.count}
-          </span>
-          <FaXmark
-            onClick={() => {
-              fetcher.submit(
-                { tagName: tag.title, intent: "remove-tag" },
-                { method: "post" }
-              );
-            }}
-            size={12}
-            className={cn(
-              " text-primary absolute justify-self-end self-start opacity-50 top-1 right-1 cursor-pointer"
-            )}
-          />
-        </div>
+        <Tag key={tag.title} title={tag.title} count={tag.count} />
       ))}
     </div>
   );
