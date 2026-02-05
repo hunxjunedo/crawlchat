@@ -1,4 +1,5 @@
 import { Indexer } from "./indexer";
+import { EarthIndexer } from "./earth-indexer";
 import { MarsIndexer } from "./mars-indexer";
 
 export function makeIndexer({
@@ -8,7 +9,13 @@ export function makeIndexer({
   key: string | null;
   topN?: number;
 }): Indexer {
-  const indexers = [new MarsIndexer()];
+  const indexers: Indexer[] = [];
+  if (process.env.PINECONE_API_KEY) {
+    indexers.push(new MarsIndexer({ topN }));
+  }
+  if (process.env.PGVECTOR_URL) {
+    indexers.push(new EarthIndexer({ topN }));
+  }
   const indexMap = new Map<string, Indexer>();
   for (const indexer of indexers) {
     indexMap.set(indexer.getKey(), indexer);
@@ -17,5 +24,5 @@ export function makeIndexer({
     return indexMap.get(key)!;
   }
 
-  throw new Error(`Indexer with key ${key} not found`);
+  throw new Error(`Indexer ${key} not found`);
 }

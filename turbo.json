@@ -19,7 +19,10 @@
       "dependsOn": ["generate"],
       "persistent": true,
       "cache": false
+    },
+    "clean" : {
+      
     }
   },
-  "concurrency": "11"
+  "concurrency": "12"
 }
